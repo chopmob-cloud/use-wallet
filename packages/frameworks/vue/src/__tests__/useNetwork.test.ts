@@ -1,11 +1,12 @@
-import { Store } from '@tanstack/vue-store'
 import {
   NetworkId,
   WalletManager,
-  WalletId,
   DEFAULT_NETWORK_CONFIG,
   type AlgodConfig,
-  type State
+  type WalletAdapterConfig,
+  type AdapterConstructorParams,
+  type WalletAccount,
+  BaseWallet
 } from '@txnlab/use-wallet'
 import { mount } from '@vue/test-utils'
 import algosdk from 'algosdk'
@@ -23,7 +24,30 @@ vi.mock('vue', async (importOriginal) => {
   }
 })
 
-let mockStore: Store<State>
+class MockWallet extends BaseWallet {
+  connect = vi.fn(() => Promise.resolve([] as WalletAccount[]))
+  disconnect = vi.fn(() => Promise.resolve())
+  setActive = vi.fn()
+  setActiveAccount = vi.fn()
+  resumeSession = vi.fn(() => Promise.resolve())
+  signTransactions = vi.fn(() => Promise.resolve([] as Uint8Array[]))
+  transactionSigner = vi.fn(() => Promise.resolve([] as Uint8Array[]))
+
+  static defaultMetadata = { name: 'Mock Wallet', icon: 'icon' }
+
+  constructor(params: AdapterConstructorParams) {
+    super(params)
+  }
+}
+
+function mockAdapter(): WalletAdapterConfig {
+  return {
+    id: 'mock-wallet',
+    metadata: MockWallet.defaultMetadata,
+    Adapter: MockWallet as unknown as WalletAdapterConfig['Adapter']
+  }
+}
+
 let mockWalletManager: WalletManager
 const mockAlgodClient = ref(new algosdk.Algodv2('token', 'https://server', ''))
 const mockSetAlgodClient = (client: algosdk.Algodv2) => {
@@ -31,21 +55,12 @@ const mockSetAlgodClient = (client: algosdk.Algodv2) => {
 }
 
 const setupMocks = () => {
-  mockStore = new Store<State>({
-    activeNetwork: NetworkId.TESTNET,
-    activeWallet: null,
-    algodClient: new algosdk.Algodv2('', 'https://testnet-api.algonode.cloud', ''),
-    managerStatus: 'ready',
-    wallets: {},
-    networkConfig: DEFAULT_NETWORK_CONFIG,
-    customNetworkConfigs: {}
-  })
+  localStorage.clear()
 
   mockWalletManager = new WalletManager({
-    wallets: [WalletId.DEFLY]
+    wallets: [mockAdapter()]
   })
 
-  vi.spyOn(mockWalletManager, 'store', 'get').mockReturnValue(mockStore)
   ;(inject as Mock).mockImplementation((token: string | InjectionKey<unknown>) => {
     if (token === 'walletManager') return mockWalletManager
     if (token === 'setAlgodClient') return mockSetAlgodClient
@@ -57,16 +72,6 @@ const setupMocks = () => {
 beforeEach(() => {
   setupMocks()
   vi.clearAllMocks()
-  mockStore.setState((state) => ({
-    ...state,
-    activeNetwork: NetworkId.TESTNET,
-    activeWallet: null,
-    algodClient: new algosdk.Algodv2('', 'https://testnet-api.algonode.cloud', ''),
-    managerStatus: 'ready',
-    networkConfig: { ...DEFAULT_NETWORK_CONFIG },
-    customNetworkConfigs: {},
-    wallets: {}
-  }))
 })
 
 describe('useNetwork', () => {
@@ -228,7 +233,7 @@ describe('useNetwork', () => {
 
     mockWalletManager.setActiveNetwork = async (networkId: string) => {
       mockSetAlgodClient(newClient)
-      mockStore.setState((state) => ({
+      mockWalletManager.store.setState((state) => ({
         ...state,
         activeNetwork: networkId,
         algodClient: newClient
@@ -267,7 +272,7 @@ describe('useNetwork', () => {
           ...config
         }
       }
-      mockStore.setState((state) => ({ ...state }))
+      mockWalletManager.store.setState((state) => ({ ...state }))
     }
 
     const { updateAlgodConfig } = useNetwork()
@@ -307,7 +312,7 @@ describe('useNetwork', () => {
     // Mock the resetNetworkConfig behavior
     mockWalletManager.resetNetworkConfig = () => {
       mockSetAlgodClient(newClient)
-      mockStore.setState((state) => ({ ...state }))
+      mockWalletManager.store.setState((state) => ({ ...state }))
     }
 
     const { resetNetworkConfig } = useNetwork()
@@ -321,19 +326,6 @@ describe('useNetwork', () => {
   })
 
   it('updates activeNetworkConfig when resetting network configuration', async () => {
-    mockStore.setState((state) => ({
-      ...state,
-      networkConfig: {
-        [NetworkId.TESTNET]: {
-          ...DEFAULT_NETWORK_CONFIG[NetworkId.TESTNET],
-          algod: {
-            ...DEFAULT_NETWORK_CONFIG[NetworkId.TESTNET].algod,
-            baseServer: 'https://custom-server.com'
-          }
-        }
-      }
-    }))
-
     const TestComponent = {
       template: `
         <div data-testid="active-network-config">{{ stringifiedConfig }}</div>
@@ -350,7 +342,7 @@ describe('useNetwork', () => {
     // Mock the resetNetworkConfig behavior
     mockWalletManager.resetNetworkConfig = () => {
       mockWalletManager.networkConfig[NetworkId.TESTNET] = DEFAULT_NETWORK_CONFIG[NetworkId.TESTNET]
-      mockStore.setState((state) => ({ ...state }))
+      mockWalletManager.store.setState((state) => ({ ...state }))
     }
 
     const { resetNetworkConfig } = useNetwork()

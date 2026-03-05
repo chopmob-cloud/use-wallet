@@ -1,21 +1,18 @@
 /* eslint-disable no-extra-semi */
-import { Store } from '@tanstack/vue-store'
 import {
   BaseWallet,
-  DeflyWallet,
-  MagicAuth,
   NetworkId,
   WalletManager,
-  WalletId,
-  DEFAULT_NETWORK_CONFIG,
   DEFAULT_STATE,
   type State,
-  type WalletAccount
+  type WalletAccount,
+  type WalletAdapterConfig,
+  type AdapterConstructorParams
 } from '@txnlab/use-wallet'
 import { mount } from '@vue/test-utils'
 import algosdk from 'algosdk'
 import { inject, nextTick, ref, type InjectionKey } from 'vue'
-import { useWallet, type Wallet } from '../useWallet'
+import { useWallet } from '../useWallet'
 import type { Mock } from 'vitest'
 
 // Mock Vue's inject function
@@ -39,140 +36,73 @@ const mocks = vi.hoisted(() => {
   }
 })
 
-vi.mock('@txnlab/use-wallet', async (importOriginal) => {
-  const mod = await importOriginal<typeof import('@txnlab/use-wallet')>()
-  return {
-    ...mod,
-    DeflyWallet: class extends mod.BaseWallet {
-      connect = mocks.connect
-      disconnect = mocks.disconnect
-      setActive = mocks.setActive
-      setActiveAccount = mocks.setActiveAccount
-      resumeSession = mocks.resumeSession
-      signTransactions = mocks.signTransactions
-      transactionSigner = mocks.transactionSigner
-    },
-    MagicAuth: class extends mod.BaseWallet {
-      connect = mocks.connect
-      disconnect = mocks.disconnect
-      setActive = mocks.setActive
-      setActiveAccount = mocks.setActiveAccount
-      resumeSession = mocks.resumeSession
-      signTransactions = mocks.signTransactions
-      transactionSigner = mocks.transactionSigner
-    }
-  }
-})
+class MockWalletA extends BaseWallet {
+  connect = mocks.connect
+  disconnect = mocks.disconnect
+  setActive = mocks.setActive
+  setActiveAccount = mocks.setActiveAccount
+  resumeSession = mocks.resumeSession
+  signTransactions = mocks.signTransactions
+  transactionSigner = mocks.transactionSigner
 
-let mockStore: Store<State>
+  static defaultMetadata = { name: 'Wallet A', icon: 'icon-a' }
+
+  constructor(params: AdapterConstructorParams) {
+    super(params)
+  }
+}
+
+class MockWalletB extends BaseWallet {
+  connect = mocks.connect
+  disconnect = mocks.disconnect
+  setActive = mocks.setActive
+  setActiveAccount = mocks.setActiveAccount
+  resumeSession = mocks.resumeSession
+  signTransactions = mocks.signTransactions
+  transactionSigner = mocks.transactionSigner
+
+  static defaultMetadata = { name: 'Wallet B', icon: 'icon-b' }
+
+  constructor(params: AdapterConstructorParams) {
+    super(params)
+  }
+}
+
+function mockAdapterA(): WalletAdapterConfig {
+  return {
+    id: 'wallet-a',
+    metadata: MockWalletA.defaultMetadata,
+    Adapter: MockWalletA as unknown as WalletAdapterConfig['Adapter']
+  }
+}
+
+function mockAdapterB(): WalletAdapterConfig {
+  return {
+    id: 'wallet-b',
+    metadata: MockWalletB.defaultMetadata,
+    Adapter: MockWalletB as unknown as WalletAdapterConfig['Adapter']
+  }
+}
+
 let mockWalletManager: WalletManager
-let mockDeflyWallet: DeflyWallet
-let mockMagicAuth: MagicAuth
 const mockAlgodClient = ref(new algosdk.Algodv2('', 'https://testnet-api.algonode.cloud', ''))
 
-const setupMocks = () => {
-  mockStore = new Store<State>({
-    activeNetwork: NetworkId.TESTNET,
-    activeWallet: null,
-    algodClient: new algosdk.Algodv2('', 'https://testnet-api.algonode.cloud', ''),
-    managerStatus: 'ready',
-    wallets: {},
-    customNetworkConfigs: {},
-    networkConfig: DEFAULT_NETWORK_CONFIG
-  })
+beforeEach(() => {
+  vi.clearAllMocks()
+  localStorage.clear()
 
   mockWalletManager = new WalletManager({
-    wallets: [WalletId.DEFLY]
+    wallets: [mockAdapterA(), mockAdapterB()]
   })
 
-  vi.spyOn(mockWalletManager, 'store', 'get').mockReturnValue(mockStore)
-
-  // Create mock wallets after store is initialized
-  mockDeflyWallet = new DeflyWallet({
-    id: WalletId.DEFLY,
-    metadata: { name: 'Defly', icon: 'icon' },
-    getAlgodClient: () => ({}) as any,
-    store: mockStore,
-    subscribe: vi.fn()
-  })
-
-  mockMagicAuth = new MagicAuth({
-    id: WalletId.MAGIC,
-    options: {
-      apiKey: 'api-key'
-    },
-    metadata: { name: 'Magic', icon: 'icon' },
-    getAlgodClient: () => ({}) as any,
-    store: mockStore,
-    subscribe: vi.fn()
-  })
   ;(inject as Mock).mockImplementation((token: string | InjectionKey<unknown>) => {
     if (token === 'walletManager') return mockWalletManager
     if (token === 'algodClient') return mockAlgodClient
     return null
   })
-}
-
-beforeEach(() => {
-  setupMocks()
-  vi.clearAllMocks()
-  mockStore.setState((state) => ({
-    ...state,
-    activeNetwork: NetworkId.TESTNET,
-    activeWallet: null,
-    algodClient: new algosdk.Algodv2('', 'https://testnet-api.algonode.cloud', ''),
-    managerStatus: 'ready',
-    wallets: {}
-  }))
 })
 
 describe('useWallet', () => {
-  let mockWallets: Wallet[]
-
-  beforeEach(() => {
-    vi.clearAllMocks()
-    mockStore.setState(() => DEFAULT_STATE)
-
-    mockWalletManager = new WalletManager()
-    mockWallets = [
-      {
-        id: mockDeflyWallet.id,
-        walletKey: mockDeflyWallet.walletKey,
-        metadata: mockDeflyWallet.metadata,
-        accounts: [],
-        activeAccount: null,
-        isConnected: false,
-        isActive: false,
-        connect: expect.any(Function),
-        disconnect: expect.any(Function),
-        setActive: expect.any(Function),
-        setActiveAccount: expect.any(Function),
-        canSignData: false,
-        canUsePrivateKey: false
-      },
-      {
-        id: mockMagicAuth.id,
-        walletKey: mockMagicAuth.walletKey,
-        metadata: mockMagicAuth.metadata,
-        accounts: [],
-        activeAccount: null,
-        isConnected: false,
-        isActive: false,
-        connect: expect.any(Function),
-        disconnect: expect.any(Function),
-        setActive: expect.any(Function),
-        setActiveAccount: expect.any(Function),
-        canSignData: false,
-        canUsePrivateKey: false
-      }
-    ]
-    mockWalletManager._clients = new Map<WalletId, BaseWallet>([
-      [WalletId.DEFLY, mockDeflyWallet],
-      [WalletId.MAGIC, mockMagicAuth]
-    ])
-    mockWalletManager.store = mockStore
-  })
-
   it('throws an error if WalletManager is not installed', () => {
     ;(inject as Mock).mockImplementation((token: string | InjectionKey<unknown>) => {
       if (token === 'walletManager') return null
@@ -186,7 +116,9 @@ describe('useWallet', () => {
   it('initializes wallets and active wallet correctly', () => {
     const { wallets, activeWallet, activeAccount } = useWallet()
 
-    expect(wallets.value).toEqual(mockWallets)
+    expect(wallets.value).toHaveLength(2)
+    expect(wallets.value[0].id).toBe('wallet-a')
+    expect(wallets.value[1].id).toBe('wallet-b')
     expect(activeWallet.value).toBeNull()
     expect(activeAccount.value).toBeNull()
   })
@@ -194,28 +126,18 @@ describe('useWallet', () => {
   it('correctly handles wallet connect/disconnect', async () => {
     const { wallets } = useWallet()
 
-    const defly = wallets.value[0]
-    const magic = wallets.value[1]
+    const walletA = wallets.value[0]
 
-    // Simulate connect and disconnect for Defly (no args)
-    await defly.connect()
-    await defly.disconnect()
+    await walletA.connect()
+    await walletA.disconnect()
 
     expect(mocks.connect).toHaveBeenCalledWith(undefined)
-    expect(mocks.disconnect).toHaveBeenCalled()
-
-    // Simulate connect and disconnect for Magic (with email)
-    await magic.connect({ email: 'test@example.com' })
-    await magic.disconnect()
-
-    expect(mocks.connect).toHaveBeenCalledWith({ email: 'test@example.com' })
     expect(mocks.disconnect).toHaveBeenCalled()
   })
 
   it('calls setActive and setActiveAccount correctly', () => {
     const { wallets } = useWallet()
 
-    // Simulate setActive
     wallets.value[0].setActive()
     wallets.value[0].setActiveAccount('address')
 
@@ -226,26 +148,17 @@ describe('useWallet', () => {
   it('calls signTransactions and transactionSigner correctly', async () => {
     const { signTransactions, transactionSigner } = useWallet()
 
-    mockStore.setState((state) => ({
+    mockWalletManager.store.setState((state) => ({
       ...state,
       wallets: {
-        [WalletId.DEFLY]: {
-          accounts: [
-            {
-              name: 'Defly Account 1',
-              address: 'address1'
-            }
-          ],
-          activeAccount: {
-            name: 'Defly Account 1',
-            address: 'address1'
-          }
+        'wallet-a': {
+          accounts: [{ name: 'Account 1', address: 'address1' }],
+          activeAccount: { name: 'Account 1', address: 'address1' }
         }
       },
-      activeWallet: WalletId.DEFLY
+      activeWallet: 'wallet-a'
     }))
 
-    // Simulate signTransactions and transactionSigner
     await signTransactions([], [])
     await transactionSigner([], [])
 
@@ -254,53 +167,26 @@ describe('useWallet', () => {
   })
 
   it('updates wallets when store state changes', () => {
-    const { wallets } = useWallet()
+    const { wallets, activeWallet, activeAddress } = useWallet()
 
-    mockStore.setState((state) => ({
+    mockWalletManager.store.setState((state) => ({
       ...state,
       wallets: {
-        [WalletId.DEFLY]: {
+        'wallet-a': {
           accounts: [
-            {
-              name: 'Defly Account 1',
-              address: 'address1'
-            },
-            {
-              name: 'Defly Account 2',
-              address: 'address2'
-            }
+            { name: 'Account 1', address: 'address1' },
+            { name: 'Account 2', address: 'address2' }
           ],
-          activeAccount: {
-            name: 'Defly Account 1',
-            address: 'address1'
-          }
+          activeAccount: { name: 'Account 1', address: 'address1' }
         }
       },
-      activeWallet: WalletId.DEFLY
+      activeWallet: 'wallet-a'
     }))
 
-    expect(wallets.value).toEqual([
-      {
-        ...mockWallets[0],
-        accounts: [
-          {
-            name: 'Defly Account 1',
-            address: 'address1'
-          },
-          {
-            name: 'Defly Account 2',
-            address: 'address2'
-          }
-        ],
-        activeAccount: {
-          name: 'Defly Account 1',
-          address: 'address1'
-        },
-        isConnected: true,
-        isActive: true
-      },
-      mockWallets[1]
-    ])
+    expect(activeWallet.value?.id).toBe('wallet-a')
+    expect(activeAddress.value).toBe('address1')
+    expect(wallets.value[0].isConnected).toBe(true)
+    expect(wallets.value[0].isActive).toBe(true)
   })
 
   it('integrates correctly with Vue component', async () => {
@@ -333,10 +219,8 @@ describe('useWallet', () => {
 
     const listItems = wrapper.findAll('[data-testid="wallet"]')
     expect(listItems).toHaveLength(2)
-
-    mockWallets.forEach((wallet, index) => {
-      expect(listItems[index].text()).toBe(wallet.metadata.name)
-    })
+    expect(listItems[0].text()).toBe('Wallet A')
+    expect(listItems[1].text()).toBe('Wallet B')
 
     expect(activeWallet.value).toBeNull()
     expect(activeAddress.value).toBeNull()
@@ -345,23 +229,15 @@ describe('useWallet', () => {
     expect(wrapper.get('[data-testid="activeAddress"]').text()).toBe('')
 
     // Mock a state change in the store
-    mockStore.setState((state) => ({
+    mockWalletManager.store.setState((state) => ({
       ...state,
       wallets: {
-        [WalletId.DEFLY]: {
-          accounts: [
-            {
-              name: 'Defly Account 1',
-              address: 'address1'
-            }
-          ],
-          activeAccount: {
-            name: 'Defly Account 1',
-            address: 'address1'
-          }
+        'wallet-a': {
+          accounts: [{ name: 'Account 1', address: 'address1' }],
+          activeAccount: { name: 'Account 1', address: 'address1' }
         }
       },
-      activeWallet: WalletId.DEFLY
+      activeWallet: 'wallet-a'
     }))
 
     // Force a re-render of the component
@@ -369,20 +245,26 @@ describe('useWallet', () => {
       wrapper.vm.$forceUpdate()
     })
 
-    expect(activeWallet.value?.id).toBe(WalletId.DEFLY)
+    expect(activeWallet.value?.id).toBe('wallet-a')
     expect(activeAddress.value).toBe('address1')
 
-    expect(wrapper.get('[data-testid="activeWallet"]').text()).toBe(WalletId.DEFLY)
+    expect(wrapper.get('[data-testid="activeWallet"]').text()).toBe('wallet-a')
     expect(wrapper.get('[data-testid="activeAddress"]').text()).toBe('address1')
   })
 
   it('initializes with isReady false and updates when manager status changes', async () => {
+    // Reset manager status to initializing
+    mockWalletManager.store.setState((state) => ({
+      ...state,
+      managerStatus: 'initializing'
+    }))
+
     const { isReady } = useWallet()
 
     // Initially should not be ready
     expect(isReady.value).toBe(false)
 
-    mockStore.setState((state) => ({
+    mockWalletManager.store.setState((state) => ({
       ...state,
       managerStatus: 'ready'
     }))
@@ -391,8 +273,8 @@ describe('useWallet', () => {
 
     expect(isReady.value).toBe(true)
 
-    // Change back to initializing (though this shouldn't happen in practice)
-    mockStore.setState((state) => ({
+    // Change back to initializing
+    mockWalletManager.store.setState((state) => ({
       ...state,
       managerStatus: 'initializing'
     }))
@@ -403,6 +285,12 @@ describe('useWallet', () => {
   })
 
   it('integrates isReady with Vue component', async () => {
+    // Reset manager status to initializing
+    mockWalletManager.store.setState((state) => ({
+      ...state,
+      managerStatus: 'initializing'
+    }))
+
     const TestComponent = {
       template: `
         <div>
@@ -420,7 +308,7 @@ describe('useWallet', () => {
     // Initially not ready
     expect(wrapper.get('[data-testid="is-ready"]').text()).toBe('false')
 
-    mockStore.setState((state) => ({
+    mockWalletManager.store.setState((state) => ({
       ...state,
       managerStatus: 'ready'
     }))

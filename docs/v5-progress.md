@@ -61,20 +61,20 @@ Reference: [v5-migration-plan.md](./v5-migration-plan.md)
 ## Sprint 3: Framework Adapter Updates
 
 **Pre-work (wallet adapter cleanup from Sprint 2 review):**
-- [ ] Move adapter test files from `src/__tests__/adapter.test.ts` to `src/adapter.test.ts` in all wallet adapter packages
-- [ ] Extract inline SVG icons to separate `.svg` files with raw string imports in all wallet adapter packages
-- [ ] Move Custom wallet adapter from `packages/wallets/custom/` to core (`packages/core/`), export from `@txnlab/use-wallet`
+- [x] Move adapter test files from `src/__tests__/adapter.test.ts` to `src/adapter.test.ts` in all wallet adapter packages
+- [x] Extract inline SVG icons to separate `icon.ts` files in all wallet adapter packages
+- [x] Move Custom wallet adapter from `packages/wallets/custom/` to core (`packages/core/`), export from `@txnlab/use-wallet`
 
 **Framework adapter updates:**
-- [ ] Move `packages/use-wallet-react/` → `packages/frameworks/react/`
-- [ ] Move `packages/use-wallet-vue/` → `packages/frameworks/vue/`
-- [ ] Move `packages/use-wallet-solid/` → `packages/frameworks/solid/`
-- [ ] Move `packages/use-wallet-svelte/` → `packages/frameworks/svelte/`
-- [ ] Import `Wallet` interface from core in all framework adapters
-- [ ] Remove wallet SDK peer dependencies from framework adapter package.json files
-- [ ] Align Solid adapter to return `Wallet` objects
-- [ ] Update framework adapter tests
-- [ ] Verify all framework adapters build and typecheck
+- [x] Move `packages/use-wallet-react/` → `packages/frameworks/react/`
+- [x] Move `packages/use-wallet-vue/` → `packages/frameworks/vue/`
+- [x] Move `packages/use-wallet-solid/` → `packages/frameworks/solid/`
+- [x] Move `packages/use-wallet-svelte/` → `packages/frameworks/svelte/`
+- [x] Import `Wallet` interface from core in all framework adapters
+- [x] Remove wallet SDK peer dependencies from framework adapter package.json files
+- [x] Align Solid adapter to return `Wallet` objects
+- [x] Update framework adapter tests
+- [x] Verify all framework adapters build and typecheck
 
 ## Sprint 4: Examples, Docs, CI, Release Pipeline
 

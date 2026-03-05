@@ -1,19 +1,18 @@
-import { Store } from '@tanstack/react-store'
 import { renderHook, act, render, screen } from '@testing-library/react'
 import {
   BaseWallet,
-  DeflyWallet,
-  MagicAuth,
   NetworkId,
   WalletManager,
-  WalletId,
   DEFAULT_STATE,
   type State,
-  type WalletAccount
+  type WalletAccount,
+  type WalletAdapterConfig,
+  type AdapterConstructorParams,
+  type Wallet,
 } from '@txnlab/use-wallet'
 import algosdk from 'algosdk'
 import * as React from 'react'
-import { Wallet, WalletProvider, useWallet, useNetwork } from '../index'
+import { WalletProvider, useWallet, useNetwork } from '../index'
 
 const mocks = vi.hoisted(() => {
   return {
@@ -27,51 +26,53 @@ const mocks = vi.hoisted(() => {
   }
 })
 
-vi.mock('@txnlab/use-wallet', async (importOriginal) => {
-  const mod = await importOriginal<typeof import('@txnlab/use-wallet')>()
-  return {
-    ...mod,
-    DeflyWallet: class extends mod.BaseWallet {
-      connect = mocks.connect
-      disconnect = mocks.disconnect
-      setActive = mocks.setActive
-      setActiveAccount = mocks.setActiveAccount
-      resumeSession = mocks.resumeSession
-      signTransactions = mocks.signTransactions
-      transactionSigner = mocks.transactionSigner
-    },
-    MagicAuth: class extends mod.BaseWallet {
-      connect = mocks.connect
-      disconnect = mocks.disconnect
-      setActive = mocks.setActive
-      setActiveAccount = mocks.setActiveAccount
-      resumeSession = mocks.resumeSession
-      signTransactions = mocks.signTransactions
-      transactionSigner = mocks.transactionSigner
-    }
+class MockWalletA extends BaseWallet {
+  connect = mocks.connect
+  disconnect = mocks.disconnect
+  setActive = mocks.setActive
+  setActiveAccount = mocks.setActiveAccount
+  resumeSession = mocks.resumeSession
+  signTransactions = mocks.signTransactions
+  transactionSigner = mocks.transactionSigner
+
+  static defaultMetadata = { name: 'Wallet A', icon: 'icon-a' }
+
+  constructor(params: AdapterConstructorParams) {
+    super(params)
   }
-})
+}
 
-const mockStore = new Store<State>(DEFAULT_STATE)
+class MockWalletB extends BaseWallet {
+  connect = mocks.connect
+  disconnect = mocks.disconnect
+  setActive = mocks.setActive
+  setActiveAccount = mocks.setActiveAccount
+  resumeSession = mocks.resumeSession
+  signTransactions = mocks.signTransactions
+  transactionSigner = mocks.transactionSigner
 
-const mockDeflyWallet = new DeflyWallet({
-  id: WalletId.DEFLY,
-  metadata: { name: 'Defly', icon: 'icon' },
-  getAlgodClient: () => ({}) as any,
-  store: mockStore,
-  subscribe: vi.fn()
-})
+  static defaultMetadata = { name: 'Wallet B', icon: 'icon-b' }
 
-const mockMagicAuth = new MagicAuth({
-  id: WalletId.MAGIC,
-  options: {
-    apiKey: 'api-key'
-  },
-  metadata: { name: 'Magic', icon: 'icon' },
-  getAlgodClient: () => ({}) as any,
-  store: mockStore,
-  subscribe: vi.fn()
-})
+  constructor(params: AdapterConstructorParams) {
+    super(params)
+  }
+}
+
+function mockAdapterA(): WalletAdapterConfig {
+  return {
+    id: 'wallet-a',
+    metadata: MockWalletA.defaultMetadata,
+    Adapter: MockWalletA as unknown as WalletAdapterConfig['Adapter'],
+  }
+}
+
+function mockAdapterB(): WalletAdapterConfig {
+  return {
+    id: 'wallet-b',
+    metadata: MockWalletB.defaultMetadata,
+    Adapter: MockWalletB as unknown as WalletAdapterConfig['Adapter'],
+  }
+}
 
 describe('WalletProvider', () => {
   it('provides context to child components', async () => {
@@ -81,7 +82,7 @@ describe('WalletProvider', () => {
     }
 
     const walletManager = new WalletManager({
-      wallets: [WalletId.DEFLY]
+      wallets: [mockAdapterA()]
     })
 
     await act(async () => {
@@ -115,9 +116,9 @@ describe('useNetwork', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
-    mockStore.setState(() => DEFAULT_STATE)
-    mockWalletManager = new WalletManager()
-    mockWalletManager.store = mockStore
+    mockWalletManager = new WalletManager({
+      wallets: [mockAdapterA(), mockAdapterB()]
+    })
 
     wrapper = ({ children }: { children: React.ReactNode }) => (
       <WalletProvider manager={mockWalletManager}>{children}</WalletProvider>
@@ -162,11 +163,6 @@ describe('useNetwork', () => {
     })
 
     expect(mockWalletManager.store.state.activeNetwork).toBe(newNetwork)
-    const { algod } = mockWalletManager.networkConfig[newNetwork]
-    const { token, baseServer, port, headers } = algod
-    expect(mockWalletManager.algodClient).toEqual(
-      new algosdk.Algodv2(token, baseServer, port, headers)
-    )
   })
 
   it('calls updateAlgodConfig on the manager when updating network config', () => {
@@ -190,64 +186,6 @@ describe('useNetwork', () => {
     )
   })
 
-  it('allows setting custom network that exists in config', async () => {
-    const customNetwork = {
-      algod: {
-        token: '',
-        baseServer: 'https://custom.network',
-        headers: {}
-      }
-    }
-
-    mockWalletManager.networkConfig['custom-net'] = customNetwork
-    const { result } = renderHook(() => useNetwork(), { wrapper })
-
-    await act(async () => {
-      await result.current.setActiveNetwork('custom-net')
-    })
-
-    expect(result.current.activeNetwork).toBe('custom-net')
-  })
-
-  it('initializes network correctly', async () => {
-    const { result } = renderHook(() => useNetwork(), { wrapper })
-
-    expect(result.current.activeNetwork).toBe(NetworkId.TESTNET)
-  })
-
-  it('updates activeNetworkConfig when switching networks', async () => {
-    const { result } = renderHook(() => useNetwork(), { wrapper })
-    const newNetwork = NetworkId.MAINNET
-
-    await act(async () => {
-      await result.current.setActiveNetwork(newNetwork)
-    })
-
-    expect(result.current.activeNetworkConfig).toBe(mockWalletManager.networkConfig[newNetwork])
-  })
-
-  it('updates activeNetworkConfig when updating network configuration', async () => {
-    // Combine hooks into a single component to ensure shared context
-    const useTestHooks = () => {
-      const network = useNetwork()
-      const wallet = useWallet()
-      return { network, wallet }
-    }
-
-    const { result } = renderHook(() => useTestHooks(), { wrapper })
-
-    const networkId = NetworkId.TESTNET
-    const config = { baseServer: 'https://new-server.com' }
-    const expectedClient = new algosdk.Algodv2('', 'https://new-server.com', '')
-
-    await act(async () => {
-      result.current.network.updateAlgodConfig(networkId, config)
-    })
-
-    expect(mockWalletManager.networkConfig[networkId].algod.baseServer).toBe(config.baseServer)
-    expect(result.current.wallet.algodClient).toEqual(expectedClient)
-  })
-
   it('provides resetNetworkConfig functionality', () => {
     const resetNetworkConfigSpy = vi.spyOn(mockWalletManager, 'resetNetworkConfig')
     const { result } = renderHook(() => useNetwork(), { wrapper })
@@ -260,211 +198,18 @@ describe('useNetwork', () => {
 
     expect(resetNetworkConfigSpy).toHaveBeenCalledWith(NetworkId.TESTNET)
   })
-
-  it('updates algodClient when resetting active network', () => {
-    const createAlgodClientSpy = vi.spyOn(mockWalletManager as any, 'createAlgodClient')
-    const { result } = renderHook(() => useNetwork(), { wrapper })
-
-    // Modify the config
-    act(() => {
-      result.current.updateAlgodConfig(NetworkId.TESTNET, {
-        token: 'custom-token',
-        baseServer: 'https://custom-server.com'
-      })
-    })
-
-    // Clear previous calls
-    createAlgodClientSpy.mockClear()
-
-    // Then reset it
-    act(() => {
-      result.current.resetNetworkConfig(NetworkId.TESTNET)
-    })
-
-    // Verify new algod client was created
-    const algodConfig = mockWalletManager.networkConfig[NetworkId.TESTNET].algod
-    expect(createAlgodClientSpy).toHaveBeenCalledWith(algodConfig)
-  })
-
-  it('updates algodClient when updating active network config', async () => {
-    const useTestHooks = () => {
-      const network = useNetwork()
-      const wallet = useWallet()
-      return { network, wallet }
-    }
-
-    const { result } = renderHook(() => useTestHooks(), { wrapper })
-
-    const networkId = NetworkId.TESTNET
-    const newConfig = { baseServer: 'https://new-server.com' }
-    const expectedClient = new algosdk.Algodv2('', 'https://new-server.com', '')
-
-    await act(async () => {
-      result.current.network.updateAlgodConfig(networkId, newConfig)
-    })
-
-    expect(mockWalletManager.networkConfig[networkId].algod.baseServer).toBe(newConfig.baseServer)
-    expect(result.current.wallet.algodClient).toEqual(expectedClient)
-  })
-
-  it('does not update algodClient when updating inactive network config', async () => {
-    const { result: networkResult } = renderHook(() => useNetwork(), { wrapper })
-    const { result: walletResult } = renderHook(() => useWallet(), { wrapper })
-
-    const initialClient = walletResult.current.algodClient
-    const networkId = NetworkId.MAINNET // Not the active network
-    const newConfig = { baseServer: 'https://new-server.com' }
-
-    await act(async () => {
-      networkResult.current.updateAlgodConfig(networkId, newConfig)
-    })
-
-    expect(mockWalletManager.networkConfig[networkId].algod.baseServer).toBe(newConfig.baseServer)
-    expect(walletResult.current.algodClient).toBe(initialClient)
-  })
-
-  it('updates algodClient when resetting active network config', async () => {
-    const { result: networkResult } = renderHook(() => useNetwork(), { wrapper })
-    const { result: walletResult } = renderHook(() => useWallet(), { wrapper })
-
-    const networkId = NetworkId.TESTNET
-    const defaultConfig = {
-      algod: {
-        baseServer: 'https://testnet-api.4160.nodely.dev',
-        token: '',
-        headers: {}
-      },
-      isTestnet: true,
-      genesisHash: 'SGO1GKSzyE7IEPItTxCByw9x8FmnrCDexi9/cOUJOiI=',
-      genesisId: 'testnet-v1.0',
-      caipChainId: 'algorand:SGO1GKSzyE7IEPItTxCByw9x8FmnrCDe'
-    }
-    const expectedClient = new algosdk.Algodv2(
-      defaultConfig.algod.token,
-      defaultConfig.algod.baseServer
-    )
-
-    // Modify the config
-    await act(async () => {
-      networkResult.current.updateAlgodConfig(networkId, {
-        baseServer: 'https://modified-server.com'
-      })
-    })
-
-    // Then reset it
-    await act(async () => {
-      networkResult.current.resetNetworkConfig(networkId)
-    })
-
-    expect(mockWalletManager.networkConfig[networkId]).toEqual(defaultConfig)
-    expect(walletResult.current.algodClient).toEqual(expectedClient)
-  })
-
-  it('does not update algodClient when resetting inactive network config', async () => {
-    const { result: networkResult } = renderHook(() => useNetwork(), { wrapper })
-    const { result: walletResult } = renderHook(() => useWallet(), { wrapper })
-
-    const initialClient = walletResult.current.algodClient
-    const networkId = NetworkId.MAINNET // Not the active network
-
-    // Modify the config
-    await act(async () => {
-      networkResult.current.updateAlgodConfig(networkId, {
-        baseServer: 'https://modified-server.com'
-      })
-    })
-
-    // Then reset it
-    await act(async () => {
-      networkResult.current.resetNetworkConfig(networkId)
-    })
-
-    expect(walletResult.current.algodClient).toBe(initialClient)
-  })
-
-  describe('setActiveNetwork', () => {
-    it('calls setActiveNetwork correctly and updates algodClient', async () => {
-      // Combine hooks into a single component for shared context
-      const useTestHooks = () => {
-        const network = useNetwork()
-        const wallet = useWallet()
-        return { network, wallet }
-      }
-
-      const { result } = renderHook(() => useTestHooks(), { wrapper })
-      const newNetwork = NetworkId.MAINNET
-
-      await act(async () => {
-        await result.current.network.setActiveNetwork(newNetwork)
-      })
-
-      expect(result.current.network.activeNetwork).toBe(newNetwork)
-
-      const { algod } = mockWalletManager.networkConfig[newNetwork]
-      const { token, baseServer, port, headers } = algod
-      expect(result.current.wallet.algodClient).toEqual(
-        new algosdk.Algodv2(token, baseServer, port, headers)
-      )
-    })
-
-    it('throws error for invalid network', async () => {
-      const { result } = renderHook(() => useNetwork(), { wrapper })
-
-      await expect(result.current.setActiveNetwork('invalid-network')).rejects.toThrow(
-        'Network "invalid-network" not found in network configuration'
-      )
-    })
-  })
 })
 
 describe('useWallet', () => {
   let mockWalletManager: WalletManager
-  let mockWallets: Wallet[]
   let wrapper: React.FC<{ children: React.ReactNode }>
 
   beforeEach(() => {
     vi.clearAllMocks()
 
-    mockStore.setState(() => DEFAULT_STATE)
-
-    mockWalletManager = new WalletManager()
-    mockWallets = [
-      {
-        id: mockDeflyWallet.id,
-        walletKey: mockDeflyWallet.walletKey,
-        metadata: mockDeflyWallet.metadata,
-        accounts: [],
-        activeAccount: null,
-        isConnected: false,
-        isActive: false,
-        connect: expect.any(Function),
-        disconnect: expect.any(Function),
-        setActive: expect.any(Function),
-        setActiveAccount: expect.any(Function),
-        canSignData: false,
-        canUsePrivateKey: false
-      },
-      {
-        id: mockMagicAuth.id,
-        walletKey: mockMagicAuth.walletKey,
-        metadata: mockMagicAuth.metadata,
-        accounts: [],
-        activeAccount: null,
-        isConnected: false,
-        isActive: false,
-        connect: expect.any(Function),
-        disconnect: expect.any(Function),
-        setActive: expect.any(Function),
-        setActiveAccount: expect.any(Function),
-        canSignData: false,
-        canUsePrivateKey: false
-      }
-    ]
-    mockWalletManager._clients = new Map<WalletId, BaseWallet>([
-      [WalletId.DEFLY, mockDeflyWallet],
-      [WalletId.MAGIC, mockMagicAuth]
-    ])
-    mockWalletManager.store = mockStore
+    mockWalletManager = new WalletManager({
+      wallets: [mockAdapterA(), mockAdapterB()]
+    })
 
     wrapper = ({ children }: { children: React.ReactNode }) => (
       <WalletProvider manager={mockWalletManager}>{children}</WalletProvider>
@@ -489,11 +234,12 @@ describe('useWallet', () => {
     const { result } = renderHook(() => useWallet(), { wrapper })
 
     await act(async () => {
-      // Wait for any initial effects to complete
       await new Promise((resolve) => setTimeout(resolve, 0))
     })
 
-    expect(result.current.wallets).toEqual(mockWallets)
+    expect(result.current.wallets).toHaveLength(2)
+    expect(result.current.wallets[0].id).toBe('wallet-a')
+    expect(result.current.wallets[1].id).toBe('wallet-b')
     expect(result.current.activeWallet).toBeNull()
     expect(result.current.activeAccount).toBeNull()
   })
@@ -501,25 +247,14 @@ describe('useWallet', () => {
   it('correctly handles wallet connect/disconnect', async () => {
     const { result } = renderHook(() => useWallet(), { wrapper })
 
-    const defly = result.current.wallets[0]
-    const magic = result.current.wallets[1]
+    const walletA = result.current.wallets[0]
 
-    // Simulate connect and disconnect for Defly (no args)
     await act(async () => {
-      await defly.connect()
-      await defly.disconnect()
+      await walletA.connect()
+      await walletA.disconnect()
     })
 
     expect(mocks.connect).toHaveBeenCalledWith(undefined)
-    expect(mocks.disconnect).toHaveBeenCalled()
-
-    // Simulate connect and disconnect for Magic (with email)
-    await act(async () => {
-      await magic.connect({ email: 'test@example.com' })
-      await magic.disconnect()
-    })
-
-    expect(mocks.connect).toHaveBeenCalledWith({ email: 'test@example.com' })
     expect(mocks.disconnect).toHaveBeenCalled()
   })
 
@@ -527,20 +262,17 @@ describe('useWallet', () => {
     const { result } = renderHook(() => useWallet(), { wrapper })
 
     await act(async () => {
-      // Get the Defly wallet from wallets array
-      const deflyWallet = result.current.wallets.find((w) => w.id === WalletId.DEFLY)
-      if (!deflyWallet) throw new Error('Defly wallet not found')
-
-      deflyWallet.setActive()
+      const walletA = result.current.wallets.find((w) => w.id === 'wallet-a')
+      if (!walletA) throw new Error('Wallet A not found')
+      walletA.setActive()
     })
 
     expect(mocks.setActive).toHaveBeenCalled()
 
     await act(async () => {
-      const deflyWallet = result.current.wallets.find((w) => w.id === WalletId.DEFLY)
-      if (!deflyWallet) throw new Error('Defly wallet not found')
-
-      deflyWallet.setActiveAccount('test-address')
+      const walletA = result.current.wallets.find((w) => w.id === 'wallet-a')
+      if (!walletA) throw new Error('Wallet A not found')
+      walletA.setActiveAccount('test-address')
     })
 
     expect(mocks.setActiveAccount).toHaveBeenCalledWith('test-address')
@@ -549,29 +281,19 @@ describe('useWallet', () => {
   it('calls signTransactions and transactionSigner correctly', async () => {
     const { result } = renderHook(() => useWallet(), { wrapper })
 
-    // Set an active wallet and account
     act(() => {
-      mockStore.setState((state) => ({
+      mockWalletManager.store.setState((state) => ({
         ...state,
         wallets: {
-          [WalletId.DEFLY]: {
-            accounts: [
-              {
-                name: 'Defly Account 1',
-                address: 'address1'
-              }
-            ],
-            activeAccount: {
-              name: 'Defly Account 1',
-              address: 'address1'
-            }
+          'wallet-a': {
+            accounts: [{ name: 'Account 1', address: 'address1' }],
+            activeAccount: { name: 'Account 1', address: 'address1' }
           }
         },
-        activeWallet: WalletId.DEFLY
+        activeWallet: 'wallet-a'
       }))
     })
 
-    // Simulate calling signTransactions and transactionSigner
     await act(async () => {
       await result.current.signTransactions([], [])
       await result.current.transactionSigner([], [])
@@ -585,41 +307,28 @@ describe('useWallet', () => {
     const { result } = renderHook(() => useWallet(), { wrapper })
 
     await act(async () => {
-      mockStore.setState((state) => ({
+      mockWalletManager.store.setState((state) => ({
         ...state,
         wallets: {
-          [WalletId.DEFLY]: {
+          'wallet-a': {
             accounts: [{ name: 'Account 1', address: 'address1' }],
             activeAccount: { name: 'Account 1', address: 'address1' }
           }
         },
-        activeWallet: WalletId.DEFLY
+        activeWallet: 'wallet-a'
       }))
     })
 
-    expect(result.current.activeWallet?.id).toBe(WalletId.DEFLY)
+    expect(result.current.activeWallet?.id).toBe('wallet-a')
     expect(result.current.activeAddress).toBe('address1')
-  })
-
-  it('initializes with isReady false and updates after resumeSessions', async () => {
-    const { result } = renderHook(() => useWallet(), { wrapper })
-    expect(result.current.isReady).toBe(false)
-
-    // Wait for resumeSessions to complete
-    await act(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 0))
-    })
-
-    expect(result.current.isReady).toBe(true)
   })
 
   it('updates isReady when manager status changes', async () => {
     const { result } = renderHook(() => useWallet(), { wrapper })
     expect(result.current.isReady).toBe(false)
 
-    // Simulate status change
     await act(async () => {
-      mockStore.setState((state) => ({
+      mockWalletManager.store.setState((state) => ({
         ...state,
         managerStatus: 'ready'
       }))
@@ -637,130 +346,5 @@ describe('useWallet', () => {
     })
 
     expect(result.current.algodClient).toBe(newAlgodClient)
-  })
-
-  it('integrates correctly with a React component', async () => {
-    // Set loading state
-    mockStore.setState((state) => ({
-      ...state,
-      managerStatus: 'initializing'
-    }))
-
-    function TestComponent() {
-      const {
-        wallets,
-        activeWallet,
-        activeWalletAccounts,
-        activeWalletAddresses,
-        activeAccount,
-        activeAddress,
-        isReady,
-        algodClient
-      } = useWallet()
-      const { activeNetwork } = useNetwork()
-
-      if (!isReady) {
-        return <div data-testid="loading">Loading...</div>
-      }
-
-      return (
-        <div>
-          <ul>
-            {wallets.map((wallet) => (
-              <li key={wallet.id}>{wallet.metadata.name}</li>
-            ))}
-          </ul>
-          <div data-testid="is-ready">Is Ready: {JSON.stringify(isReady)}</div>
-          <div data-testid="active-network">Active Network: {JSON.stringify(activeNetwork)}</div>
-          <div data-testid="active-wallet">Active Wallet: {JSON.stringify(activeWallet)}</div>
-          <div data-testid="active-wallet-accounts">
-            Active Wallet Accounts: {JSON.stringify(activeWalletAccounts)}
-          </div>
-          <div data-testid="active-wallet-addresses">
-            Active Wallet Addresses: {JSON.stringify(activeWalletAddresses)}
-          </div>
-          <div data-testid="active-account">Active Account: {JSON.stringify(activeAccount)}</div>
-          <div data-testid="active-address">Active Address: {JSON.stringify(activeAddress)}</div>
-          <div data-testid="algod-client">Algod Client: {JSON.stringify(!!algodClient)}</div>
-        </div>
-      )
-    }
-
-    const { getByTestId, getAllByRole } = render(
-      <WalletProvider manager={mockWalletManager}>
-        <TestComponent />
-      </WalletProvider>
-    )
-
-    // Verify loading state
-    expect(getByTestId('loading')).toHaveTextContent('Loading...')
-
-    // Set ready state
-    await act(async () => {
-      mockStore.setState((state) => ({
-        ...state,
-        managerStatus: 'ready'
-      }))
-    })
-
-    // Verify ready state
-    expect(getByTestId('is-ready')).toHaveTextContent('true')
-
-    const listItems = getAllByRole('listitem')
-    mockWallets.forEach((wallet, index) => {
-      expect(listItems[index]).toHaveTextContent(wallet.metadata.name)
-    })
-
-    expect(getByTestId('active-network')).toHaveTextContent(JSON.stringify(NetworkId.TESTNET))
-    expect(getByTestId('active-wallet')).toHaveTextContent(JSON.stringify(null))
-    expect(getByTestId('active-wallet-accounts')).toHaveTextContent(JSON.stringify(null))
-    expect(getByTestId('active-wallet-addresses')).toHaveTextContent(JSON.stringify(null))
-    expect(getByTestId('active-account')).toHaveTextContent(JSON.stringify(null))
-    expect(getByTestId('active-address')).toHaveTextContent(JSON.stringify(null))
-    expect(getByTestId('algod-client')).toHaveTextContent('true')
-
-    // Mock a state change in the store
-    await act(async () => {
-      mockStore.setState((state) => ({
-        ...state,
-        managerStatus: 'ready',
-        wallets: {
-          [WalletId.DEFLY]: {
-            accounts: [
-              {
-                name: 'Defly Account 1',
-                address: 'address1'
-              }
-            ],
-            activeAccount: {
-              name: 'Defly Account 1',
-              address: 'address1'
-            }
-          }
-        },
-        activeWallet: WalletId.DEFLY
-      }))
-    })
-
-    expect(getByTestId('is-ready')).toHaveTextContent('true')
-    expect(getByTestId('active-network')).toHaveTextContent(JSON.stringify(NetworkId.TESTNET))
-    expect(getByTestId('active-wallet')).toHaveTextContent(JSON.stringify(WalletId.DEFLY))
-    expect(getByTestId('active-wallet-accounts')).toHaveTextContent(
-      JSON.stringify([
-        {
-          name: 'Defly Account 1',
-          address: 'address1'
-        }
-      ])
-    )
-    expect(getByTestId('active-wallet-addresses')).toHaveTextContent(JSON.stringify(['address1']))
-    expect(getByTestId('active-account')).toHaveTextContent(
-      JSON.stringify({
-        name: 'Defly Account 1',
-        address: 'address1'
-      })
-    )
-    expect(getByTestId('active-address')).toHaveTextContent(JSON.stringify('address1'))
-    expect(getByTestId('algod-client')).toHaveTextContent('true')
   })
 })

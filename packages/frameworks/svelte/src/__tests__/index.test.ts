@@ -1,18 +1,16 @@
 import { waitFor } from '@testing-library/svelte'
-import { Store } from '@tanstack/svelte-store'
 import {
   BaseWallet,
-  DeflyWallet,
-  LuteWallet,
   NetworkId,
   WalletManager,
-  WalletId,
   DEFAULT_NETWORK_CONFIG,
   type State,
   type WalletAccount,
   type SignDataResponse,
+  type WalletAdapterConfig,
+  type AdapterConstructorParams,
   ScopeType,
-  ManagerStatus
+  type ManagerStatus
 } from '@txnlab/use-wallet'
 import algosdk from 'algosdk'
 import { getContext, setContext } from 'svelte'
@@ -73,102 +71,71 @@ const mocks = vi.hoisted(() => {
   }
 })
 
-vi.mock('@txnlab/use-wallet', async (importOriginal) => {
-  const mod = await importOriginal<typeof import('@txnlab/use-wallet')>()
-  return {
-    ...mod,
-    LuteWallet: class extends mod.BaseWallet {
-      connect = mocks.connect
-      disconnect = mocks.disconnect
-      setActive = mocks.setActive
-      setActiveAccount = mocks.setActiveAccount
-      resumeSession = mocks.resumeSession
-      signTransactions = mocks.signTransactions
-      transactionSigner = mocks.transactionSigner
-      signData = mocks.signData
-    },
-    DeflyWallet: class extends mod.BaseWallet {
-      connect = mocks.connect
-      disconnect = mocks.disconnect
-      setActive = mocks.setActive
-      setActiveAccount = mocks.setActiveAccount
-      resumeSession = mocks.resumeSession
-      signTransactions = mocks.signTransactions
-      transactionSigner = mocks.transactionSigner
-      signData = mocks.signData
-    }
-  }
-})
+class MockWalletA extends BaseWallet {
+  connect = mocks.connect
+  disconnect = mocks.disconnect
+  setActive = mocks.setActive
+  setActiveAccount = mocks.setActiveAccount
+  resumeSession = mocks.resumeSession
+  signTransactions = mocks.signTransactions
+  transactionSigner = mocks.transactionSigner
+  signData = mocks.signData
 
-let mockStore: Store<State>
+  static defaultMetadata = { name: 'Wallet A', icon: 'icon-a' }
+
+  constructor(params: AdapterConstructorParams) {
+    super(params)
+  }
+}
+
+class MockWalletB extends BaseWallet {
+  connect = mocks.connect
+  disconnect = mocks.disconnect
+  setActive = mocks.setActive
+  setActiveAccount = mocks.setActiveAccount
+  resumeSession = mocks.resumeSession
+  signTransactions = mocks.signTransactions
+  transactionSigner = mocks.transactionSigner
+  signData = mocks.signData
+
+  static defaultMetadata = { name: 'Wallet B', icon: 'icon-b' }
+
+  constructor(params: AdapterConstructorParams) {
+    super(params)
+  }
+}
+
+function mockAdapterA(): WalletAdapterConfig {
+  return {
+    id: 'wallet-a',
+    metadata: MockWalletA.defaultMetadata,
+    Adapter: MockWalletA as unknown as WalletAdapterConfig['Adapter']
+  }
+}
+
+function mockAdapterB(): WalletAdapterConfig {
+  return {
+    id: 'wallet-b',
+    metadata: MockWalletB.defaultMetadata,
+    Adapter: MockWalletB as unknown as WalletAdapterConfig['Adapter']
+  }
+}
+
 let mockWalletManager: WalletManager
-let mockDeflyWallet: DeflyWallet
-let mockLuteWallet: LuteWallet
 
 const setupMocks = () => {
-  mockStore = new Store<State>({
-    activeNetwork: NetworkId.TESTNET,
-    activeWallet: null,
-    algodClient: new algosdk.Algodv2('', 'https://testnet-api.algonode.cloud', ''),
-    managerStatus: 'ready',
-    wallets: {},
-    customNetworkConfigs: {},
-    networkConfig: DEFAULT_NETWORK_CONFIG
-  })
+  localStorage.clear()
 
   mockWalletManager = new WalletManager({
-    wallets: [
-      {
-        id: WalletId.LUTE,
-        options: {
-          siteName: 'Test Site'
-        }
-      },
-      WalletId.DEFLY
-    ]
+    wallets: [mockAdapterA(), mockAdapterB()]
   })
 
-  vi.spyOn(mockWalletManager, 'store', 'get').mockReturnValue(mockStore)
   vi.spyOn(mockWalletManager, 'resumeSessions').mockResolvedValue()
-
-  mockLuteWallet = new LuteWallet({
-    id: WalletId.LUTE,
-    options: {
-      siteName: 'Test Site'
-    },
-    metadata: { name: 'Lute', icon: 'icon' },
-    getAlgodClient: () => ({}) as any,
-    store: mockStore,
-    subscribe: vi.fn()
-  })
-
-  mockDeflyWallet = new DeflyWallet({
-    id: WalletId.DEFLY,
-    metadata: { name: 'Defly', icon: 'icon' },
-    getAlgodClient: () => ({}) as any,
-    store: mockStore,
-    subscribe: vi.fn()
-  })
-
-  mockWalletManager._clients = new Map<WalletId, BaseWallet>([
-    [WalletId.LUTE, mockLuteWallet],
-    [WalletId.DEFLY, mockDeflyWallet]
-  ])
 }
 
 beforeEach(() => {
   setupMocks()
   vi.clearAllMocks()
-  mockStore.setState((state) => ({
-    ...state,
-    activeNetwork: NetworkId.TESTNET,
-    activeWallet: null,
-    algodClient: new algosdk.Algodv2('', 'https://testnet-api.algonode.cloud', ''),
-    managerStatus: 'ready',
-    wallets: {},
-    networkConfig: { ...DEFAULT_NETWORK_CONFIG },
-    customNetworkConfigs: {}
-  }))
 })
 
 describe('useWalletContext', () => {
@@ -245,13 +212,13 @@ describe('useNetwork', () => {
     await network.setActiveNetwork(newNetwork)
 
     expect(setActiveNetworkSpy).toHaveBeenCalledWith(newNetwork)
-    expect(mockStore.state.activeNetwork).toBe(newNetwork)
-    expect(mockStore.state.algodClient).toBeInstanceOf(algosdk.Algodv2)
+    expect(mockWalletManager.store.state.activeNetwork).toBe(newNetwork)
+    expect(mockWalletManager.store.state.algodClient).toBeInstanceOf(algosdk.Algodv2)
   })
 
   it('does not change network if already active', async () => {
     const network = useNetwork()
-    const currentNetwork = mockStore.state.activeNetwork
+    const currentNetwork = mockWalletManager.store.state.activeNetwork
 
     const setActiveNetworkSpy = vi.spyOn(mockWalletManager, 'setActiveNetwork').mockResolvedValue()
 
@@ -279,21 +246,21 @@ describe('useNetwork', () => {
     network.updateAlgodConfig(networkId, config)
 
     expect(updateAlgodConfigSpy).toHaveBeenCalledWith(networkId, config)
-    expect(mockStore.state.algodClient).toBeInstanceOf(algosdk.Algodv2)
+    expect(mockWalletManager.store.state.algodClient).toBeInstanceOf(algosdk.Algodv2)
   })
 
   it('does not update algod client when updating config for non-active network', () => {
     const network = useNetwork()
     const nonActiveNetwork = NetworkId.MAINNET
     const config = { baseServer: 'https://new-server.com' }
-    const originalClient = mockStore.state.algodClient
+    const originalClient = mockWalletManager.store.state.algodClient
 
     const updateAlgodConfigSpy = vi.spyOn(mockWalletManager, 'updateAlgodConfig')
 
     network.updateAlgodConfig(nonActiveNetwork, config)
 
     expect(updateAlgodConfigSpy).toHaveBeenCalledWith(nonActiveNetwork, config)
-    expect(mockStore.state.algodClient).toBe(originalClient)
+    expect(mockWalletManager.store.state.algodClient).toBe(originalClient)
   })
 
   it('resets network config and updates client for active network', () => {
@@ -305,7 +272,7 @@ describe('useNetwork', () => {
     network.resetNetworkConfig(networkId)
 
     expect(resetNetworkConfigSpy).toHaveBeenCalledWith(networkId)
-    expect(mockStore.state.algodClient).toBeInstanceOf(algosdk.Algodv2)
+    expect(mockWalletManager.store.state.algodClient).toBeInstanceOf(algosdk.Algodv2)
   })
 })
 
@@ -318,7 +285,7 @@ describe('useWallet', () => {
     mockGetContext.mockReturnValue(mockWalletManager)
 
     // Reset wallets state for each test
-    mockStore.setState((state) => ({
+    mockWalletManager.store.setState((state) => ({
       ...state,
       wallets: {}
     }))
@@ -345,82 +312,88 @@ describe('useWallet', () => {
 
     expect(wallet.wallets).toHaveLength(2)
 
-    const luteWallet = wallet.wallets.find((w) => w.id === WalletId.LUTE)
-    expect(luteWallet).toBeDefined()
-    expect(luteWallet!.metadata.name).toBe('Lute')
-    expect(typeof luteWallet!.connect).toBe('function')
-    expect(typeof luteWallet!.disconnect).toBe('function')
-    expect(typeof luteWallet!.setActive).toBe('function')
-    expect(typeof luteWallet!.setActiveAccount).toBe('function')
-    expect(typeof luteWallet!.isConnected).toBe('function')
-    expect(typeof luteWallet!.isActive).toBe('function')
+    const walletA = wallet.wallets.find((w) => w.id === 'wallet-a')
+    expect(walletA).toBeDefined()
+    expect(walletA!.metadata.name).toBe('Wallet A')
+    expect(typeof walletA!.connect).toBe('function')
+    expect(typeof walletA!.disconnect).toBe('function')
+    expect(typeof walletA!.setActive).toBe('function')
+    expect(typeof walletA!.setActiveAccount).toBe('function')
+    expect(typeof walletA!.isConnected).toBe('function')
+    expect(typeof walletA!.isActive).toBe('function')
 
-    const deflyWallet = wallet.wallets.find((w) => w.id === WalletId.DEFLY)
-    expect(deflyWallet).toBeDefined()
-    expect(deflyWallet!.metadata.name).toBe('Defly')
+    const walletB = wallet.wallets.find((w) => w.id === 'wallet-b')
+    expect(walletB).toBeDefined()
+    expect(walletB!.metadata.name).toBe('Wallet B')
   })
 
   it('correctly identifies wallet connection status', () => {
     const wallet = useWallet()
-    const luteWallet = wallet.wallets.find((w) => w.id === WalletId.LUTE)!
+    const walletA = wallet.wallets.find((w) => w.id === 'wallet-a')!
 
     // Initially not connected
-    expect(luteWallet.isConnected()).toBe(false)
+    expect(walletA.isConnected()).toBe(false)
 
     // Simulate connection
-    mockStore.setState((state) => ({
+    mockWalletManager.store.setState((state) => ({
       ...state,
       wallets: {
         ...state.wallets,
-        [WalletId.LUTE]: {
+        'wallet-a': {
           accounts: [testAccount1],
           activeAccount: testAccount1
         }
       }
     }))
 
-    expect(luteWallet.isConnected()).toBe(true)
+    expect(walletA.isConnected()).toBe(true)
   })
 
   it('correctly identifies active wallet', () => {
     const wallet = useWallet()
-    const luteWallet = wallet.wallets.find((w) => w.id === WalletId.LUTE)!
+    const walletA = wallet.wallets.find((w) => w.id === 'wallet-a')!
 
     // Initially no active wallet
-    expect(luteWallet.isActive()).toBe(false)
+    expect(walletA.isActive()).toBe(false)
 
     // Set active wallet
-    mockStore.setState((state) => ({
+    mockWalletManager.store.setState((state) => ({
       ...state,
-      activeWallet: WalletId.LUTE
+      activeWallet: 'wallet-a'
     }))
 
-    expect(luteWallet.isActive()).toBe(true)
+    expect(walletA.isActive()).toBe(true)
   })
 
   it('calls wallet methods correctly', async () => {
     const wallet = useWallet()
-    const luteWallet = wallet.wallets.find((w) => w.id === WalletId.LUTE)!
+    const walletA = wallet.wallets.find((w) => w.id === 'wallet-a')!
 
-    await luteWallet.connect()
+    await walletA.connect()
     expect(mocks.connect).toHaveBeenCalledWith(undefined)
 
-    await luteWallet.disconnect()
+    await walletA.disconnect()
     expect(mocks.disconnect).toHaveBeenCalled()
 
-    luteWallet.setActive()
+    walletA.setActive()
     expect(mocks.setActive).toHaveBeenCalled()
 
-    luteWallet.setActiveAccount('test-address')
+    walletA.setActiveAccount('test-address')
     expect(mocks.setActiveAccount).toHaveBeenCalledWith('test-address')
   })
 
   it('returns isReady status based on manager status', () => {
+    // Set manager to ready first
+    mockWalletManager.store.setState((state) => ({
+      ...state,
+      managerStatus: 'ready'
+    }))
+
     const wallet = useWallet()
 
     expect(wallet.isReady()).toBe(true)
 
-    mockStore.setState((state) => ({
+    mockWalletManager.store.setState((state) => ({
       ...state,
       managerStatus: 'loading' as ManagerStatus
     }))
@@ -435,12 +408,12 @@ describe('useWallet', () => {
     expect(wallet.activeWallet()).toBeUndefined()
 
     // Set active wallet with accounts
-    mockStore.setState((state) => ({
+    mockWalletManager.store.setState((state) => ({
       ...state,
-      activeWallet: WalletId.LUTE,
+      activeWallet: 'wallet-a',
       wallets: {
         ...state.wallets,
-        [WalletId.LUTE]: {
+        'wallet-a': {
           accounts: [testAccount1, testAccount2],
           activeAccount: testAccount1
         }
@@ -449,7 +422,7 @@ describe('useWallet', () => {
 
     const activeWallet = wallet.activeWallet()
     expect(activeWallet).toBeDefined()
-    expect(activeWallet!.id).toBe(WalletId.LUTE)
+    expect(activeWallet!.id).toBe('wallet-a')
 
     expect(wallet.activeWalletAccounts.current).toEqual([testAccount1, testAccount2])
     expect(wallet.activeWalletAddresses.current).toEqual(['address1', 'address2'])
@@ -467,9 +440,9 @@ describe('useWallet', () => {
     const wallet = useWallet()
 
     // Set active wallet
-    mockStore.setState((state) => ({
+    mockWalletManager.store.setState((state) => ({
       ...state,
-      activeWallet: WalletId.LUTE
+      activeWallet: 'wallet-a'
     }))
 
     const txns = [] as algosdk.Transaction[]
@@ -490,9 +463,9 @@ describe('useWallet', () => {
     const wallet = useWallet()
 
     // Set active wallet
-    mockStore.setState((state) => ({
+    mockWalletManager.store.setState((state) => ({
       ...state,
-      activeWallet: WalletId.LUTE
+      activeWallet: 'wallet-a'
     }))
 
     const txns = [] as algosdk.Transaction[]
@@ -515,9 +488,9 @@ describe('useWallet', () => {
     const wallet = useWallet()
 
     // Set active wallet
-    mockStore.setState((state) => ({
+    mockWalletManager.store.setState((state) => ({
       ...state,
-      activeWallet: WalletId.LUTE
+      activeWallet: 'wallet-a'
     }))
 
     const data = 'test-data'
