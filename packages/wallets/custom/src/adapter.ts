@@ -50,9 +50,6 @@ export class CustomAdapter extends BaseWallet<CustomWalletOptions> {
 
     // Set canSignData based on whether the provider supports it
     this.canSignData = typeof this.provider.signData === 'function'
-
-    // Delete the instance property set by BaseWallet so the getter takes effect
-    delete (this as any).canSignData
   }
 
   static defaultMetadata: WalletMetadata = {

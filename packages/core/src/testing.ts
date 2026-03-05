@@ -63,6 +63,35 @@ export function createMockStoreAccessor(
   return { ...defaultAccessor, ...overrides }
 }
 
+/**
+ * Test harness for wallet adapter tests.
+ * Returns both the store accessor and the underlying store,
+ * allowing tests to pre-populate state and verify mutations.
+ */
+export function createTestHarness(
+  walletKey: string,
+  stateOverrides?: Partial<State>
+): { store: Store<State>; accessor: AdapterStoreAccessor } {
+  const store = createTestStore(stateOverrides)
+
+  const accessor: AdapterStoreAccessor = {
+    getWalletState: () => store.state.wallets[walletKey],
+    getActiveWallet: () => store.state.activeWallet,
+    getActiveNetwork: () => store.state.activeNetwork,
+    getState: () => store.state,
+    addWallet: (wallet: WalletState) =>
+      addWallet(store, { walletId: walletKey, wallet }),
+    removeWallet: () => removeWallet(store, { walletId: walletKey }),
+    setAccounts: (accounts) =>
+      setAccounts(store, { walletId: walletKey, accounts }),
+    setActiveAccount: (address) =>
+      setActiveAccount(store, { walletId: walletKey, address }),
+    setActive: () => setActiveWallet(store, { walletId: walletKey })
+  }
+
+  return { store, accessor }
+}
+
 // Re-export commonly needed test types
 export type { State } from './store'
 export type { AdapterStoreAccessor, WalletState, WalletAccount } from './wallets/types'
