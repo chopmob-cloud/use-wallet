@@ -29,11 +29,9 @@ export interface CustomWalletOptions {
   provider: CustomProvider
 }
 
-const ICON = `data:image/svg+xml;base64,${btoa(`
-<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-  <rect width="24" height="24" fill="#525252" />
-</svg>
-`)}`
+import { icon } from './icon'
+
+const ICON = `data:image/svg+xml;base64,${btoa(icon)}`
 
 export class CustomAdapter extends BaseWallet<CustomWalletOptions> {
   private provider: CustomProvider
