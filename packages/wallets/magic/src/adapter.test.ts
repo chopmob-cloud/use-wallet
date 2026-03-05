@@ -1,10 +1,9 @@
 import algosdk from 'algosdk'
-import { MagicAdapter } from '../adapter'
+import { MagicAdapter } from './adapter'
 import { createTestHarness, type WalletState } from '@txnlab/use-wallet/testing'
 import { base64ToByteArray, byteArrayToBase64 } from '@txnlab/use-wallet/adapter'
 import type { AdapterStoreAccessor } from '@txnlab/use-wallet/adapter'
-import type { Store } from '@tanstack/store'
-import type { State } from '@txnlab/use-wallet/testing'
+import type { State, Store } from '@txnlab/use-wallet/testing'
 
 vi.mock('@txnlab/use-wallet/adapter', async (importOriginal) => {
   const original = await importOriginal<typeof import('@txnlab/use-wallet/adapter')>()

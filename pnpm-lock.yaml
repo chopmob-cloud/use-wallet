@@ -765,21 +765,6 @@ importers:
         specifier: 3.5.27
         version: 3.5.27(typescript@5.9.3)
 
-  packages/wallets/custom:
-    devDependencies:
-      '@txnlab/use-wallet':
-        specifier: workspace:*
-        version: link:../../core
-      algosdk:
-        specifier: 3.5.2
-        version: 3.5.2
-      tsup:
-        specifier: 8.5.1
-        version: 8.5.1(jiti@2.6.1)(postcss@8.5.6)(typescript@5.9.3)(yaml@2.8.2)
-      typescript:
-        specifier: 5.9.3
-        version: 5.9.3
-
   packages/wallets/defly:
     dependencies:
       '@blockshake/defly-connect':

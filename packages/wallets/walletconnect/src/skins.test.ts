@@ -1,5 +1,5 @@
-import { BUILTIN_SKINS, registerSkin, getSkin, resolveSkin } from '../skins'
-import type { WalletConnectSkin } from '../skins'
+import { BUILTIN_SKINS, registerSkin, getSkin, resolveSkin } from './skins'
+import type { WalletConnectSkin } from './skins'
 
 describe('WalletConnect Skins', () => {
   describe('BUILTIN_SKINS', () => {

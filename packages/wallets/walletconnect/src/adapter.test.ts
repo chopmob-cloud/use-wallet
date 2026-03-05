@@ -1,10 +1,9 @@
 import algosdk from 'algosdk'
-import { WalletConnectAdapter } from '../adapter'
+import { WalletConnectAdapter } from './adapter'
 import { createTestHarness, type WalletState } from '@txnlab/use-wallet/testing'
 import { byteArrayToBase64, base64ToByteArray } from '@txnlab/use-wallet/adapter'
 import type { AdapterStoreAccessor, WalletTransaction } from '@txnlab/use-wallet/adapter'
-import type { Store } from '@tanstack/store'
-import type { State } from '@txnlab/use-wallet/testing'
+import type { State, Store } from '@txnlab/use-wallet/testing'
 import type { SessionTypes } from '@walletconnect/types'
 
 vi.mock('@txnlab/use-wallet/adapter', async (importOriginal) => {

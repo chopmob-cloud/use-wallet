@@ -1,10 +1,9 @@
 import algosdk from 'algosdk'
-import { LuteAdapter } from '../adapter'
+import { LuteAdapter } from './adapter'
 import { createTestHarness, type WalletState } from '@txnlab/use-wallet/testing'
 import { byteArrayToBase64, ScopeType } from '@txnlab/use-wallet/adapter'
 import type { AdapterStoreAccessor } from '@txnlab/use-wallet/adapter'
-import type { Store } from '@tanstack/store'
-import type { State } from '@txnlab/use-wallet/testing'
+import type { State, Store } from '@txnlab/use-wallet/testing'
 import type { Mock } from 'vitest'
 
 vi.mock('@txnlab/use-wallet/adapter', async (importOriginal) => {

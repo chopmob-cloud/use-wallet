@@ -95,3 +95,6 @@ export function createTestHarness(
 // Re-export commonly needed test types
 export type { State } from './store'
 export type { AdapterStoreAccessor, WalletState, WalletAccount } from './wallets/types'
+
+// Re-export Store type so adapter tests don't need a direct @tanstack/store dependency
+export type { Store } from '@tanstack/store'
