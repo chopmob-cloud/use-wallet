@@ -1,13 +1,10 @@
 import algosdk from 'algosdk'
 import { logger } from 'src/logger'
 import { DEFAULT_NETWORK_CONFIG, NetworkConfig, NetworkId } from 'src/network'
-import { WalletId, type WalletAccount, type WalletKey } from 'src/wallets/types'
+import type { WalletAccount, WalletKey, WalletState } from 'src/wallets/types'
 import type { Store } from '@tanstack/store'
 
-export type WalletState = {
-  accounts: WalletAccount[]
-  activeAccount: WalletAccount | null
-}
+export type { WalletState }
 
 export type WalletStateMap = Partial<Record<WalletKey, WalletState>>
 
@@ -35,7 +32,7 @@ export const DEFAULT_STATE: State = {
 
 export type PersistedState = Omit<State, 'algodClient' | 'managerStatus' | 'networkConfig'>
 
-export const LOCAL_STORAGE_KEY = '@txnlab/use-wallet:v4'
+export const LOCAL_STORAGE_KEY = '@txnlab/use-wallet:v5'
 
 // State mutations
 
@@ -166,28 +163,6 @@ export function setActiveNetwork(
 }
 
 // Type guards
-
-export function isValidWalletId(walletId: any): walletId is WalletId {
-  return Object.values(WalletId).includes(walletId)
-}
-
-/**
- * Check if a value is a valid WalletKey.
- * A WalletKey can be either:
- * - A standard WalletId enum value
- * - A composite string in the format 'walletconnect:skinId'
- */
-export function isValidWalletKey(walletKey: any): walletKey is WalletKey {
-  if (isValidWalletId(walletKey)) {
-    return true
-  }
-  // Check for composite key format: walletconnect:skinId
-  if (typeof walletKey === 'string' && walletKey.startsWith(`${WalletId.WALLETCONNECT}:`)) {
-    const skinId = walletKey.slice(`${WalletId.WALLETCONNECT}:`.length)
-    return skinId.length > 0
-  }
-  return false
-}
 
 export function isValidWalletAccount(account: any): account is WalletAccount {
   return (

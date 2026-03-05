@@ -1,38 +1,5 @@
 import algosdk from 'algosdk'
-import { WalletId, type JsonRpcRequest, type WalletAccount, type WalletMap } from './wallets/types'
-import { BiatecWallet } from './wallets/biatec'
-import { CustomWallet } from './wallets/custom'
-import { DeflyWallet } from './wallets/defly'
-import { DeflyWebWallet } from './wallets/defly-web'
-import { ExodusWallet } from './wallets/exodus'
-import { KibisisWallet } from './wallets/kibisis'
-import { KmdWallet } from './wallets/kmd'
-import { LuteWallet } from './wallets/lute'
-import { MagicAuth } from './wallets/magic'
-import { MnemonicWallet } from './wallets/mnemonic'
-import { PeraWallet } from './wallets/pera'
-import { WalletConnect } from './wallets/walletconnect'
-import { Web3AuthWallet } from './wallets/web3auth'
-import { W3Wallet } from './wallets/w3wallet'
-
-export function createWalletMap(): WalletMap {
-  return {
-    [WalletId.BIATEC]: BiatecWallet,
-    [WalletId.CUSTOM]: CustomWallet,
-    [WalletId.DEFLY]: DeflyWallet,
-    [WalletId.DEFLY_WEB]: DeflyWebWallet,
-    [WalletId.EXODUS]: ExodusWallet,
-    [WalletId.KIBISIS]: KibisisWallet,
-    [WalletId.KMD]: KmdWallet,
-    [WalletId.LUTE]: LuteWallet,
-    [WalletId.MAGIC]: MagicAuth,
-    [WalletId.MNEMONIC]: MnemonicWallet,
-    [WalletId.PERA]: PeraWallet,
-    [WalletId.WALLETCONNECT]: WalletConnect,
-    [WalletId.WEB3AUTH]: Web3AuthWallet,
-    [WalletId.W3_WALLET]: W3Wallet
-  }
-}
+import type { JsonRpcRequest, WalletAccount } from './wallets/types'
 
 export function compareAccounts(accounts: WalletAccount[], compareTo: WalletAccount[]): boolean {
   const addresses = new Set(accounts.map((account) => account.address))
@@ -140,28 +107,4 @@ export function formatJsonRpcRequest<T = any>(method: string, params: T): JsonRp
     method,
     params
   }
-}
-
-// @todo: remove
-export function deepMerge(target: any, source: any): any {
-  const isObject = (obj: any) => obj && typeof obj === 'object'
-
-  if (!isObject(target) || !isObject(source)) {
-    throw new Error('Target and source must be objects')
-  }
-
-  Object.keys(source).forEach((key) => {
-    const targetValue = target[key]
-    const sourceValue = source[key]
-
-    if (Array.isArray(targetValue) && Array.isArray(sourceValue)) {
-      target[key] = targetValue.concat(sourceValue)
-    } else if (isObject(targetValue) && isObject(sourceValue)) {
-      target[key] = deepMerge(Object.assign({}, targetValue), sourceValue)
-    } else {
-      target[key] = sourceValue
-    }
-  })
-
-  return target
 }

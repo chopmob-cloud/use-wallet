@@ -1,0 +1,63 @@
+{
+  "name": "@txnlab/use-wallet",
+  "version": "5.0.0-rc.0",
+  "description": "TypeScript library for integrating Algorand wallets into decentralized applications",
+  "author": "Doug Richar <drichar@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/txnlab/use-wallet.git",
+    "directory": "packages/core"
+  },
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./adapter": {
+      "types": "./dist/adapter.d.ts",
+      "import": "./dist/adapter.js",
+      "require": "./dist/adapter.cjs"
+    },
+    "./testing": {
+      "types": "./dist/testing.d.ts",
+      "import": "./dist/testing.js",
+      "require": "./dist/testing.cjs"
+    }
+  },
+  "scripts": {
+    "build": "tsup",
+    "start": "tsup src/index.ts --watch",
+    "test": "vitest run",
+    "test:watch": "pnpm run test --watch",
+    "lint": "eslint -c \"../../.eslintrc.json\" \"**/*.{js,ts}\"",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "algorand",
+    "wallet",
+    "algosdk",
+    "algokit"
+  ],
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "@tanstack/store": "0.8.0"
+  },
+  "devDependencies": {
+    "@types/node": "20.11.30",
+    "algosdk": "3.5.2",
+    "tsup": "8.5.1",
+    "tweetnacl": "1.0.3",
+    "typescript": "5.9.3"
+  },
+  "peerDependencies": {
+    "algosdk": "^3.0.0"
+  }
+}

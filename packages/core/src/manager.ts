@@ -1,5 +1,6 @@
 import { Store } from '@tanstack/store'
 import algosdk from 'algosdk'
+import { EventEmitter, type WalletManagerEvents } from 'src/events'
 import { Logger, LogLevel, logger } from 'src/logger'
 import {
   createNetworkConfig,
@@ -13,25 +14,22 @@ import {
   DEFAULT_STATE,
   isValidPersistedState,
   LOCAL_STORAGE_KEY,
+  addWallet,
   removeWallet,
+  setAccounts,
   setActiveNetwork,
   setActiveWallet,
   type State,
   type ManagerStatus,
   type PersistedState
 } from 'src/store'
-import { createWalletMap } from 'src/utils'
 import type { BaseWallet } from 'src/wallets/base'
-import { resolveSkin } from 'src/wallets/skins'
-import {
-  WalletId,
-  type SupportedWallet,
-  type WalletAccount,
-  type WalletConfigMap,
-  type WalletIdConfig,
-  type WalletKey,
-  type WalletMetadata,
-  type WalletOptions
+import type {
+  AdapterConstructorParams,
+  AdapterStoreAccessor,
+  WalletAccount,
+  WalletAdapterConfig,
+  WalletKey
 } from 'src/wallets/types'
 
 export interface WalletManagerOptions {
@@ -41,7 +39,7 @@ export interface WalletManagerOptions {
 }
 
 export interface WalletManagerConfig {
-  wallets?: SupportedWallet[]
+  wallets?: WalletAdapterConfig[]
   networks?: Record<string, NetworkConfig>
   defaultNetwork?: string
   options?: WalletManagerOptions
@@ -55,6 +53,7 @@ export class WalletManager {
   public options: { resetNetwork: boolean }
 
   private logger: ReturnType<typeof logger.createScopedLogger>
+  private events = new EventEmitter<WalletManagerEvents>()
 
   constructor({
     wallets = [],
@@ -125,6 +124,22 @@ export class WalletManager {
 
     // Initialize wallets
     this.initializeWallets(wallets)
+  }
+
+  // ---------- Events ------------------------------------------------- //
+
+  public on<K extends keyof WalletManagerEvents>(
+    event: K,
+    handler: (payload: WalletManagerEvents[K]) => void
+  ): () => void {
+    return this.events.on(event, handler)
+  }
+
+  public emit<K extends keyof WalletManagerEvents>(
+    event: K,
+    ...args: WalletManagerEvents[K] extends void ? [] : [payload: WalletManagerEvents[K]]
+  ): void {
+    this.events.emit(event, ...args)
   }
 
   // ---------- Logging ----------------------------------------------- //
@@ -216,6 +231,21 @@ export class WalletManager {
     }
   }
 
+  // ---------- Scoped Store Access ----------------------------------- //
+
+  private createStoreAccessor(walletKey: string): AdapterStoreAccessor {
+    return {
+      getWalletState: () => this.store.state.wallets[walletKey],
+      getActiveWallet: () => this.store.state.activeWallet,
+      getActiveNetwork: () => this.store.state.activeNetwork,
+      getState: () => this.store.state,
+      addWallet: (wallet) => addWallet(this.store, { walletId: walletKey, wallet }),
+      removeWallet: () => removeWallet(this.store, { walletId: walletKey }),
+      setAccounts: (accounts) => setAccounts(this.store, { walletId: walletKey, accounts }),
+      setActive: () => setActiveWallet(this.store, { walletId: walletKey })
+    }
+  }
+
   // ---------- Status ------------------------------------------------ //
 
   public get status(): ManagerStatus {
@@ -228,77 +258,35 @@ export class WalletManager {
 
   // ---------- Wallets ----------------------------------------------- //
 
-  /**
-   * Derive the wallet key from wallet config.
-   * For WalletConnect with a skin option, returns 'walletconnect:skinId'.
-   * For other wallets, returns the wallet ID.
-   */
-  private deriveWalletKey<T extends keyof WalletConfigMap>(
-    walletId: T,
-    walletOptions?: WalletOptions<T>
-  ): WalletKey {
-    // Check if this is a WalletConnect config with a skin option
-    if (walletId === WalletId.WALLETCONNECT && walletOptions) {
-      const options = walletOptions as WalletOptions<WalletId.WALLETCONNECT>
-      if (options.skin) {
-        const skin = resolveSkin(options.skin)
-        if (skin) {
-          return `walletconnect:${skin.id}`
-        }
-      }
-    }
-    return walletId
-  }
-
-  private initializeWallets<T extends keyof WalletConfigMap>(
-    walletsConfig: Array<T | WalletIdConfig<T>>
-  ) {
+  private initializeWallets(walletConfigs: WalletAdapterConfig[]) {
     this.logger.info('Initializing wallets...')
 
-    for (const walletConfig of walletsConfig) {
-      let walletId: T
-      let walletOptions: WalletOptions<T> | undefined
-      let walletMetadata: Partial<WalletMetadata> | undefined
+    for (const config of walletConfigs) {
+      const walletKey = config.id
 
-      // Parse wallet config
-      if (typeof walletConfig === 'string') {
-        walletId = walletConfig
-      } else {
-        const { id, options, metadata } = walletConfig
-        walletId = id
-        walletOptions = options
-        walletMetadata = metadata
-      }
-
-      // Derive wallet key (handles skin-based composite keys)
-      const walletKey = this.deriveWalletKey(walletId, walletOptions)
-
-      // Check for duplicate wallet keys
       if (this._clients.has(walletKey)) {
         this.logger.warn(`Duplicate wallet key: ${walletKey}. Skipping...`)
         continue
       }
 
-      // Get wallet class
-      const walletMap = createWalletMap()
-      const WalletClass = walletMap[walletId]
-      if (!WalletClass) {
-        this.logger.error(`Wallet not found: ${walletId}`)
-        continue
+      const storeAccessor = this.createStoreAccessor(walletKey)
+
+      const params: AdapterConstructorParams = {
+        id: config.id,
+        metadata: config.metadata,
+        store: storeAccessor,
+        subscribe: this.subscribe,
+        getAlgodClient: this.getAlgodClient
       }
 
-      // Initialize wallet
-      const walletInstance = new WalletClass({
-        id: walletId,
-        metadata: walletMetadata,
-        options: walletOptions as any,
-        getAlgodClient: this.getAlgodClient,
-        store: this.store,
-        subscribe: this.subscribe
-      })
+      if (config.options) {
+        params.options = config.options
+      }
 
-      this._clients.set(walletKey, walletInstance)
-      this.logger.info(`✅ Initialized ${walletKey}`)
+      const instance = new config.Adapter(params)
+
+      this._clients.set(walletKey, instance)
+      this.logger.info(`Initialized ${walletKey}`)
     }
 
     const state = this.store.state
@@ -336,6 +324,7 @@ export class WalletManager {
         ...state,
         managerStatus: 'ready'
       }))
+      this.events.emit('ready')
     }
   }
 
@@ -407,7 +396,8 @@ export class WalletManager {
     const algodClient = this.createAlgodClient(this.networkConfig[networkId].algod)
     setActiveNetwork(this.store, { networkId, algodClient })
 
-    this.logger.info(`✅ Active network set to ${networkId}`)
+    this.events.emit('networkChanged', { networkId })
+    this.logger.info(`Active network set to ${networkId}`)
   }
 
   public updateAlgodConfig(networkId: string, algodConfig: Partial<AlgodConfig>): void {
@@ -447,7 +437,7 @@ export class WalletManager {
     // Save the updated configuration
     this.savePersistedState()
 
-    this.logger.info(`✅ Updated algod configuration for ${networkId}`)
+    this.logger.info(`Updated algod configuration for ${networkId}`)
   }
 
   public resetNetworkConfig(networkId: string): void {
@@ -479,7 +469,7 @@ export class WalletManager {
       StorageAdapter.setItem(LOCAL_STORAGE_KEY, JSON.stringify(persistedState))
     }
 
-    this.logger.info(`✅ Reset network configuration for ${networkId}`)
+    this.logger.info(`Reset network configuration for ${networkId}`)
   }
 
   public get activeNetwork(): string {

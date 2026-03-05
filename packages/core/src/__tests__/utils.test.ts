@@ -1,7 +1,6 @@
 import algosdk from 'algosdk'
 import {
   compareAccounts,
-  deepMerge,
   flattenTxnGroup,
   formatJsonRpcRequest,
   isSignedTxn,
@@ -212,21 +211,6 @@ describe('flattenTxnGroup', () => {
 
   it('should handle an empty array', () => {
     expect(flattenTxnGroup([])).toEqual([])
-  })
-})
-
-describe('deepMerge', () => {
-  it('should deeply merge two objects', () => {
-    const target = { a: 1, b: { c: 2 } }
-    const source = { b: { d: 3 }, e: 4 }
-    const expected = { a: 1, b: { c: 2, d: 3 }, e: 4 }
-
-    expect(deepMerge(target, source)).toEqual(expected)
-  })
-
-  it('should throw an error if either argument is not an object', () => {
-    expect(() => deepMerge(null, {})).toThrow('Target and source must be objects')
-    expect(() => deepMerge({}, null)).toThrow('Target and source must be objects')
   })
 })
 

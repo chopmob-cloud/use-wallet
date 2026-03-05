@@ -6,32 +6,32 @@ Reference: [v5-migration-plan.md](./v5-migration-plan.md)
 
 ## Sprint 1: Core Foundation
 
-- [ ] Move `packages/use-wallet/` → `packages/core/`
-- [ ] Update `pnpm-workspace.yaml` to `packages/**`
-- [ ] Make `BaseWallet` generic: `BaseWallet<TOptions>`
-- [ ] Define `WalletAdapterConfig`, `AdapterConstructorParams<TOptions>`, `AdapterStoreAccessor` interfaces
-- [ ] Implement `WalletManager.createStoreAccessor()` for scoped store access
-- [ ] Refactor `WalletManager` to accept `WalletAdapterConfig[]`
-- [ ] Add event emitter to `WalletManager` (define full `WalletManagerEvents` surface)
-- [ ] Convert `WalletId` from enum to string type
-- [ ] Simplify `WalletKey` to `string`
-- [ ] Remove `WalletMap`, `WalletOptionsMap`, `WalletConfigMap` and related types
-- [ ] Remove `manageWalletConnectSession()` from `BaseWallet`
-- [ ] Add `updateMetadata()` protected method to `BaseWallet`
-- [ ] Add optional `metadata` field to `WalletAccount` type
-- [ ] Move `Wallet` interface definition to core
-- [ ] Set up subpath exports: `@txnlab/use-wallet/adapter` and `@txnlab/use-wallet/testing`
-- [ ] Create `@txnlab/use-wallet/testing` helpers (`createTestStore`, `createMockAlgodClient`, `createMockStoreAccessor`)
-- [ ] Remove `createWalletMap()` from `src/utils.ts`
-- [ ] Remove dead code: `deepMerge()`, `isValidWalletId()`, `isValidWalletKey()`
-- [ ] Remove `src/webpack.ts`
-- [ ] Remove all wallet implementation files from `src/wallets/`
-- [ ] Remove `src/wallets/skins.ts`
-- [ ] Update `src/wallets/index.ts` exports
-- [ ] Update `src/index.ts` exports
-- [ ] Update `LOCAL_STORAGE_KEY` to `@txnlab/use-wallet:v5`
-- [ ] Update core tests
-- [ ] Verify core builds and typechecks
+- [x] Move `packages/use-wallet/` → `packages/core/`
+- [x] Update `pnpm-workspace.yaml` to `packages/**`
+- [x] Make `BaseWallet` generic: `BaseWallet<TOptions>`
+- [x] Define `WalletAdapterConfig`, `AdapterConstructorParams<TOptions>`, `AdapterStoreAccessor` interfaces
+- [x] Implement `WalletManager.createStoreAccessor()` for scoped store access
+- [x] Refactor `WalletManager` to accept `WalletAdapterConfig[]`
+- [x] Add event emitter to `WalletManager` (define full `WalletManagerEvents` surface)
+- [x] Convert `WalletId` from enum to string type
+- [x] Simplify `WalletKey` to `string`
+- [x] Remove `WalletMap`, `WalletOptionsMap`, `WalletConfigMap` and related types
+- [x] Remove `manageWalletConnectSession()` from `BaseWallet`
+- [x] Add `updateMetadata()` protected method to `BaseWallet`
+- [x] Add optional `metadata` field to `WalletAccount` type
+- [x] Move `Wallet` interface definition to core
+- [x] Set up subpath exports: `@txnlab/use-wallet/adapter` and `@txnlab/use-wallet/testing`
+- [x] Create `@txnlab/use-wallet/testing` helpers (`createTestStore`, `createMockAlgodClient`, `createMockStoreAccessor`)
+- [x] Remove `createWalletMap()` from `src/utils.ts`
+- [x] Remove dead code: `deepMerge()`, `isValidWalletId()`, `isValidWalletKey()`
+- [x] Remove `src/webpack.ts`
+- [x] Remove all wallet implementation files from `src/wallets/`
+- [x] Remove `src/wallets/skins.ts`
+- [x] Update `src/wallets/index.ts` exports
+- [x] Update `src/index.ts` exports
+- [x] Update `LOCAL_STORAGE_KEY` to `@txnlab/use-wallet:v5`
+- [x] Update core tests
+- [x] Verify core builds and typechecks
 
 ## Sprint 2: Wallet Adapter Extraction
 
@@ -98,12 +98,10 @@ Reference: [v5-migration-plan.md](./v5-migration-plan.md)
 
 ## Findings & Decisions
 
-_Record discoveries, edge cases, and decisions made during implementation here._
-
-<!-- Example:
-- **2025-01-15**: Decided to keep `BaseWallet` class name unchanged (not rename to `BaseAdapter`) to minimize churn. The "adapter" terminology applies to packages and docs, not class names.
-- **2025-01-16**: `@tanstack/store` v0.8.0 works fine as a shared dependency. No need to upgrade for v5.
--->
+- **2026-03-05**: `BaseWallet.setActiveAccount()` in v5 uses `this.store.setAccounts()` (scoped accessor) instead of the v4 `setActiveAccount(this.store, ...)` pattern. The scoped accessor doesn't expose a direct `setActiveAccount` method since setting the active account is handled implicitly when accounts are set (the store's `setAccounts` function preserves the active account if it still exists in the new list). For explicit active account switching, the raw `setActiveAccount` store function is still available via the `/adapter` subpath.
+- **2026-03-05**: `exactOptionalPropertyTypes` in tsconfig required conditional assignment of `options` in `WalletManager.initializeWallets()` — can't pass `options: config.options` when `config.options` might be `undefined` and the target type uses `options?: TOptions`.
+- **2026-03-05**: Package exports field requires `types` condition first (before `import`/`require`) to avoid esbuild warnings about unused conditions.
+- **2026-03-05**: `WalletState` type is now defined in `wallets/types.ts` (alongside other wallet types) and re-exported from `store.ts` for backward compatibility. This keeps all wallet-related types in one place.
 
 ---
 

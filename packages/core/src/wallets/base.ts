@@ -1,31 +1,23 @@
 import { logger } from 'src/logger'
 import { NetworkConfig } from 'src/network'
-import { StorageAdapter } from 'src/storage'
-import { setActiveWallet, setActiveAccount, removeWallet, type State } from 'src/store'
-import type { Store } from '@tanstack/store'
+import type { State } from 'src/store'
 import type algosdk from 'algosdk'
 import type {
+  AdapterConstructorParams,
+  AdapterStoreAccessor,
   SignDataResponse,
   SignMetadata,
   WalletAccount,
-  WalletConstructor,
-  WalletId,
-  WalletKey,
   WalletMetadata
 } from 'src/wallets/types'
 
-interface WalletConstructorType {
-  new (...args: any[]): BaseWallet
-  defaultMetadata: WalletMetadata
-}
+export abstract class BaseWallet<TOptions = Record<string, unknown>> {
+  public readonly id: string
+  public readonly walletKey: string
+  public metadata: WalletMetadata
 
-export abstract class BaseWallet {
-  readonly id: WalletId
-  /** Unique key for this wallet instance. Used for state storage and session isolation. */
-  readonly walletKey: WalletKey
-  readonly metadata: WalletMetadata
-
-  protected store: Store<State>
+  protected options: TOptions
+  protected store: AdapterStoreAccessor
   protected getAlgodClient: () => algosdk.Algodv2
 
   public subscribe: (callback: (state: State) => void) => () => void
@@ -34,20 +26,19 @@ export abstract class BaseWallet {
 
   protected constructor({
     id,
-    walletKey,
     metadata,
     store,
     subscribe,
-    getAlgodClient
-  }: WalletConstructor<WalletId>) {
+    getAlgodClient,
+    options
+  }: AdapterConstructorParams<TOptions>) {
     this.id = id
-    this.walletKey = walletKey || id // Default to id for backward compatibility
+    this.walletKey = id
+    this.metadata = { ...metadata }
+    this.options = options ?? ({} as TOptions)
     this.store = store
     this.subscribe = subscribe
     this.getAlgodClient = getAlgodClient
-
-    const ctor = this.constructor as WalletConstructorType
-    this.metadata = { ...ctor.defaultMetadata, ...metadata }
 
     // Initialize logger with a scope based on the wallet key
     this.logger = logger.createScopedLogger(`Wallet:${this.walletKey.toUpperCase()}`)
@@ -63,15 +54,19 @@ export abstract class BaseWallet {
 
   public setActive = (): void => {
     this.logger.info(`Set active wallet: ${this.walletKey}`)
-    setActiveWallet(this.store, { walletId: this.walletKey })
+    this.store.setActive()
   }
 
   public setActiveAccount = (account: string): void => {
     this.logger.info(`Set active account: ${account}`)
-    setActiveAccount(this.store, {
-      walletId: this.walletKey,
-      address: account
-    })
+    const walletState = this.store.getWalletState()
+    if (!walletState) return
+
+    const newActiveAccount = walletState.accounts.find((a) => a.address === account)
+    if (!newActiveAccount) return
+
+    // Re-set accounts to trigger a state update with the new active account
+    this.store.setAccounts(walletState.accounts)
   }
 
   public abstract signTransactions<T extends algosdk.Transaction[] | Uint8Array[]>(
@@ -118,8 +113,7 @@ export abstract class BaseWallet {
   }
 
   public get accounts(): WalletAccount[] {
-    const state = this.store.state
-    const walletState = state.wallets[this.walletKey]
+    const walletState = this.store.getWalletState()
     return walletState ? walletState.accounts : []
   }
 
@@ -128,8 +122,7 @@ export abstract class BaseWallet {
   }
 
   public get activeAccount(): WalletAccount | null {
-    const state = this.store.state
-    const walletState = state.wallets[this.walletKey]
+    const walletState = this.store.getWalletState()
     return walletState ? walletState.activeAccount : null
   }
 
@@ -138,52 +131,31 @@ export abstract class BaseWallet {
   }
 
   public get activeNetwork(): string {
-    const state = this.store.state
-    return state.activeNetwork
+    return this.store.getActiveNetwork()
   }
 
   public get isConnected(): boolean {
-    const state = this.store.state
-    const walletState = state.wallets[this.walletKey]
+    const walletState = this.store.getWalletState()
     return walletState ? walletState.accounts.length > 0 : false
   }
 
   public get isActive(): boolean {
-    const state = this.store.state
-    return state.activeWallet === this.walletKey
+    return this.store.getActiveWallet() === this.walletKey
   }
 
   public get activeNetworkConfig(): NetworkConfig {
-    const { networkConfig, activeNetwork } = this.store.state
-    return networkConfig[activeNetwork]
+    const state = this.store.getState()
+    return state.networkConfig[state.activeNetwork]
   }
 
   // ---------- Protected Methods ------------------------------------- //
 
   protected onDisconnect = (): void => {
     this.logger.debug(`Removing wallet from store...`)
-    removeWallet(this.store, { walletId: this.walletKey })
+    this.store.removeWallet()
   }
 
-  protected manageWalletConnectSession = (
-    action: 'backup' | 'restore',
-    targetWalletKey?: WalletKey
-  ): void => {
-    const key = targetWalletKey || this.walletKey
-    if (action === 'backup') {
-      const data = StorageAdapter.getItem('walletconnect')
-      if (data) {
-        StorageAdapter.setItem(`walletconnect-${key}`, data)
-        StorageAdapter.removeItem('walletconnect')
-        this.logger.debug(`Backed up WalletConnect session for ${key}`)
-      }
-    } else if (action === 'restore') {
-      const data = StorageAdapter.getItem(`walletconnect-${key}`)
-      if (data) {
-        StorageAdapter.setItem('walletconnect', data)
-        StorageAdapter.removeItem(`walletconnect-${key}`)
-        this.logger.debug(`Restored WalletConnect session for ${key}`)
-      }
-    }
+  protected updateMetadata(updates: Partial<WalletMetadata>): void {
+    this.metadata = { ...this.metadata, ...updates }
   }
 }

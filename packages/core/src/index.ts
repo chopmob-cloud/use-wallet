@@ -16,5 +16,5 @@ export {
   withSecureKey,
   withSecureKeySync
 } from './secure-key'
-export { webpackFallback } from './webpack'
+export type { WalletManagerEvents } from './events'
 export * from './wallets'
