@@ -63,5 +63,9 @@ export {
   zeroString
 } from './secure-key'
 
+// Custom wallet adapter
+export { CustomWallet, custom } from './wallets/custom'
+export type { CustomWalletOptions, CustomProvider } from './wallets/custom'
+
 // Logger
 export { LogLevel } from './logger'

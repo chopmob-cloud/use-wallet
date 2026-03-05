@@ -1,18 +1,21 @@
 import algosdk from 'algosdk'
-import { CustomAdapter } from '../adapter'
-import { createTestHarness, type WalletState } from '@txnlab/use-wallet/testing'
-import type { AdapterStoreAccessor } from '@txnlab/use-wallet/adapter'
+import { CustomWallet } from 'src/wallets/custom'
+import { createTestHarness } from 'src/testing'
+import type { AdapterStoreAccessor, WalletState } from 'src/wallets/types'
 import type { Store } from '@tanstack/store'
-import type { State } from '@txnlab/use-wallet/testing'
-import type { CustomProvider } from '../adapter'
+import type { State } from 'src/store'
+import type { CustomProvider } from 'src/wallets/custom'
 
-vi.mock('@txnlab/use-wallet/adapter', async (importOriginal) => {
-  const original = await importOriginal<typeof import('@txnlab/use-wallet/adapter')>()
-  return {
-    ...original,
-    LogLevel: original.LogLevel,
-  }
-})
+vi.mock('src/logger', () => ({
+  logger: {
+    createScopedLogger: () => ({
+      debug: vi.fn(),
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
+    }),
+  },
+}))
 
 class MockProvider implements CustomProvider {
   constructor() {}
@@ -30,10 +33,10 @@ const WALLET_ID = 'custom'
 function createWallet(
   store: AdapterStoreAccessor,
   provider: CustomProvider = mockProvider,
-): CustomAdapter {
-  return new CustomAdapter({
+): CustomWallet {
+  return new CustomWallet({
     id: WALLET_ID,
-    metadata: CustomAdapter.defaultMetadata,
+    metadata: CustomWallet.defaultMetadata,
     store,
     subscribe: vi.fn(),
     getAlgodClient: () => ({}) as any,
@@ -41,8 +44,8 @@ function createWallet(
   })
 }
 
-describe('CustomAdapter', () => {
-  let wallet: CustomAdapter
+describe('CustomWallet', () => {
+  let wallet: CustomWallet
   let store: Store<State>
   let accessor: AdapterStoreAccessor
 
@@ -73,9 +76,9 @@ describe('CustomAdapter', () => {
     it('should throw an error if provider is not defined', () => {
       expect(
         () =>
-          new CustomAdapter({
+          new CustomWallet({
             id: WALLET_ID,
-            metadata: CustomAdapter.defaultMetadata,
+            metadata: CustomWallet.defaultMetadata,
             store: accessor,
             subscribe: vi.fn(),
             getAlgodClient: () => ({}) as any,

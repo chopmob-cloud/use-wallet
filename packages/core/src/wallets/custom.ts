@@ -1,14 +1,15 @@
 import algosdk from 'algosdk'
-import {
-  BaseWallet,
-  compareAccounts,
-  type AdapterConstructorParams,
-  type SignDataResponse,
-  type SignMetadata,
-  type WalletAccount,
-  type WalletMetadata,
-  type WalletState,
-} from '@txnlab/use-wallet/adapter'
+import { BaseWallet } from './base'
+import { compareAccounts } from '../utils'
+import type {
+  AdapterConstructorParams,
+  SignDataResponse,
+  SignMetadata,
+  WalletAccount,
+  WalletAdapterConfig,
+  WalletMetadata,
+  WalletState,
+} from './types'
 
 export type CustomProvider = {
   connect(args?: Record<string, any>): Promise<WalletAccount[]>
@@ -29,11 +30,15 @@ export interface CustomWalletOptions {
   provider: CustomProvider
 }
 
-import { icon } from './icon'
+const ICON = `data:image/svg+xml;base64,${btoa(`
+<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+  <rect width="24" height="24" fill="#525252" />
+</svg>
+`)}`
 
-const ICON = `data:image/svg+xml;base64,${btoa(icon)}`
+const CUSTOM_WALLET_ID = 'custom' as const
 
-export class CustomAdapter extends BaseWallet<CustomWalletOptions> {
+export class CustomWallet extends BaseWallet<CustomWalletOptions> {
   private provider: CustomProvider
 
   constructor(params: AdapterConstructorParams<CustomWalletOptions>) {
@@ -179,5 +184,16 @@ export class CustomAdapter extends BaseWallet<CustomWalletOptions> {
     }
     this.logger.debug('Signing data...', { data, metadata })
     return await this.provider.signData(data, metadata)
+  }
+}
+
+// ---------- Factory Function ----------------------------------------- //
+
+export function custom(options: CustomWalletOptions): WalletAdapterConfig {
+  return {
+    id: CUSTOM_WALLET_ID,
+    metadata: CustomWallet.defaultMetadata,
+    Adapter: CustomWallet as unknown as WalletAdapterConfig['Adapter'],
+    options: options as unknown as Record<string, unknown>,
   }
 }
