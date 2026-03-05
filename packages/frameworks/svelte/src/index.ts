@@ -7,11 +7,10 @@ import {
   NetworkId,
   type SignDataResponse,
   type SignMetadata,
-  WalletAccount,
-  WalletId,
+  type WalletAccount,
   type WalletKey,
   WalletManager,
-  WalletMetadata
+  type WalletMetadata
 } from '@txnlab/use-wallet'
 
 export * from '@txnlab/use-wallet'
@@ -111,8 +110,7 @@ export const useNetwork = () => {
 }
 
 export interface Wallet {
-  id: WalletId
-  /** Unique key for this wallet instance. Used for skinned WalletConnect instances. */
+  id: string
   walletKey: WalletKey
   metadata: WalletMetadata
   accounts: { current: WalletAccount[] | undefined }

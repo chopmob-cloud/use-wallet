@@ -5,11 +5,8 @@ import {
   NetworkId,
   SignDataResponse,
   SignMetadata,
-  type WalletAccount,
-  WalletId,
-  type WalletKey,
+  type Wallet,
   WalletManager,
-  type WalletMetadata
 } from '@txnlab/use-wallet'
 import algosdk from 'algosdk'
 import * as React from 'react'
@@ -121,23 +118,6 @@ export const useNetwork = () => {
     updateAlgodConfig,
     resetNetworkConfig
   }
-}
-
-export interface Wallet {
-  id: WalletId
-  /** Unique key for this wallet instance. Used for skinned WalletConnect instances. */
-  walletKey: WalletKey
-  metadata: WalletMetadata
-  accounts: WalletAccount[]
-  activeAccount: WalletAccount | null
-  isConnected: boolean
-  isActive: boolean
-  canSignData: boolean
-  canUsePrivateKey: boolean
-  connect: (args?: Record<string, any>) => Promise<WalletAccount[]>
-  disconnect: () => Promise<void>
-  setActive: () => void
-  setActiveAccount: (address: string) => void
 }
 
 export const useWallet = () => {

@@ -2,32 +2,12 @@ import { useStore } from '@tanstack/vue-store'
 import {
   BaseWallet,
   WalletManager,
-  type WalletAccount,
-  type WalletKey,
-  type WalletMetadata,
-  type WalletId,
+  type Wallet,
   type SignMetadata,
   type SignDataResponse
 } from '@txnlab/use-wallet'
 import algosdk from 'algosdk'
 import { computed, inject, ref } from 'vue'
-
-export interface Wallet {
-  id: WalletId
-  /** Unique key for this wallet instance. Used for skinned WalletConnect instances. */
-  walletKey: WalletKey
-  metadata: WalletMetadata
-  accounts: WalletAccount[]
-  activeAccount: WalletAccount | null
-  isConnected: boolean
-  isActive: boolean
-  connect: (args?: Record<string, any>) => Promise<WalletAccount[]>
-  disconnect: () => Promise<void>
-  setActive: () => void
-  setActiveAccount: (address: string) => void
-  canSignData: boolean
-  canUsePrivateKey: boolean
-}
 
 export type SetAlgodClient = (client: algosdk.Algodv2) => void
 

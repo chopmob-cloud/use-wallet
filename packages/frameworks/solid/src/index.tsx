@@ -3,12 +3,12 @@ import algosdk from 'algosdk'
 import { JSX, createContext, createMemo, onMount, useContext } from 'solid-js'
 import type {
   AlgodConfig,
+  BaseWallet,
   NetworkId,
   SignDataResponse,
   SignMetadata,
-  WalletKey,
+  Wallet,
   WalletManager,
-  WalletState
 } from '@txnlab/use-wallet'
 
 export * from '@txnlab/use-wallet'
@@ -127,25 +127,54 @@ export const useWallet = () => {
   const isReady = createMemo(() => managerStatus() === 'ready')
   const algodClient = useStore(manager().store, (state) => state.algodClient)
 
-  const walletStore = useStore(manager().store, (state) => state.wallets)
-  const walletState = (walletKey: WalletKey): WalletState | null => walletStore()[walletKey] || null
+  const walletStateMap = useStore(manager().store, (state) => state.wallets)
   const activeWalletId = useStore(manager().store, (state) => state.activeWallet)
-  const activeWallet = () => manager().getWallet(activeWalletId() as WalletKey) || null
-  const activeWalletState = () => walletState(activeWalletId() as WalletKey)
-  const activeWalletAccounts = () => activeWalletState()?.accounts ?? null
-  const activeWalletAddresses = () =>
+
+  const transformToWallet = (wallet: BaseWallet): Wallet => {
+    const walletState = walletStateMap()[wallet.walletKey]
+    return {
+      id: wallet.id,
+      walletKey: wallet.walletKey,
+      metadata: wallet.metadata,
+      accounts: walletState?.accounts ?? [],
+      activeAccount: walletState?.activeAccount ?? null,
+      isConnected: !!walletState,
+      isActive: wallet.walletKey === activeWalletId(),
+      canSignData: wallet.canSignData ?? false,
+      canUsePrivateKey: wallet.canUsePrivateKey ?? false,
+      connect: (args) => wallet.connect(args),
+      disconnect: () => wallet.disconnect(),
+      setActive: () => wallet.setActive(),
+      setActiveAccount: (addr) => wallet.setActiveAccount(addr)
+    }
+  }
+
+  const wallets = createMemo(() => {
+    return [...manager().wallets.values()].map(transformToWallet)
+  })
+
+  const activeBaseWallet = createMemo(() => {
+    const id = activeWalletId()
+    return id ? manager().getWallet(id) || null : null
+  })
+
+  const activeWallet = createMemo(() => {
+    const base = activeBaseWallet()
+    return base ? transformToWallet(base) : null
+  })
+
+  const activeWalletAccounts = createMemo(() => activeWallet()?.accounts ?? null)
+  const activeWalletAddresses = createMemo(() =>
     activeWalletAccounts()?.map((account) => account.address) ?? null
-  const activeAccount = () => activeWalletState()?.activeAccount ?? null
-  const activeAddress = () => activeAccount()?.address ?? null
-  const isWalletActive = (walletKey: WalletKey) => walletKey === activeWalletId()
-  const isWalletConnected = (walletKey: WalletKey) =>
-    !!walletState(walletKey)?.accounts.length || false
+  )
+  const activeAccount = createMemo(() => activeWallet()?.activeAccount ?? null)
+  const activeAddress = createMemo(() => activeAccount()?.address ?? null)
 
   const signTransactions = <T extends algosdk.Transaction[] | Uint8Array[]>(
     txnGroup: T | T[],
     indexesToSign?: number[]
   ): Promise<(Uint8Array | null)[]> => {
-    const wallet = activeWallet()
+    const wallet = activeBaseWallet()
     if (!wallet) {
       throw new Error('No active wallet')
     }
@@ -156,7 +185,7 @@ export const useWallet = () => {
     txnGroup: algosdk.Transaction[],
     indexesToSign: number[]
   ): Promise<Uint8Array[]> => {
-    const wallet = activeWallet()
+    const wallet = activeBaseWallet()
     if (!wallet) {
       throw new Error('No active wallet')
     }
@@ -164,7 +193,7 @@ export const useWallet = () => {
   }
 
   const signData = (data: string, metadata: SignMetadata): Promise<SignDataResponse> => {
-    const wallet = activeWallet()
+    const wallet = activeBaseWallet()
     if (!wallet) {
       throw new Error('No active wallet')
     }
@@ -172,7 +201,7 @@ export const useWallet = () => {
   }
 
   const withPrivateKey = <T,>(callback: (secretKey: Uint8Array) => Promise<T>): Promise<T> => {
-    const wallet = activeWallet()
+    const wallet = activeBaseWallet()
     if (!wallet) {
       throw new Error('No active wallet')
     }
@@ -180,22 +209,17 @@ export const useWallet = () => {
   }
 
   return {
-    wallets: manager().wallets,
+    wallets,
     isReady,
     algodClient,
     activeWallet,
     activeWalletAccounts,
     activeWalletAddresses,
-    activeWalletState,
     activeAccount,
     activeAddress,
-    activeWalletId,
-    isWalletActive,
-    isWalletConnected,
     signData,
     withPrivateKey,
     signTransactions,
-    transactionSigner,
-    walletStore
+    transactionSigner
   }
 }
