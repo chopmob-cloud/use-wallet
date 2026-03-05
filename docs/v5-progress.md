@@ -35,23 +35,26 @@ Reference: [v5-migration-plan.md](./v5-migration-plan.md)
 
 ## Sprint 2: Wallet Adapter Extraction
 
-- [ ] Create shared build configs (`packages/wallets/tsconfig.base.json`, `tsup.config.base.ts`, `vitest.config.base.ts`)
-- [ ] Create adapter package template (package.json extending shared configs)
-- [ ] Extract Pera adapter (establish pattern, include local `manageWalletConnectSession`)
-- [ ] Extract Defly adapter (include local `manageWalletConnectSession`)
-- [ ] Extract Defly Web adapter
-- [ ] Extract Exodus adapter
-- [ ] Extract WalletConnect adapter (with skins from `src/wallets/skins.ts`)
-- [ ] Extract Web3Auth adapter
-- [ ] Extract Mnemonic adapter
-- [ ] Extract KMD adapter
-- [ ] Extract Magic adapter
-- [ ] Extract Lute adapter
-- [ ] Extract Kibisis adapter
-- [ ] Extract Biatec adapter
-- [ ] Extract W3Wallet adapter
-- [ ] Extract Custom adapter
-- [ ] Verify all adapter packages build and typecheck
+- [x] Fix `setActiveAccount` bug in `AdapterStoreAccessor`
+- [x] Export `setActiveAccount` from `/adapter` subpath
+- [x] Export `deriveAlgorandAccountFromEd25519` from `/adapter` subpath
+- [x] Create shared build configs (`packages/wallets/tsconfig.base.json`, `tsup.config.base.ts`, `vitest.config.base.ts`)
+- [x] Create adapter package template (package.json extending shared configs)
+- [x] Extract Pera adapter (establish pattern, include local `manageWalletConnectSession`)
+- [x] Extract Defly adapter (include local `manageWalletConnectSession`)
+- [x] Extract Defly Web adapter
+- [x] Extract Exodus adapter
+- [x] Extract WalletConnect adapter (with skins from `src/wallets/skins.ts`)
+- [x] Extract Web3Auth adapter
+- [x] Extract Mnemonic adapter
+- [x] Extract KMD adapter
+- [x] Extract Magic adapter
+- [x] Extract Lute adapter
+- [x] Extract Kibisis adapter
+- [x] ~~Extract Biatec adapter~~ — Removed: Biatec is a built-in skin in `@txnlab/use-wallet-walletconnect` (`skin: 'biatec'`)
+- [x] Extract W3Wallet adapter
+- [x] Extract Custom adapter
+- [x] Verify all adapter packages build and typecheck
 - [ ] Add/migrate tests for each adapter (using `@txnlab/use-wallet/testing` helpers)
 
 ## Sprint 3: Framework Adapter Updates
@@ -98,18 +101,19 @@ Reference: [v5-migration-plan.md](./v5-migration-plan.md)
 
 ## Findings & Decisions
 
-- **2026-03-05**: `BaseWallet.setActiveAccount()` in v5 uses `this.store.setAccounts()` (scoped accessor) instead of the v4 `setActiveAccount(this.store, ...)` pattern. The scoped accessor doesn't expose a direct `setActiveAccount` method since setting the active account is handled implicitly when accounts are set (the store's `setAccounts` function preserves the active account if it still exists in the new list). For explicit active account switching, the raw `setActiveAccount` store function is still available via the `/adapter` subpath.
+- **2026-03-05**: ~~`BaseWallet.setActiveAccount()` in v5 uses `this.store.setAccounts()` (scoped accessor) instead of the v4 `setActiveAccount(this.store, ...)` pattern.~~ **BUG**: This doesn't work — `setAccounts` with the same accounts array preserves the existing active account. The `AdapterStoreAccessor` needs a `setActiveAccount(address: string)` method. **Fixed** — added `setActiveAccount` to `AdapterStoreAccessor` interface and implementation.
 - **2026-03-05**: `exactOptionalPropertyTypes` in tsconfig required conditional assignment of `options` in `WalletManager.initializeWallets()` — can't pass `options: config.options` when `config.options` might be `undefined` and the target type uses `options?: TOptions`.
 - **2026-03-05**: Package exports field requires `types` condition first (before `import`/`require`) to avoid esbuild warnings about unused conditions.
 - **2026-03-05**: `WalletState` type is now defined in `wallets/types.ts` (alongside other wallet types) and re-exported from `store.ts` for backward compatibility. This keeps all wallet-related types in one place.
+- **2026-03-05**: Biatec adapter removed as standalone package. Biatec was deprecated in v4 (PR #412) in favor of WalletConnect skins. In v5, use `walletConnect({ projectId: '...', skin: 'biatec' })` from `@txnlab/use-wallet-walletconnect`.
+- **2026-03-05**: Adapter packages omit `exactOptionalPropertyTypes` from their tsconfig because the `WalletAdapterConfig` interface uses type erasure (`Record<string, unknown>`) which conflicts with specific options interfaces.
+- **2026-03-05**: Factory functions in adapter packages require double cast (`as unknown as WalletAdapterConfig['Adapter']`) for the `Adapter` field and (`as unknown as Record<string, unknown>`) for `options` due to type erasure in `WalletAdapterConfig`.
+- **2026-03-05**: Web3Auth adapter uses ambient module declarations (`web3auth-modules.d.ts`) for optional peer deps (`@web3auth/modal`, `@web3auth/base`, etc.) since they're dynamically imported at runtime and may not be installed during build.
 
 ---
 
 ## Open Issues
 
-_Track unresolved problems encountered during implementation here._
-
-<!-- Example:
-- [ ] WalletConnect session migration: need to test whether v4 WC sessions survive the localStorage key change
-- [ ] Biatec adapter: decide between standalone implementation (Option A) vs thin WalletConnect wrapper (Option B)
--->
+- [x] **`setActiveAccount` bug**: Fixed — added `setActiveAccount(address: string)` to `AdapterStoreAccessor`, implemented in `WalletManager.createStoreAccessor()`, updated `BaseWallet.setActiveAccount()`.
+- [x] **`setActiveAccount` not exported from `/adapter`**: Fixed — now exported from `@txnlab/use-wallet/adapter`.
+- [ ] **Adapter tests not yet migrated**: V4 test files exist in `_v4-wallet-implementations/__tests__/` but have not been migrated to the new adapter packages yet. Tests need to be updated to use `@txnlab/use-wallet/testing` helpers and the new adapter constructor patterns.

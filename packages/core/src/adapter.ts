@@ -56,6 +56,7 @@ export {
 // Secure key utilities
 export {
   SecureKeyContainer,
+  deriveAlgorandAccountFromEd25519,
   withSecureKey,
   withSecureKeySync,
   zeroMemory,
