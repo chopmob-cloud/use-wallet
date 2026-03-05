@@ -60,6 +60,12 @@ Reference: [v5-migration-plan.md](./v5-migration-plan.md)
 
 ## Sprint 3: Framework Adapter Updates
 
+**Pre-work (wallet adapter cleanup from Sprint 2 review):**
+- [ ] Move adapter test files from `src/__tests__/adapter.test.ts` to `src/adapter.test.ts` in all wallet adapter packages
+- [ ] Extract inline SVG icons to separate `.svg` files with raw string imports in all wallet adapter packages
+- [ ] Move Custom wallet adapter from `packages/wallets/custom/` to core (`packages/core/`), export from `@txnlab/use-wallet`
+
+**Framework adapter updates:**
 - [ ] Move `packages/use-wallet-react/` → `packages/frameworks/react/`
 - [ ] Move `packages/use-wallet-vue/` → `packages/frameworks/vue/`
 - [ ] Move `packages/use-wallet-solid/` → `packages/frameworks/solid/`
@@ -110,6 +116,9 @@ Reference: [v5-migration-plan.md](./v5-migration-plan.md)
 - **2026-03-05**: Adapter packages omit `exactOptionalPropertyTypes` from their tsconfig because the `WalletAdapterConfig` interface uses type erasure (`Record<string, unknown>`) which conflicts with specific options interfaces.
 - **2026-03-05**: Factory functions in adapter packages require double cast (`as unknown as WalletAdapterConfig['Adapter']`) for the `Adapter` field and (`as unknown as Record<string, unknown>`) for `options` due to type erasure in `WalletAdapterConfig`.
 - **2026-03-05**: Web3Auth adapter uses ambient module declarations (`web3auth-modules.d.ts`) for optional peer deps (`@web3auth/modal`, `@web3auth/base`, etc.) since they're dynamically imported at runtime and may not be installed during build.
+- **2026-03-05**: Adapter icons should be stored as `.svg` files and imported as raw strings via tsup/build tooling, rather than inlined as base64 constants in adapter.ts. Cleaner separation of assets from logic. Apply during Sprint 3 pre-work.
+- **2026-03-05**: Custom wallet adapter moves to core (`@txnlab/use-wallet`). It's a template/extension point for inline wallets, not a real wallet — conceptually part of the framework. Remove `packages/wallets/custom/` and add Custom to core exports. Apply during Sprint 3 pre-work.
+- **2026-03-05**: Adapter test files should live alongside source (`src/adapter.test.ts`) rather than in `src/__tests__/adapter.test.ts`. Colocate during Sprint 3 pre-work.
 
 ---
 
@@ -117,4 +126,4 @@ Reference: [v5-migration-plan.md](./v5-migration-plan.md)
 
 - [x] **`setActiveAccount` bug**: Fixed — added `setActiveAccount(address: string)` to `AdapterStoreAccessor`, implemented in `WalletManager.createStoreAccessor()`, updated `BaseWallet.setActiveAccount()`.
 - [x] **`setActiveAccount` not exported from `/adapter`**: Fixed — now exported from `@txnlab/use-wallet/adapter`.
-- [ ] **Adapter tests not yet migrated**: V4 test files exist in `_v4-wallet-implementations/__tests__/` but have not been migrated to the new adapter packages yet. Tests need to be updated to use `@txnlab/use-wallet/testing` helpers and the new adapter constructor patterns.
+- [x] **Adapter tests not yet migrated**: Tests migrated to adapter packages using `@txnlab/use-wallet/testing` helpers.
