@@ -55,7 +55,8 @@ Reference: [v5-migration-plan.md](./v5-migration-plan.md)
 - [x] Extract W3Wallet adapter
 - [x] Extract Custom adapter
 - [x] Verify all adapter packages build and typecheck
-- [ ] Add/migrate tests for each adapter (using `@txnlab/use-wallet/testing` helpers)
+- [x] Add/migrate tests for each adapter (using `@txnlab/use-wallet/testing` helpers)
+- [x] Delete `_v4-wallet-implementations/` directory
 
 ## Sprint 3: Framework Adapter Updates
 
