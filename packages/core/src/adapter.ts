@@ -36,6 +36,9 @@ export { ScopeType, SignTxnsError, SignDataError } from './wallets/types'
 // State type (for subscribe callback typing)
 export type { State } from './store'
 
+// Store functions (for advanced adapter use cases)
+export { setActiveAccount } from './store'
+
 // Utility functions
 export {
   compareAccounts,

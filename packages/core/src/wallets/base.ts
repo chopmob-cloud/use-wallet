@@ -59,14 +59,7 @@ export abstract class BaseWallet<TOptions = Record<string, unknown>> {
 
   public setActiveAccount = (account: string): void => {
     this.logger.info(`Set active account: ${account}`)
-    const walletState = this.store.getWalletState()
-    if (!walletState) return
-
-    const newActiveAccount = walletState.accounts.find((a) => a.address === account)
-    if (!newActiveAccount) return
-
-    // Re-set accounts to trigger a state update with the new active account
-    this.store.setAccounts(walletState.accounts)
+    this.store.setActiveAccount(account)
   }
 
   public abstract signTransactions<T extends algosdk.Transaction[] | Uint8Array[]>(

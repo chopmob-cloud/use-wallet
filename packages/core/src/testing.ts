@@ -11,6 +11,7 @@ import {
   addWallet,
   removeWallet,
   setAccounts,
+  setActiveAccount,
   setActiveWallet,
   DEFAULT_STATE,
   type State
@@ -54,6 +55,8 @@ export function createMockStoreAccessor(
     removeWallet: () => removeWallet(store, { walletId: walletKey }),
     setAccounts: (accounts) =>
       setAccounts(store, { walletId: walletKey, accounts }),
+    setActiveAccount: (address) =>
+      setActiveAccount(store, { walletId: walletKey, address }),
     setActive: () => setActiveWallet(store, { walletId: walletKey })
   }
 

@@ -45,6 +45,7 @@ export interface AdapterStoreAccessor {
   addWallet(wallet: WalletState): void
   removeWallet(): void
   setAccounts(accounts: WalletAccount[]): void
+  setActiveAccount(address: string): void
   setActive(): void
 }
 
