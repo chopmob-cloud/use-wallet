@@ -220,21 +220,6 @@ importers:
 
   examples/react:
     dependencies:
-      '@agoralabs-sh/avm-web-provider':
-        specifier: ^1.7.0
-        version: 1.7.0
-      '@blockshake/defly-connect':
-        specifier: ^1.2.1
-        version: 1.2.1(algosdk@3.5.2)(bufferutil@4.1.0)(utf-8-validate@5.0.10)
-      '@magic-ext/algorand':
-        specifier: ^23.0.0
-        version: 23.20.0
-      '@magic-sdk/provider':
-        specifier: ^28.0.0
-        version: 28.19.0(localforage@1.10.0)
-      '@perawallet/connect':
-        specifier: ^1.4.1
-        version: 1.4.1(algosdk@3.5.2)(bufferutil@4.1.0)(utf-8-validate@5.0.10)
       '@txnlab/use-wallet-defly':
         specifier: workspace:*
         version: link:../../packages/wallets/defly
@@ -274,33 +259,9 @@ importers:
       '@txnlab/use-wallet-web3auth':
         specifier: workspace:*
         version: link:../../packages/wallets/web3auth
-      '@walletconnect/modal':
-        specifier: ^2.7.0
-        version: 2.7.0(@types/react@18.3.27)(react@18.3.1)
-      '@walletconnect/sign-client':
-        specifier: ^2.23.4
-        version: 2.23.4(bufferutil@4.1.0)(db0@0.3.4)(ioredis@5.9.2)(typescript@5.9.3)(utf-8-validate@5.0.10)
-      '@web3auth/base':
-        specifier: 9.7.0
-        version: 9.7.0(@babel/runtime@7.28.6)(bufferutil@4.1.0)(utf-8-validate@5.0.10)
-      '@web3auth/base-provider':
-        specifier: 9.7.0
-        version: 9.7.0(@babel/runtime@7.28.6)(bufferutil@4.1.0)(utf-8-validate@5.0.10)
-      '@web3auth/modal':
-        specifier: 9.7.0
-        version: 9.7.0(@babel/runtime@7.28.6)(bufferutil@4.1.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3)(utf-8-validate@5.0.10)
-      '@web3auth/single-factor-auth':
-        specifier: 9.5.0
-        version: 9.5.0(@babel/runtime@7.28.6)(bufferutil@4.1.0)(utf-8-validate@5.0.10)
       algosdk:
         specifier: 3.5.2
         version: 3.5.2
-      lute-connect:
-        specifier: ^1.6.3
-        version: 1.6.3
-      magic-sdk:
-        specifier: ^28.0.0
-        version: 28.20.0
       react:
         specifier: 18.3.1
         version: 18.3.1
@@ -920,6 +881,19 @@ importers:
         version: 5.9.3
 
   packages/wallets/web3auth:
+    dependencies:
+      '@web3auth/base':
+        specifier: ^9.7.0
+        version: 9.7.0(@babel/runtime@7.28.6)(bufferutil@4.1.0)(utf-8-validate@5.0.10)
+      '@web3auth/base-provider':
+        specifier: ^9.7.0
+        version: 9.7.0(@babel/runtime@7.28.6)(bufferutil@4.1.0)(utf-8-validate@5.0.10)
+      '@web3auth/modal':
+        specifier: ^9.7.0
+        version: 9.7.0(@babel/runtime@7.28.6)(bufferutil@4.1.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3)(utf-8-validate@5.0.10)
+      '@web3auth/single-factor-auth':
+        specifier: ^9.5.0
+        version: 9.5.0(@babel/runtime@7.28.6)(bufferutil@4.1.0)(utf-8-validate@5.0.10)
     devDependencies:
       '@txnlab/use-wallet':
         specifier: workspace:*

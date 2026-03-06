@@ -25,6 +25,12 @@
     "@txnlab/use-wallet": "^5.0.0",
     "algosdk": "^3.0.0"
   },
+  "dependencies": {
+    "@web3auth/modal": "^9.7.0",
+    "@web3auth/base": "^9.7.0",
+    "@web3auth/base-provider": "^9.7.0",
+    "@web3auth/single-factor-auth": "^9.5.0"
+  },
   "devDependencies": {
     "@txnlab/use-wallet": "workspace:*",
     "algosdk": "3.5.2",

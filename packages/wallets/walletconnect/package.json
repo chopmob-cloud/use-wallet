@@ -23,10 +23,12 @@
   "files": ["dist"],
   "peerDependencies": {
     "@txnlab/use-wallet": "^5.0.0",
+    "algosdk": "^3.0.0"
+  },
+  "dependencies": {
     "@walletconnect/sign-client": "^2.17.0",
     "@walletconnect/modal": "^2.7.0",
-    "@walletconnect/types": "^2.17.0",
-    "algosdk": "^3.0.0"
+    "@walletconnect/types": "^2.17.0"
   },
   "devDependencies": {
     "@txnlab/use-wallet": "workspace:*",

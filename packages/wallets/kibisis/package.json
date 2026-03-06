@@ -23,8 +23,10 @@
   "files": ["dist"],
   "peerDependencies": {
     "@txnlab/use-wallet": "^5.0.0",
-    "@agoralabs-sh/avm-web-provider": "^1.7.0",
     "algosdk": "^3.0.0"
+  },
+  "dependencies": {
+    "@agoralabs-sh/avm-web-provider": "^1.7.0"
   },
   "devDependencies": {
     "@txnlab/use-wallet": "workspace:*",

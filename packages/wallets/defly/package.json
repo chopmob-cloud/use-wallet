@@ -23,8 +23,10 @@
   "files": ["dist"],
   "peerDependencies": {
     "@txnlab/use-wallet": "^5.0.0",
-    "@blockshake/defly-connect": "^1.0.3",
     "algosdk": "^3.0.0"
+  },
+  "dependencies": {
+    "@blockshake/defly-connect": "^1.0.3"
   },
   "devDependencies": {
     "@txnlab/use-wallet": "workspace:*",
