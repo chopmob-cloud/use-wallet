@@ -5,24 +5,6 @@
   "editor.formatOnSave": true,
   "git.closeDiffOnOperation": true,
   "javascript.validate.enable": true,
-  "eslint.workingDirectories": [
-    "./packages/core",
-    "./packages/frameworks/react",
-    "./packages/frameworks/vue",
-    "./packages/frameworks/solid",
-    "./packages/frameworks/svelte",
-    "./packages/wallets/pera",
-    "./packages/wallets/defly",
-    "./packages/wallets/defly-web",
-    "./packages/wallets/exodus",
-    "./packages/wallets/walletconnect",
-    "./packages/wallets/web3auth",
-    "./packages/wallets/mnemonic",
-    "./packages/wallets/kmd",
-    "./packages/wallets/magic",
-    "./packages/wallets/lute",
-    "./packages/wallets/kibisis",
-    "./packages/wallets/w3wallet"
-  ],
+  "eslint.useFlatConfig": true,
   "typescript.tsdk": "./packages/core/node_modules/typescript/lib"
 }

@@ -3,15 +3,12 @@ import {
   BaseWallet,
   NetworkId,
   WalletManager,
-  DEFAULT_NETWORK_CONFIG,
-  type State,
   type WalletAccount,
   type WalletAdapterConfig,
   type AdapterConstructorParams,
   type ManagerStatus
 } from '@txnlab/use-wallet'
-import algosdk from 'algosdk'
-import { For, Show } from 'solid-js'
+import { For } from 'solid-js'
 import { WalletProvider, useWallet, useWalletManager, useNetwork } from './index'
 
 const mocks = vi.hoisted(() => {

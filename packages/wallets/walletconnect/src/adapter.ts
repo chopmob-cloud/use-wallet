@@ -82,7 +82,7 @@ export class WalletConnectAdapter extends BaseWallet<WalletConnectOptions> {
       projectId,
       relayUrl = 'wss://relay.walletconnect.com',
       metadata: metadataOptions,
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
       skin: _skinOption, // Extract skin to exclude from modalOptions
       ...modalOptions
     } = this.options

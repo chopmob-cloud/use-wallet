@@ -1,4 +1,3 @@
-/* eslint-disable no-extra-semi */
 import algosdk from 'algosdk'
 import { W3WalletAdapter } from './adapter'
 import type { W3WalletProvider } from './adapter'

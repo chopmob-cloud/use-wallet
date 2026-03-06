@@ -39,7 +39,7 @@
     "start": "tsup src/index.ts --watch",
     "test": "vitest run",
     "test:watch": "pnpm run test --watch",
-    "lint": "eslint -c \"../../.eslintrc.json\" \"**/*.{js,ts}\"",
+    "lint": "eslint \"src/**/*.{js,ts}\"",
     "typecheck": "tsc --noEmit"
   },
   "keywords": [

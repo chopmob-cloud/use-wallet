@@ -1,4 +1,3 @@
-/* eslint-disable no-extra-semi */
 import {
   BaseWallet,
   WalletManager,

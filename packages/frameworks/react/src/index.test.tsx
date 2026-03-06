@@ -3,12 +3,9 @@ import {
   BaseWallet,
   NetworkId,
   WalletManager,
-  DEFAULT_STATE,
-  type State,
   type WalletAccount,
   type WalletAdapterConfig,
-  type AdapterConstructorParams,
-  type Wallet
+  type AdapterConstructorParams
 } from '@txnlab/use-wallet'
 import algosdk from 'algosdk'
 import * as React from 'react'

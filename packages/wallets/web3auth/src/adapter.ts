@@ -270,9 +270,8 @@ export class Web3AuthAdapter extends BaseWallet<Web3AuthOptions> {
   private async initializeClient(): Promise<IWeb3AuthModal> {
     this.logger.info('Initializing Web3Auth client...')
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let Web3Auth: any
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     let WEB3AUTH_NETWORK: any
 
     try {
@@ -298,9 +297,7 @@ export class Web3AuthAdapter extends BaseWallet<Web3AuthOptions> {
     // Only clientId, web3AuthNetwork, and uiConfig are needed.
     const web3auth = new Web3Auth({
       clientId: this.options.clientId,
-      web3AuthNetwork:
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        networkMap[this.options.web3AuthNetwork || 'sapphire_mainnet'] as any,
+      web3AuthNetwork: networkMap[this.options.web3AuthNetwork || 'sapphire_mainnet'] as any,
       uiConfig: this.options.uiConfig
     })
 
@@ -318,11 +315,10 @@ export class Web3AuthAdapter extends BaseWallet<Web3AuthOptions> {
   private async initializeSFAClient(): Promise<IWeb3AuthSFA> {
     this.logger.info('Initializing Web3Auth Single Factor Auth client...')
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let Web3Auth: any
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     let WEB3AUTH_NETWORK: any
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     let CommonPrivateKeyProvider: any
 
     try {
@@ -371,9 +367,7 @@ export class Web3AuthAdapter extends BaseWallet<Web3AuthOptions> {
 
     const web3authSFA = new Web3Auth({
       clientId: this.options.clientId,
-      web3AuthNetwork:
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        networkMap[this.options.web3AuthNetwork || 'sapphire_mainnet'] as any,
+      web3AuthNetwork: networkMap[this.options.web3AuthNetwork || 'sapphire_mainnet'] as any,
       privateKeyProvider
     })
 
