@@ -42,9 +42,9 @@
 
       <div class="space-y-4">
         <div>
-          <label class="text-xs font-medium text-gray-500 uppercase tracking-wider">
+          <span class="text-xs font-medium text-gray-500 uppercase tracking-wider">
             Active Account
-          </label>
+          </span>
           <div class="mt-1 rounded-lg bg-gray-50 p-3 font-mono text-sm text-gray-700 break-all">
             {account.address}
           </div>
