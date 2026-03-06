@@ -6,6 +6,7 @@ export default defineNuxtConfig({
   ssr: false,
   css: ['~/assets/css/main.css'],
   vite: {
+    // @ts-expect-error Vite version mismatch between plugins and Nuxt's bundled Vite
     plugins: [tailwindcss(), nodePolyfills()]
   }
 })
