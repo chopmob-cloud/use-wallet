@@ -61,26 +61,26 @@ Using `packages/**` discovers packages at any depth, supporting the nested struc
                                │                    │ peerDep
 @txnlab/use-wallet-pera ──peerDep───────────────────┘
                                │
-                               └─peerDep──► @perawallet/connect
+                               ├──dep──► @perawallet/connect
                                └─peerDep──► algosdk
 ```
 
 - **Framework adapters** depend on core as a regular dependency and re-export everything (unchanged from v4).
 - **Wallet adapters** depend on core as a peer dependency. The consumer's framework adapter (or direct core install) satisfies it.
-- **Wallet SDKs** remain peer dependencies of their respective wallet adapter packages.
-- **algosdk** is a peer dependency of core and wallet adapters.
+- **Wallet SDKs** are regular dependencies of their respective wallet adapter packages — consumers don't need to install them separately.
+- **algosdk** is a peer dependency of core and wallet adapters (consumers use it directly).
 
 ### Consumer Installation
 
 ```bash
 # React project
-npm install @txnlab/use-wallet-react @txnlab/use-wallet-pera @txnlab/use-wallet-defly algosdk @perawallet/connect @blockshake/defly-connect
+npm install @txnlab/use-wallet-react @txnlab/use-wallet-pera @txnlab/use-wallet-defly algosdk
 
 # Vanilla TypeScript
-npm install @txnlab/use-wallet @txnlab/use-wallet-pera algosdk @perawallet/connect
+npm install @txnlab/use-wallet @txnlab/use-wallet-pera algosdk
 ```
 
-Framework adapters bring in core automatically. Consumers install only the wallet adapters they need, along with each adapter's wallet SDK peer dep.
+Framework adapters bring in core automatically. Wallet adapters bring in their SDK automatically. Consumers install only the adapters they need plus `algosdk`.
 
 ---
 
@@ -541,14 +541,16 @@ These are a transitional convenience for the monorepo phase. When wallet teams f
 }
 ```
 
-Wallet adapters with external SDK dependencies add them as peer deps:
+Wallet adapters with external SDK dependencies add them as regular dependencies (so consumers don't have to install them separately):
 
 ```json
 {
   "peerDependencies": {
     "@txnlab/use-wallet": "^5.0.0",
-    "@perawallet/connect": "^1.4.1",
     "algosdk": "^3.0.0"
+  },
+  "dependencies": {
+    "@perawallet/connect": "^1.4.1"
   }
 }
 ```

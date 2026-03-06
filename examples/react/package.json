@@ -9,11 +9,6 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@agoralabs-sh/avm-web-provider": "^1.7.0",
-    "@blockshake/defly-connect": "^1.2.1",
-    "@magic-ext/algorand": "^23.0.0",
-    "@magic-sdk/provider": "^28.0.0",
-    "@perawallet/connect": "^1.4.1",
     "@txnlab/use-wallet-defly": "workspace:*",
     "@txnlab/use-wallet-defly-web": "workspace:*",
     "@txnlab/use-wallet-exodus": "workspace:*",
@@ -27,15 +22,7 @@
     "@txnlab/use-wallet-w3wallet": "workspace:*",
     "@txnlab/use-wallet-walletconnect": "workspace:*",
     "@txnlab/use-wallet-web3auth": "workspace:*",
-    "@walletconnect/modal": "^2.7.0",
-    "@walletconnect/sign-client": "^2.23.4",
-    "@web3auth/base": "9.7.0",
-    "@web3auth/base-provider": "9.7.0",
-    "@web3auth/modal": "9.7.0",
-    "@web3auth/single-factor-auth": "9.5.0",
     "algosdk": "3.5.2",
-    "lute-connect": "^1.6.3",
-    "magic-sdk": "^28.0.0",
     "react": "18.3.1",
     "react-dom": "18.3.1"
   },

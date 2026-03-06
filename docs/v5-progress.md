@@ -78,7 +78,7 @@ Reference: [v5-migration-plan.md](./v5-migration-plan.md)
 
 ## Sprint 4: Examples, Docs, CI, Release Pipeline
 
-- [ ] Update React example to v5 API
+- [x] Update React example to v5 API
 - [ ] Update Vue example to v5 API
 - [ ] Update SolidJS example to v5 API
 - [ ] Update Svelte example to v5 API
@@ -129,5 +129,5 @@ Reference: [v5-migration-plan.md](./v5-migration-plan.md)
 - [x] **`setActiveAccount` bug**: Fixed — added `setActiveAccount(address: string)` to `AdapterStoreAccessor`, implemented in `WalletManager.createStoreAccessor()`, updated `BaseWallet.setActiveAccount()`.
 - [x] **`setActiveAccount` not exported from `/adapter`**: Fixed — now exported from `@txnlab/use-wallet/adapter`.
 - [x] **Adapter tests not yet migrated**: Tests migrated to adapter packages using `@txnlab/use-wallet/testing` helpers.
-- [ ] **Move wallet SDKs from `peerDependencies` to `dependencies`** in all adapter packages. Remove Web3Auth ambient module declarations. Update migration plan §2 (Dependency Graph) and §5.2 (package.json template).
+- [x] **Move wallet SDKs from `peerDependencies` to `dependencies`** in all adapter packages. Removed Web3Auth ambient module declarations. Updated migration plan §2 (Dependency Graph) and §5.2 (package.json template).
 - [ ] **Magic SDK ESM bug**: `@magic-sdk/provider` broken ESM build requires Vite alias workaround. Document in example and migration guide. Track upstream fix.
