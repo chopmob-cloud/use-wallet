@@ -12,7 +12,7 @@ import type {
 } from './types'
 
 export type CustomProvider = {
-  connect(args?: Record<string, any>): Promise<WalletAccount[]>
+  connect?(args?: Record<string, any>): Promise<WalletAccount[]>
   disconnect?(): Promise<void>
   resumeSession?(): Promise<WalletAccount[] | void>
   signTransactions?<T extends algosdk.Transaction[] | Uint8Array[]>(

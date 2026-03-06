@@ -140,7 +140,6 @@ describe('CustomWallet', () => {
 
     it('should throw an error if provider.connect is not defined', async () => {
       wallet = createWallet(accessor, {
-        // @ts-expect-error connect is intentionally missing
         disconnect: vi.fn(),
       })
 
