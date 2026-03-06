@@ -1,9 +1,9 @@
 import { defineComponent, h, inject } from 'vue'
-import { WalletManagerPlugin } from '../walletManagerPlugin'
+import { WalletManagerPlugin } from './walletManagerPlugin'
 import { NetworkId, WalletManager, type WalletManagerConfig } from '@txnlab/use-wallet'
 import algosdk from 'algosdk'
 import { mount } from '@vue/test-utils'
-import type { SetAlgodClient } from '../useWallet'
+import type { SetAlgodClient } from './useWallet'
 
 const mockAlgodClient = new algosdk.Algodv2('mock-token', 'https://mock-server', '')
 

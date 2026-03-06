@@ -12,7 +12,7 @@ import {
 import { mount } from '@vue/test-utils'
 import algosdk from 'algosdk'
 import { inject, nextTick, ref, type InjectionKey } from 'vue'
-import { useWallet } from '../useWallet'
+import { useWallet } from './useWallet'
 import type { Mock } from 'vitest'
 
 // Mock Vue's inject function

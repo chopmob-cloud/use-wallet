@@ -11,8 +11,8 @@ import {
 import { mount } from '@vue/test-utils'
 import algosdk from 'algosdk'
 import { computed, inject, nextTick, ref, type InjectionKey } from 'vue'
-import { useNetwork } from '../useNetwork'
-import { useWallet } from '../useWallet'
+import { useNetwork } from './useNetwork'
+import { useWallet } from './useWallet'
 import type { Mock } from 'vitest'
 
 // Mock Vue's inject function

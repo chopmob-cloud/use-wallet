@@ -12,7 +12,7 @@ import {
 } from '@txnlab/use-wallet'
 import algosdk from 'algosdk'
 import { For, Show } from 'solid-js'
-import { WalletProvider, useWallet, useWalletManager, useNetwork } from '../index'
+import { WalletProvider, useWallet, useWalletManager, useNetwork } from './index'
 
 const mocks = vi.hoisted(() => {
   return {

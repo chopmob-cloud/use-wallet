@@ -15,7 +15,7 @@ import {
 import algosdk from 'algosdk'
 import { getContext, setContext } from 'svelte'
 import type { Mock } from 'vitest'
-import { useWalletContext, useWalletManager, useNetwork, useWallet } from '../index'
+import { useWalletContext, useWalletManager, useNetwork, useWallet } from './index'
 
 // Mock Svelte's context functions
 vi.mock('svelte', async (importOriginal) => {

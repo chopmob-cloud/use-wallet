@@ -12,7 +12,7 @@ import {
 } from '@txnlab/use-wallet'
 import algosdk from 'algosdk'
 import * as React from 'react'
-import { WalletProvider, useWallet, useNetwork } from '../index'
+import { WalletProvider, useWallet, useNetwork } from './index'
 
 const mocks = vi.hoisted(() => {
   return {
