@@ -19,11 +19,11 @@
     "typecheck": "pnpm -r typecheck",
     "example:ts": "pnpm --filter \"./examples/vanilla-ts\" dev",
     "example:react": "pnpm --filter \"./examples/react\" dev",
-    "example:solid": "pnpm --filter \"./examples/solid-ts\" dev",
-    "example:vue": "pnpm --filter \"./examples/vue-ts\" dev",
-    "example:nextjs": "pnpm --filter \"./examples/nextjs\" dev",
+    "example:solid": "pnpm --filter \"./examples/solid\" dev",
+    "example:vue": "pnpm --filter \"./examples/vue\" dev",
+    "example:nextjs": "pnpm --filter \"./examples/next\" dev",
     "example:nuxt": "pnpm --filter \"./examples/nuxt\" dev",
-    "example:svelte": "pnpm --filter \"./examples/svelte-ts\" dev"
+    "example:svelte": "pnpm --filter \"./examples/svelte\" dev"
   },
   "devDependencies": {
     "@playwright/test": "1.58.1",

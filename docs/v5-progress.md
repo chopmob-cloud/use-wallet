@@ -79,13 +79,13 @@ Reference: [v5-migration-plan.md](./v5-migration-plan.md)
 ## Sprint 4: Examples, Docs, CI, Release Pipeline
 
 - [x] Update React example to v5 API (rebuilt with Vite v7, React 19)
-- [ ] Update Vue example to v5 API
-- [ ] Update SolidJS example to v5 API
-- [ ] Update Svelte example to v5 API
-- [ ] Update vanilla TypeScript example to v5 API
-- [ ] Update Next.js example (remove webpack fallback)
-- [ ] Update Nuxt example to v5 API
-- [ ] Update root `package.json` build scripts
+- [x] Update Vue example to v5 API (rebuilt with Vite v7, Vue 3.5)
+- [x] Update SolidJS example to v5 API (rebuilt with Vite v7, Solid 1.9)
+- [x] Update Svelte example to v5 API (rebuilt with SvelteKit, Svelte 5, adapter-static)
+- [x] Update vanilla TypeScript example to v5 API (rebuilt with Vite v7)
+- [x] Update Next.js example (rebuilt with Next.js 16, Turbopack, no webpack fallback needed)
+- [x] Update Nuxt example to v5 API (rebuilt with Nuxt 3.21, SSR disabled)
+- [x] Update root `package.json` build scripts
 - [ ] Update `.github/workflows/ci.yml` (PR-only triggers, add publint, add concurrency)
 - [ ] Update `.vscode/settings.json` ESLint working directories
 - [ ] Update `.github/renovate.json`
