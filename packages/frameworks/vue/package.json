@@ -31,7 +31,7 @@
     "dist"
   ],
   "dependencies": {
-    "@tanstack/vue-store": "0.8.0",
+    "@tanstack/vue-store": "0.9.1",
     "@txnlab/use-wallet": "workspace:*"
   },
   "devDependencies": {

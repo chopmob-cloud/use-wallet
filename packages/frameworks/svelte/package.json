@@ -31,7 +31,7 @@
     "dist"
   ],
   "dependencies": {
-    "@tanstack/svelte-store": "0.9.0",
+    "@tanstack/svelte-store": "0.10.1",
     "@txnlab/use-wallet": "workspace:*"
   },
   "devDependencies": {

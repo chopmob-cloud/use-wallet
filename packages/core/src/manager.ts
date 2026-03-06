@@ -107,20 +107,21 @@ export class WalletManager {
     }
 
     // Create store
-    this.store = new Store<State>(initialState, {
-      onUpdate: () => this.savePersistedState()
-    })
+    this.store = new Store<State>(initialState)
+
+    // Subscribe to persist state on updates
+    this.store.subscribe(() => this.savePersistedState())
 
     // Save persisted state immediately
     this.savePersistedState()
 
     // Subscribe to store updates
     this.subscribe = (callback: (state: State) => void): (() => void) => {
-      const unsubscribe = this.store.subscribe(() => {
+      const subscription = this.store.subscribe(() => {
         callback(this.store.state)
       })
 
-      return unsubscribe
+      return () => subscription.unsubscribe()
     }
 
     // Initialize wallets
