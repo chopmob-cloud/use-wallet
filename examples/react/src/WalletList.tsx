@@ -72,40 +72,38 @@ function WalletRow({
       className={`rounded-xl border p-3 transition-colors ${
         wallet.isActive
           ? 'border-blue-200 bg-blue-50'
-          : wallet.isConnected
-            ? 'border-green-200 bg-green-50/50'
-            : 'border-gray-200 bg-white hover:border-gray-300'
+          : 'border-gray-200 bg-white hover:border-gray-300'
       }`}
     >
       <div className="flex items-center gap-3">
         <img
           src={wallet.metadata.icon}
           alt={wallet.metadata.name}
-          className="h-10 w-10 rounded-lg"
+          className="h-10 w-10 rounded-lg shrink-0"
         />
         <div className="flex-1 min-w-0">
           <div className="text-sm font-medium text-gray-900">{wallet.metadata.name}</div>
           {wallet.isConnected && wallet.activeAccount && (
-            <div className="text-xs text-gray-500 truncate font-mono">
+            <div className="text-xs text-gray-400 truncate font-mono">
               {wallet.activeAccount.address.slice(0, 8)}...
               {wallet.activeAccount.address.slice(-4)}
             </div>
           )}
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 shrink-0">
           {wallet.isConnected ? (
             <>
               {!wallet.isActive && (
                 <button
                   onClick={() => wallet.setActive()}
-                  className="text-xs font-medium text-blue-600 hover:text-blue-700"
+                  className="rounded-lg border border-blue-200 bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-600 hover:bg-blue-100 transition-colors"
                 >
                   Activate
                 </button>
               )}
               <button
                 onClick={() => wallet.disconnect()}
-                className="text-xs font-medium text-red-500 hover:text-red-600"
+                className="rounded-lg border border-red-200 bg-red-50 px-2.5 py-1 text-xs font-medium text-red-500 hover:bg-red-100 transition-colors"
               >
                 Disconnect
               </button>
@@ -114,7 +112,7 @@ function WalletRow({
             <button
               onClick={onConnect}
               disabled={isConnecting || connectDisabled}
-              className="rounded-lg bg-gray-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-gray-800 disabled:opacity-50"
+              className="rounded-lg bg-gray-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-gray-800 disabled:opacity-50 transition-colors"
             >
               {isConnecting ? 'Connecting...' : 'Connect'}
             </button>
