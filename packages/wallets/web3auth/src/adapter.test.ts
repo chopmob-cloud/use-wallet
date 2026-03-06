@@ -21,9 +21,9 @@ const mockWeb3AuthProvider = {
   request: vi.fn(),
 }
 
-// Mock Web3Auth Modal client
+// Mock Web3Auth Modal client (v10: initModal() replaced by init())
 const mockWeb3Auth = {
-  initModal: vi.fn(),
+  init: vi.fn(),
   connect: vi.fn(),
   logout: vi.fn(),
   connected: false,
@@ -42,16 +42,6 @@ const mockWeb3AuthSFA = {
 
 vi.mock('@web3auth/modal', () => ({
   Web3Auth: vi.fn(() => mockWeb3Auth),
-}))
-
-vi.mock('@web3auth/single-factor-auth', () => ({
-  Web3Auth: vi.fn(() => mockWeb3AuthSFA),
-}))
-
-vi.mock('@web3auth/base', () => ({
-  CHAIN_NAMESPACES: {
-    OTHER: 'other',
-  },
   WEB3AUTH_NETWORK: {
     MAINNET: 'mainnet',
     TESTNET: 'testnet',
@@ -60,6 +50,10 @@ vi.mock('@web3auth/base', () => ({
     CYAN: 'cyan',
     AQUA: 'aqua',
   },
+}))
+
+vi.mock('@web3auth/single-factor-auth', () => ({
+  Web3Auth: vi.fn(() => mockWeb3AuthSFA),
 }))
 
 vi.mock('@web3auth/base-provider', () => ({
@@ -102,7 +96,7 @@ describe('Web3AuthAdapter', () => {
     // Reset mock Web3Auth Modal state
     mockWeb3Auth.connected = false
     mockWeb3Auth.provider = null
-    mockWeb3Auth.initModal.mockResolvedValue(undefined)
+    mockWeb3Auth.init.mockResolvedValue(undefined)
     mockWeb3Auth.connect.mockImplementation(async () => {
       mockWeb3Auth.connected = true
       mockWeb3Auth.provider = mockWeb3AuthProvider
@@ -173,7 +167,7 @@ describe('Web3AuthAdapter', () => {
     it('should initialize client, authenticate, and return account', async () => {
       const result = await wallet.connect()
 
-      expect(mockWeb3Auth.initModal).toHaveBeenCalled()
+      expect(mockWeb3Auth.init).toHaveBeenCalled()
       expect(mockWeb3Auth.connect).toHaveBeenCalled()
       expect(mockWeb3Auth.getUserInfo).toHaveBeenCalled()
       expect(mockWeb3AuthProvider.request).toHaveBeenCalledWith({ method: 'private_key' })

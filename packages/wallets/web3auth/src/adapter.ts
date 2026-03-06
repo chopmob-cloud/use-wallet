@@ -51,7 +51,7 @@ interface IWeb3AuthUserInfo {
 }
 
 interface IWeb3AuthModal {
-  initModal(): Promise<void>
+  init(): Promise<void>
   connect(): Promise<IWeb3AuthProvider | null>
   logout(): Promise<void>
   connected: boolean
@@ -271,50 +271,26 @@ export class Web3AuthAdapter extends BaseWallet<Web3AuthOptions> {
   // ---------- Client Initialization ---------------------------------- //
 
   /**
-   * Initialize the Web3Auth client
+   * Initialize the Web3Auth client (v10 Modal SDK)
    */
   private async initializeClient(): Promise<IWeb3AuthModal> {
     this.logger.info('Initializing Web3Auth client...')
 
-    // Dynamic import to avoid bundling Web3Auth for users who don't need it
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let Web3Auth: any
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let CHAIN_NAMESPACES: any
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let WEB3AUTH_NETWORK: any
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let CommonPrivateKeyProvider: any
 
     try {
-      // Dynamic imports - these are optional peer dependencies
+      // Dynamic import - @web3auth/modal is a dependency
       const modal = await import('@web3auth/modal')
       Web3Auth = modal.Web3Auth
-      const base = await import('@web3auth/base')
-      CHAIN_NAMESPACES = base.CHAIN_NAMESPACES
-      WEB3AUTH_NETWORK = base.WEB3AUTH_NETWORK
-      const baseProvider = await import('@web3auth/base-provider')
-      CommonPrivateKeyProvider = baseProvider.CommonPrivateKeyProvider
+      WEB3AUTH_NETWORK = modal.WEB3AUTH_NETWORK
     } catch (error) {
-      this.logger.error(
-        'Failed to load Web3Auth. Make sure @web3auth/modal, @web3auth/base, ' +
-          'and @web3auth/base-provider are installed.',
-        error,
-      )
+      this.logger.error('Failed to load Web3Auth.', error)
       throw new Error(
-        'Web3Auth packages not found. Please install @web3auth/modal, ' +
-          '@web3auth/base, and @web3auth/base-provider',
+        'Web3Auth package not found. Please install @web3auth/modal',
       )
-    }
-
-    const chainConfig = {
-      chainNamespace: CHAIN_NAMESPACES.OTHER,
-      chainId: 'algorand',
-      rpcTarget: 'https://mainnet-api.algonode.cloud', // Required by Web3Auth, not actually used for signing
-      displayName: 'Algorand',
-      blockExplorerUrl: 'https://lora.algokit.io/mainnet',
-      ticker: 'ALGO',
-      tickerName: 'Algorand',
     }
 
     const networkMap: Record<string, string> = {
@@ -326,21 +302,17 @@ export class Web3AuthAdapter extends BaseWallet<Web3AuthOptions> {
       aqua: WEB3AUTH_NETWORK.AQUA,
     }
 
-    // Create private key provider for non-EVM chains (required in Web3Auth v9)
-    const privateKeyProvider = new CommonPrivateKeyProvider({
-      config: { chainConfig },
-    })
-
+    // v10: Chain config and provider are handled internally for non-EVM chains.
+    // Only clientId, web3AuthNetwork, and uiConfig are needed.
     const web3auth = new Web3Auth({
       clientId: this.options.clientId,
       web3AuthNetwork:
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         networkMap[this.options.web3AuthNetwork || 'sapphire_mainnet'] as any,
-      privateKeyProvider,
       uiConfig: this.options.uiConfig,
     })
 
-    await web3auth.initModal()
+    await web3auth.init()
     this.web3auth = web3auth
     this.logger.info('Web3Auth client initialized')
 
@@ -348,7 +320,8 @@ export class Web3AuthAdapter extends BaseWallet<Web3AuthOptions> {
   }
 
   /**
-   * Initialize the Web3Auth Single Factor Auth client for custom JWT authentication
+   * Initialize the Web3Auth Single Factor Auth client for custom JWT authentication.
+   * SFA SDK is still at v9 and requires CommonPrivateKeyProvider with chain config.
    */
   private async initializeSFAClient(): Promise<IWeb3AuthSFA> {
     this.logger.info('Initializing Web3Auth Single Factor Auth client...')
@@ -359,33 +332,31 @@ export class Web3AuthAdapter extends BaseWallet<Web3AuthOptions> {
     let WEB3AUTH_NETWORK: any
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let CommonPrivateKeyProvider: any
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let CHAIN_NAMESPACES: any
 
     try {
-      // Dynamic imports - these are optional peer dependencies
+      // Dynamic imports
       const sfa = await import('@web3auth/single-factor-auth')
       Web3Auth = sfa.Web3Auth
-      const base = await import('@web3auth/base')
-      WEB3AUTH_NETWORK = base.WEB3AUTH_NETWORK
-      CHAIN_NAMESPACES = base.CHAIN_NAMESPACES
+      // Import WEB3AUTH_NETWORK from @web3auth/modal (v10 re-exports it)
+      const modal = await import('@web3auth/modal')
+      WEB3AUTH_NETWORK = modal.WEB3AUTH_NETWORK
       const baseProvider = await import('@web3auth/base-provider')
       CommonPrivateKeyProvider = baseProvider.CommonPrivateKeyProvider
     } catch {
       this.logger.error(
-        'Failed to load Web3Auth SFA. Make sure @web3auth/single-factor-auth, ' +
-          '@web3auth/base, and @web3auth/base-provider are installed.',
+        'Failed to load Web3Auth SFA. Make sure @web3auth/single-factor-auth ' +
+          'and @web3auth/base-provider are installed.',
       )
       throw new Error(
-        'Web3Auth SFA packages not found. Please install @web3auth/single-factor-auth, ' +
-          '@web3auth/base, and @web3auth/base-provider',
+        'Web3Auth SFA packages not found. Please install @web3auth/single-factor-auth ' +
+          'and @web3auth/base-provider',
       )
     }
 
     const chainConfig = {
-      chainNamespace: CHAIN_NAMESPACES.OTHER,
+      chainNamespace: 'other',
       chainId: 'algorand',
-      rpcTarget: 'https://mainnet-api.algonode.cloud', // Required by Web3Auth, not actually used for signing
+      rpcTarget: 'https://mainnet-api.algonode.cloud',
       displayName: 'Algorand',
       blockExplorerUrl: 'https://lora.algokit.io/mainnet',
       ticker: 'ALGO',
@@ -401,7 +372,7 @@ export class Web3AuthAdapter extends BaseWallet<Web3AuthOptions> {
       aqua: WEB3AUTH_NETWORK.AQUA,
     }
 
-    // Create private key provider for non-EVM chains
+    // SFA v9 still requires CommonPrivateKeyProvider for non-EVM chains
     const privateKeyProvider = new CommonPrivateKeyProvider({
       config: { chainConfig },
     })
