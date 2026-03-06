@@ -7,11 +7,29 @@ import type {
   NetworkId,
   SignDataResponse,
   SignMetadata,
-  Wallet,
+  WalletAccount,
   WalletManager,
+  WalletMetadata,
+  WalletKey,
 } from '@txnlab/use-wallet'
 
 export * from '@txnlab/use-wallet'
+
+export interface Wallet {
+  id: string
+  walletKey: WalletKey
+  metadata: WalletMetadata
+  readonly accounts: WalletAccount[]
+  readonly activeAccount: WalletAccount | null
+  readonly isConnected: boolean
+  readonly isActive: boolean
+  canSignData: boolean
+  canUsePrivateKey: boolean
+  connect: (args?: Record<string, any>) => Promise<WalletAccount[]>
+  disconnect: () => Promise<void>
+  setActive: () => void
+  setActiveAccount: (address: string) => void
+}
 
 interface WalletProviderProps {
   manager: WalletManager
@@ -131,27 +149,32 @@ export const useWallet = () => {
   const activeWalletId = useStore(manager().store, (state) => state.activeWallet)
 
   const transformToWallet = (wallet: BaseWallet): Wallet => {
-    const walletState = walletStateMap()[wallet.walletKey]
     return {
       id: wallet.id,
       walletKey: wallet.walletKey,
       metadata: wallet.metadata,
-      accounts: walletState?.accounts ?? [],
-      activeAccount: walletState?.activeAccount ?? null,
-      isConnected: !!walletState,
-      isActive: wallet.walletKey === activeWalletId(),
+      get accounts() {
+        return walletStateMap()[wallet.walletKey]?.accounts ?? []
+      },
+      get activeAccount() {
+        return walletStateMap()[wallet.walletKey]?.activeAccount ?? null
+      },
+      get isConnected() {
+        return !!walletStateMap()[wallet.walletKey]
+      },
+      get isActive() {
+        return wallet.walletKey === activeWalletId()
+      },
       canSignData: wallet.canSignData ?? false,
       canUsePrivateKey: wallet.canUsePrivateKey ?? false,
       connect: (args) => wallet.connect(args),
       disconnect: () => wallet.disconnect(),
       setActive: () => wallet.setActive(),
-      setActiveAccount: (addr) => wallet.setActiveAccount(addr)
+      setActiveAccount: (addr) => wallet.setActiveAccount(addr),
     }
   }
 
-  const wallets = createMemo(() => {
-    return [...manager().wallets.values()].map(transformToWallet)
-  })
+  const wallets = [...manager().wallets].map(transformToWallet)
 
   const activeBaseWallet = createMemo(() => {
     const id = activeWalletId()
@@ -159,15 +182,21 @@ export const useWallet = () => {
   })
 
   const activeWallet = createMemo(() => {
-    const base = activeBaseWallet()
-    return base ? transformToWallet(base) : null
+    const id = activeWalletId()
+    return id ? wallets.find((w) => w.walletKey === id) ?? null : null
   })
 
-  const activeWalletAccounts = createMemo(() => activeWallet()?.accounts ?? null)
+  const activeWalletAccounts = createMemo(() => {
+    const state = walletStateMap()[activeWalletId()!]
+    return state?.accounts ?? null
+  })
   const activeWalletAddresses = createMemo(() =>
     activeWalletAccounts()?.map((account) => account.address) ?? null
   )
-  const activeAccount = createMemo(() => activeWallet()?.activeAccount ?? null)
+  const activeAccount = createMemo(() => {
+    const state = walletStateMap()[activeWalletId()!]
+    return state?.activeAccount ?? null
+  })
   const activeAddress = createMemo(() => activeAccount()?.address ?? null)
 
   const signTransactions = <T extends algosdk.Transaction[] | Uint8Array[]>(
@@ -209,7 +238,7 @@ export const useWallet = () => {
   }
 
   return {
-    wallets,
+    wallets: () => wallets,
     isReady,
     algodClient,
     activeWallet,
@@ -220,6 +249,6 @@ export const useWallet = () => {
     signData,
     withPrivateKey,
     signTransactions,
-    transactionSigner
+    transactionSigner,
   }
 }

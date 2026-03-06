@@ -513,6 +513,96 @@ describe('useWallet', () => {
     expect(screen.getByTestId('active-network')).toHaveTextContent(NetworkId.MAINNET)
   })
 
+  it('wallet properties update reactively via getters', () => {
+    const WalletStatus = (props: { wallet: any }) => {
+      return (
+        <div>
+          <span data-testid={`reactive-connected-${props.wallet.id}`}>
+            {props.wallet.isConnected ? 'yes' : 'no'}
+          </span>
+          <span data-testid={`reactive-active-${props.wallet.id}`}>
+            {props.wallet.isActive ? 'yes' : 'no'}
+          </span>
+          <span data-testid={`reactive-accounts-${props.wallet.id}`}>
+            {props.wallet.accounts.length}
+          </span>
+          <span data-testid={`reactive-active-account-${props.wallet.id}`}>
+            {props.wallet.activeAccount?.address ?? 'none'}
+          </span>
+        </div>
+      )
+    }
+
+    const ReactiveTestComponent = () => {
+      const { wallets } = useWallet()
+      return (
+        <For each={wallets()}>
+          {(wallet) => <WalletStatus wallet={wallet} />}
+        </For>
+      )
+    }
+
+    render(() => (
+      <WalletProvider manager={mockWalletManager}>
+        <ReactiveTestComponent />
+      </WalletProvider>
+    ))
+
+    // Initially disconnected
+    expect(screen.getByTestId('reactive-connected-wallet-a')).toHaveTextContent('no')
+    expect(screen.getByTestId('reactive-active-wallet-a')).toHaveTextContent('no')
+    expect(screen.getByTestId('reactive-accounts-wallet-a')).toHaveTextContent('0')
+    expect(screen.getByTestId('reactive-active-account-wallet-a')).toHaveTextContent('none')
+
+    // Connect wallet-a
+    mockWalletManager.store.setState((state) => ({
+      ...state,
+      wallets: {
+        ...state.wallets,
+        'wallet-a': {
+          accounts: [testAccount1, testAccount2],
+          activeAccount: testAccount1
+        }
+      },
+      activeWallet: 'wallet-a'
+    }))
+
+    expect(screen.getByTestId('reactive-connected-wallet-a')).toHaveTextContent('yes')
+    expect(screen.getByTestId('reactive-active-wallet-a')).toHaveTextContent('yes')
+    expect(screen.getByTestId('reactive-accounts-wallet-a')).toHaveTextContent('2')
+    expect(screen.getByTestId('reactive-active-account-wallet-a')).toHaveTextContent('address1')
+
+    // Switch active to wallet-b
+    mockWalletManager.store.setState((state) => ({
+      ...state,
+      wallets: {
+        ...state.wallets,
+        'wallet-b': {
+          accounts: [testAccount2],
+          activeAccount: testAccount2
+        }
+      },
+      activeWallet: 'wallet-b'
+    }))
+
+    // wallet-a should now be connected but not active
+    expect(screen.getByTestId('reactive-connected-wallet-a')).toHaveTextContent('yes')
+    expect(screen.getByTestId('reactive-active-wallet-a')).toHaveTextContent('no')
+    // wallet-b should be active
+    expect(screen.getByTestId('reactive-connected-wallet-b')).toHaveTextContent('yes')
+    expect(screen.getByTestId('reactive-active-wallet-b')).toHaveTextContent('yes')
+
+    // Disconnect wallet-a
+    mockWalletManager.store.setState((state) => {
+      const { 'wallet-a': _, ...rest } = state.wallets
+      return { ...state, wallets: rest }
+    })
+
+    expect(screen.getByTestId('reactive-connected-wallet-a')).toHaveTextContent('no')
+    expect(screen.getByTestId('reactive-active-wallet-a')).toHaveTextContent('no')
+    expect(screen.getByTestId('reactive-accounts-wallet-a')).toHaveTextContent('0')
+  })
+
   it('initializes with isReady false and updates after resumeSessions', async () => {
     render(() => (
       <WalletProvider manager={mockWalletManager}>
