@@ -8,7 +8,7 @@ export default mergeConfig(
     plugins: [
       solidPlugin({
         ssr: false
-      })
+      }) as any
     ],
     test: {
       name: 'use-wallet-solid',
