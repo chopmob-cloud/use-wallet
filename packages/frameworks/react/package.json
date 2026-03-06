@@ -1,6 +1,10 @@
 {
   "name": "@txnlab/use-wallet-react",
   "version": "5.0.0-rc.0",
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
   "description": "React library for integrating Algorand wallets into decentralized applications",
   "author": "Doug Richar <drichar@gmail.com>",
   "license": "MIT",

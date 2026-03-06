@@ -7,5 +7,15 @@
     "@typescript-eslint/no-explicit-any": "off",
     "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_" }]
   },
-  "ignorePatterns": ["node_modules/", "dist/", ".env"]
+  "ignorePatterns": ["node_modules/", "dist/", ".env"],
+  "overrides": [
+    {
+      "files": ["scripts/**/*.mjs"],
+      "env": { "node": true },
+      "parserOptions": { "sourceType": "module" },
+      "rules": {
+        "@typescript-eslint/no-var-requires": "off"
+      }
+    }
+  ]
 }

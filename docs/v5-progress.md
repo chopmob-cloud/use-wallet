@@ -86,17 +86,17 @@ Reference: [v5-migration-plan.md](./v5-migration-plan.md)
 - [x] Update Next.js example (rebuilt with Next.js 16, Turbopack, no webpack fallback needed)
 - [x] Update Nuxt example to v5 API (rebuilt with Nuxt 3.21, SSR disabled)
 - [x] Update root `package.json` build scripts
-- [ ] Update `.github/workflows/ci.yml` (PR-only triggers, add publint, add concurrency)
-- [ ] Update `.vscode/settings.json` ESLint working directories
-- [ ] Update `.github/renovate.json`
-- [ ] Install semantic-release and plugins as root devDependencies
-- [ ] Create root `.releaserc.js` with pre-release branch config (`v5` → rc, `main` → stable)
-- [ ] Create `scripts/update-versions.mjs` (lockstep version bumping)
-- [ ] Create `scripts/publish-packages.mjs` (ordered multi-package publishing)
-- [ ] Add `publishConfig` (`access`, `provenance`) to all publishable `package.json` files
-- [ ] Add root `publint` script
-- [ ] Create `.github/workflows/release.yml` (TxnLab Release Bot, OIDC)
-- [ ] Add `CHANGELOG.md` to `.prettierignore`
+- [x] Update `.github/workflows/ci.yml` (PR-only triggers, add publint, add concurrency)
+- [x] Update `.vscode/settings.json` ESLint working directories
+- [x] Update `.github/renovate.json`
+- [x] Install semantic-release and plugins as root devDependencies
+- [x] Create root `.releaserc.js` with pre-release branch config (`v5` → rc, `main` → stable)
+- [x] Create `scripts/update-versions.mjs` (lockstep version bumping)
+- [x] Create `scripts/publish-packages.mjs` (ordered multi-package publishing)
+- [x] Add `publishConfig` (`access`, `provenance`) to all publishable `package.json` files
+- [x] Add root `publint` script
+- [x] Create `.github/workflows/release.yml` (TxnLab Release Bot, OIDC)
+- [x] Add `CHANGELOG.md` to `.prettierignore`
 - [ ] Manual first publish of all new packages to npm
 - [ ] Configure npm trusted publishing (OIDC) for each package on npmjs.com
 - [ ] Update GitBook documentation
@@ -123,6 +123,8 @@ Reference: [v5-migration-plan.md](./v5-migration-plan.md)
 - **2026-03-06**: **Magic SDK upgrade (v28 → v33)**: Updated `magic-sdk` from `^28.0.0` to `^33.5.0`, `@magic-ext/algorand` from `^23.0.0` to `^28.4.0`. Dropped `@magic-sdk/provider` as a direct dependency — `magic-sdk` re-exports `InstanceWithExtensions`, `SDKBase`, and all types. Breaking change in `@magic-sdk/types@27.1.0`: `MagicUserMetadata.publicAddress` removed, replaced by `wallets` object with per-chain entries (`wallets.algorand?.publicAddress`). The ESM build issue (`@magic-sdk/provider` shipping CJS in `.mjs`) is fixed in v33 — removed the Vite alias workaround from the React example. Other notable changes across v29-v33: `user.getMetadata()` removed (use `getInfo()`), `@magic-sdk/commons` removed, EVM-specific method renames — none of these affect the Algorand adapter.
 - **2026-03-06**: **Web3Auth SDK upgrade (v9 → v10)**: Updated `@web3auth/modal` from `^9.7.0` to `^10.15.0`. Removed `@web3auth/base` as a direct dependency — `WEB3AUTH_NETWORK` and `CHAIN_NAMESPACES` are now re-exported from `@web3auth/modal` v10. Kept `@web3auth/base-provider@^9.5.0` because `@web3auth/single-factor-auth@^9.5.0` (still at v9, no v10 release) requires `CommonPrivateKeyProvider` with explicit Algorand chain config. Modal SDK v10 no longer requires `CommonPrivateKeyProvider` or client-side chain config for non-EVM chains — the provider is handled internally. `initModal()` replaced by `init()`. All other APIs unchanged: `connect()`, `logout()`, `getUserInfo()`, `provider.request({ method: 'private_key' })`. `Web3AuthOptions` type unchanged — no breaking changes to the adapter's public API. Web3Auth v9 EOL is December 2025.
 - **2026-03-06**: **Dependency model change**: Wallet SDKs move from `peerDependencies` to regular `dependencies` in adapter packages. Peer deps forced consumers to manually install each wallet SDK alongside each adapter (28 packages for a full setup). With regular deps, `npm install @txnlab/use-wallet-pera` brings in `@perawallet/connect` automatically. `algosdk` stays as a peer dep since consumers use it directly. Web3Auth adapter must add `@web3auth/modal`, `@web3auth/base`, `@web3auth/base-provider`, `@web3auth/single-factor-auth` as regular deps (they were invisible before — not listed as peer deps despite being required at runtime). The Web3Auth ambient module declarations (`web3auth-modules.d.ts`) can be removed since the packages will be installed. Magic SDK has a broken ESM build (`@magic-sdk/types` missing `Wallets` export) — document the required Vite workaround until upstream fixes it.
+- **2026-03-06**: **Solid adapter reactivity fix**: The v5 Solid adapter's `transformToWallet()` created plain objects with static property values — `isConnected`, `isActive`, `accounts`, `activeAccount` were captured once and never updated. Solid's fine-grained reactivity requires reactive accessors, not static values. Fixed by using JavaScript getter properties that re-evaluate from the store on each access (e.g., `get isConnected() { return !!walletStateMap()[wallet.walletKey] }`). The `wallets` array is created once (not wrapped in `createMemo`) since the wallet list is static — only the dynamic properties need getters. The Solid adapter now defines its own local `Wallet` interface with `readonly` properties (matching the Svelte adapter precedent of framework-specific `Wallet` types). The core `Wallet` is still re-exported for consumers who need the flat type.
+- **2026-03-06**: **Example project directory renames**: Standardized example directory names to match framework adapter names: `vue-ts` → `vue`, `solid-ts` → `solid`, `svelte-ts` → `svelte`, `nextjs` → `next`. `vanilla-ts` kept as-is (no framework name to shorten to). `nuxt` already clean. Updated root `package.json` example scripts to match.
 
 ---
 
@@ -138,3 +140,4 @@ Reference: [v5-migration-plan.md](./v5-migration-plan.md)
 - [x] **Custom adapter test TypeScript error**: Fixed — made `connect` optional in `CustomProvider` type to match runtime behavior. Removed `@ts-expect-error` from test.
 - [x] **Framework adapter tests in `__tests__/`**: Colocated all framework adapter tests alongside source files. Also moved core `custom.test.ts` to `src/wallets/`.
 - [x] **React example uses Vite v6**: Rebuilt with Vite v7 starter template (Vite 7.3, React 19, flat ESLint config, new tsconfig structure). Apply same pattern to remaining examples.
+- [x] **Solid adapter reactivity broken**: `useWallet()` returned `Wallet` objects with static properties that didn't update when store state changed. Fixed by using getter properties on `Wallet` objects that re-evaluate from the store on each access. Defined a Solid-specific `Wallet` interface with `readonly` modifiers (precedent: Svelte adapter).

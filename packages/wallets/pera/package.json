@@ -1,6 +1,10 @@
 {
   "name": "@txnlab/use-wallet-pera",
   "version": "5.0.0-rc.0",
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
   "description": "Pera Wallet adapter for @txnlab/use-wallet",
   "author": "Doug Richar <drichar@gmail.com>",
   "license": "MIT",

@@ -2,9 +2,11 @@ name: CI
 
 on:
   pull_request:
-    branches: [main, v4]
-  push:
-    branches: [main, v4]
+    branches: [main, v5]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   run-ci:
@@ -45,7 +47,7 @@ jobs:
         run: pnpm install
 
       - name: Build
-        run: pnpm build
+        run: pnpm build:packages
 
       - name: Lint
         run: pnpm lint
@@ -58,3 +60,6 @@ jobs:
 
       - name: Run tests
         run: pnpm test
+
+      - name: Publint
+        run: pnpm publint

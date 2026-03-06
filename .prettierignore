@@ -11,7 +11,9 @@ docs/**
 
 # Generated Svelte files
 **/.svelte-kit
+**/build
 
 # Project files
 CLAUDE.md
 .claude/**
+CHANGELOG.md
