@@ -78,7 +78,7 @@ Reference: [v5-migration-plan.md](./v5-migration-plan.md)
 
 ## Sprint 4: Examples, Docs, CI, Release Pipeline
 
-- [x] Update React example to v5 API
+- [x] Update React example to v5 API (rebuilt with Vite v7, React 19)
 - [ ] Update Vue example to v5 API
 - [ ] Update SolidJS example to v5 API
 - [ ] Update Svelte example to v5 API
@@ -135,3 +135,6 @@ Reference: [v5-migration-plan.md](./v5-migration-plan.md)
 - [x] **Magic SDK ESM bug**: Fixed by upgrading to `magic-sdk@^33.5.0`. The `@magic-sdk/provider` ESM build issue is resolved in v33. Removed the Vite alias workaround from the React example.
 - [x] **Upgrade Magic SDK** from v28 to v33. Updated `magic-sdk` to `^33.5.0`, `@magic-ext/algorand` to `^28.4.0`. Dropped `@magic-sdk/provider` as a direct dependency (re-exported from `magic-sdk`). Key API change: `MagicUserMetadata.publicAddress` replaced by `wallets.algorand?.publicAddress` in `@magic-sdk/types@27.1.0+`. Updated adapter `connect()` and `resumeSession()` methods accordingly.
 - [x] **Upgrade Web3Auth SDK** from v9 to v10. Updated `@web3auth/modal` from `^9.7.0` to `^10.15.0`. Removed `@web3auth/base` as a direct dependency (re-exported from `@web3auth/modal` v10). Kept `@web3auth/base-provider@^9.5.0` for SFA SDK compatibility. `@web3auth/single-factor-auth` remains at `^9.5.0` (no v10 release). Key API changes: `initModal()` replaced by `init()`, chain config and `CommonPrivateKeyProvider` no longer needed for Modal SDK v10 (handled internally for non-EVM chains), `WEB3AUTH_NETWORK` and `CHAIN_NAMESPACES` now importable from `@web3auth/modal`. SFA path still requires `CommonPrivateKeyProvider` with explicit chain config. No changes to `Web3AuthOptions` type — the public API is unchanged.
+- [x] **Custom adapter test TypeScript error**: Fixed — made `connect` optional in `CustomProvider` type to match runtime behavior. Removed `@ts-expect-error` from test.
+- [x] **Framework adapter tests in `__tests__/`**: Colocated all framework adapter tests alongside source files. Also moved core `custom.test.ts` to `src/wallets/`.
+- [x] **React example uses Vite v6**: Rebuilt with Vite v7 starter template (Vite 7.3, React 19, flat ESLint config, new tsconfig structure). Apply same pattern to remaining examples.

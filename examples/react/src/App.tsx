@@ -11,9 +11,9 @@ import { pera } from '@txnlab/use-wallet-pera'
 import { w3wallet } from '@txnlab/use-wallet-w3wallet'
 import { walletConnect } from '@txnlab/use-wallet-walletconnect'
 import { web3auth } from '@txnlab/use-wallet-web3auth'
-import { WalletList } from './WalletList'
-import { ActiveWallet } from './ActiveWallet'
-import { NetworkSwitch } from './NetworkSwitch'
+import { WalletList } from './WalletList.tsx'
+import { ActiveWallet } from './ActiveWallet.tsx'
+import { NetworkSwitch } from './NetworkSwitch.tsx'
 
 const WC_PROJECT_ID = 'fcfde0713d43baa0d23be0773c80a72b'
 
@@ -32,12 +32,12 @@ const wallets = [
   magic({ apiKey: 'pk_live_D17FD8D89621B5F3' }),
   ...(import.meta.env.VITE_WEB3AUTH_CLIENT_ID
     ? [web3auth({ clientId: import.meta.env.VITE_WEB3AUTH_CLIENT_ID })]
-    : [])
+    : []),
 ]
 
 const walletManager = new WalletManager({
   wallets,
-  defaultNetwork: 'testnet'
+  defaultNetwork: 'testnet',
 })
 
 function App() {

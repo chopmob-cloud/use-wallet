@@ -1,6 +1,6 @@
 import { useWallet } from '@txnlab/use-wallet-react'
-import { AccountSwitcher } from './AccountSwitcher'
-import { SendTransaction } from './SendTransaction'
+import { AccountSwitcher } from './AccountSwitcher.tsx'
+import { SendTransaction } from './SendTransaction.tsx'
 
 export function ActiveWallet() {
   const { activeWallet, activeAccount } = useWallet()
