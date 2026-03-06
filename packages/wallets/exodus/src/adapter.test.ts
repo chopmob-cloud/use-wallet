@@ -10,7 +10,7 @@ vi.mock('@txnlab/use-wallet/adapter', async (importOriginal) => {
   const original = await importOriginal<typeof import('@txnlab/use-wallet/adapter')>()
   return {
     ...original,
-    LogLevel: original.LogLevel,
+    LogLevel: original.LogLevel
   }
 })
 
@@ -21,26 +21,24 @@ const mockExodus: Exodus = {
   isConnected: true,
   address: 'mockAddress1',
   enable: mockEnableFn,
-  signTxns: mockSignTxns,
+  signTxns: mockSignTxns
 }
 
 Object.defineProperty(global, 'window', {
   value: {
-    algorand: mockExodus,
-  },
+    algorand: mockExodus
+  }
 })
 
 const WALLET_ID = 'exodus'
 
-function createWallet(
-  store: AdapterStoreAccessor,
-): ExodusAdapter {
+function createWallet(store: AdapterStoreAccessor): ExodusAdapter {
   return new ExodusAdapter({
     id: WALLET_ID,
     metadata: ExodusAdapter.defaultMetadata,
     store,
     subscribe: vi.fn(),
-    getAlgodClient: () => ({}) as any,
+    getAlgodClient: () => ({}) as any
   })
 }
 
@@ -51,11 +49,11 @@ describe('ExodusAdapter', () => {
 
   const account1 = {
     name: 'Exodus Account 1',
-    address: 'mockAddress1',
+    address: 'mockAddress1'
   }
   const account2 = {
     name: 'Exodus Account 2',
-    address: 'mockAddress2',
+    address: 'mockAddress2'
   }
 
   beforeEach(() => {
@@ -77,7 +75,7 @@ describe('ExodusAdapter', () => {
       mockEnableFn.mockResolvedValueOnce({
         genesisID: 'mainnet-v1.0',
         genesisHash: 'wGHE2Pwdvd7S12BL5FaOP20EGYesN73ktiC1qzkkit8=',
-        accounts: [account1.address, account2.address],
+        accounts: [account1.address, account2.address]
       })
 
       const accounts = await wallet.connect()
@@ -86,7 +84,7 @@ describe('ExodusAdapter', () => {
       expect(accounts).toEqual([account1, account2])
       expect(store.state.wallets[WALLET_ID]).toEqual({
         accounts: [account1, account2],
-        activeAccount: account1,
+        activeAccount: account1
       })
     })
 
@@ -94,7 +92,7 @@ describe('ExodusAdapter', () => {
       mockEnableFn.mockResolvedValueOnce({
         genesisID: 'mainnet-v1.0',
         genesisHash: 'wGHE2Pwdvd7S12BL5FaOP20EGYesN73ktiC1qzkkit8=',
-        accounts: [],
+        accounts: []
       })
 
       await expect(wallet.connect()).rejects.toThrow('No accounts found!')
@@ -120,7 +118,7 @@ describe('ExodusAdapter', () => {
       mockEnableFn.mockResolvedValueOnce({
         genesisID: 'mainnet-v1.0',
         genesisHash: 'wGHE2Pwdvd7S12BL5FaOP20EGYesN73ktiC1qzkkit8=',
-        accounts: [account1.address],
+        accounts: [account1.address]
       })
 
       await wallet.connect()
@@ -141,11 +139,11 @@ describe('ExodusAdapter', () => {
     it('should resume session if session is found', async () => {
       const walletState: WalletState = {
         accounts: [account1],
-        activeAccount: account1,
+        activeAccount: account1
       }
 
       const harness = createTestHarness(WALLET_ID, {
-        wallets: { [WALLET_ID]: walletState },
+        wallets: { [WALLET_ID]: walletState }
       })
       store = harness.store
       wallet = createWallet(harness.accessor)
@@ -162,11 +160,11 @@ describe('ExodusAdapter', () => {
 
       const walletState: WalletState = {
         accounts: [account1],
-        activeAccount: account1,
+        activeAccount: account1
       }
 
       const harness = createTestHarness(WALLET_ID, {
-        wallets: { [WALLET_ID]: walletState },
+        wallets: { [WALLET_ID]: walletState }
       })
       store = harness.store
       wallet = createWallet(harness.accessor)
@@ -195,9 +193,9 @@ describe('ExodusAdapter', () => {
           firstValid: 51,
           lastValid: 61,
           minFee: 1000,
-          genesisID: 'mainnet-v1.0',
+          genesisID: 'mainnet-v1.0'
         },
-        paymentParams: { receiver, amount },
+        paymentParams: { receiver, amount }
       })
     }
 
@@ -210,7 +208,7 @@ describe('ExodusAdapter', () => {
       mockEnableFn.mockResolvedValueOnce({
         genesisID: 'mainnet-v1.0',
         genesisHash: 'wGHE2Pwdvd7S12BL5FaOP20EGYesN73ktiC1qzkkit8=',
-        accounts: [connectedAcct1, connectedAcct2],
+        accounts: [connectedAcct1, connectedAcct2]
       })
 
       const mockSignedTxn = byteArrayToBase64(txn1.toByte())
@@ -233,7 +231,7 @@ describe('ExodusAdapter', () => {
         expect(mockSignTxns).toHaveBeenCalledWith([
           { txn: byteArrayToBase64(gtxn1.toByte()) },
           { txn: byteArrayToBase64(gtxn2.toByte()) },
-          { txn: byteArrayToBase64(gtxn3.toByte()) },
+          { txn: byteArrayToBase64(gtxn3.toByte()) }
         ])
       })
 
@@ -243,14 +241,14 @@ describe('ExodusAdapter', () => {
 
         await wallet.signTransactions([
           [g1txn1, g1txn2],
-          [g2txn1, g2txn2],
+          [g2txn1, g2txn2]
         ])
 
         expect(mockSignTxns).toHaveBeenCalledWith([
           { txn: byteArrayToBase64(g1txn1.toByte()) },
           { txn: byteArrayToBase64(g1txn2.toByte()) },
           { txn: byteArrayToBase64(g2txn1.toByte()) },
-          { txn: byteArrayToBase64(g2txn2.toByte()) },
+          { txn: byteArrayToBase64(g2txn2.toByte()) }
         ])
       })
 
@@ -270,7 +268,7 @@ describe('ExodusAdapter', () => {
         expect(mockSignTxns).toHaveBeenCalledWith([
           { txn: byteArrayToBase64(gtxn1) },
           { txn: byteArrayToBase64(gtxn2) },
-          { txn: byteArrayToBase64(gtxn3) },
+          { txn: byteArrayToBase64(gtxn3) }
         ])
       })
 
@@ -283,14 +281,14 @@ describe('ExodusAdapter', () => {
 
         await wallet.signTransactions([
           [g1txn1, g1txn2],
-          [g2txn1, g2txn2],
+          [g2txn1, g2txn2]
         ])
 
         expect(mockSignTxns).toHaveBeenCalledWith([
           { txn: byteArrayToBase64(g1txn1) },
           { txn: byteArrayToBase64(g1txn2) },
           { txn: byteArrayToBase64(g2txn1) },
-          { txn: byteArrayToBase64(g2txn2) },
+          { txn: byteArrayToBase64(g2txn2) }
         ])
       })
 
@@ -309,14 +307,14 @@ describe('ExodusAdapter', () => {
           base64ToByteArray(gtxn1String),
           base64ToByteArray(gtxn2String),
           null,
-          base64ToByteArray(gtxn4String),
+          base64ToByteArray(gtxn4String)
         ])
 
         expect(mockSignTxns).toHaveBeenCalledWith([
           { txn: byteArrayToBase64(gtxn1.toByte()) },
           { txn: byteArrayToBase64(gtxn2.toByte()) },
           { txn: byteArrayToBase64(gtxn3.toByte()), signers: [] },
-          { txn: byteArrayToBase64(gtxn4.toByte()) },
+          { txn: byteArrayToBase64(gtxn4.toByte()) }
         ])
       })
 
@@ -328,7 +326,7 @@ describe('ExodusAdapter', () => {
         const [gtxn1, gtxn2, gtxn3] = algosdk.assignGroupID([
           canSignTxn1,
           cannotSignTxn2,
-          canSignTxn3,
+          canSignTxn3
         ])
 
         await wallet.signTransactions([gtxn1, gtxn2, gtxn3])
@@ -336,7 +334,7 @@ describe('ExodusAdapter', () => {
         expect(mockSignTxns).toHaveBeenCalledWith([
           { txn: byteArrayToBase64(gtxn1.toByte()) },
           { txn: byteArrayToBase64(gtxn2.toByte()), signers: [] },
-          { txn: byteArrayToBase64(gtxn3.toByte()) },
+          { txn: byteArrayToBase64(gtxn3.toByte()) }
         ])
       })
     })

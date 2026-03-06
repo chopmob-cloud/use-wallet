@@ -9,7 +9,7 @@ export function lute(options?: LuteConnectOptions): WalletAdapterConfig {
     id: WALLET_ID,
     metadata: LuteAdapter.defaultMetadata,
     Adapter: LuteAdapter as unknown as WalletAdapterConfig['Adapter'],
-    options: options as unknown as Record<string, unknown> | undefined,
+    options: options as unknown as Record<string, unknown> | undefined
   }
 }
 

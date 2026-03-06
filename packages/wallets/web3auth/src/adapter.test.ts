@@ -8,7 +8,7 @@ vi.mock('@txnlab/use-wallet/adapter', async (importOriginal) => {
   const original = await importOriginal<typeof import('@txnlab/use-wallet/adapter')>()
   return {
     ...original,
-    LogLevel: original.LogLevel,
+    LogLevel: original.LogLevel
   }
 })
 
@@ -18,7 +18,7 @@ const TEST_PRIVATE_KEY_HEX = 'a'.repeat(64) // 32 bytes as hex (64 chars)
 
 // Mock Web3Auth provider (shared between modal and SFA)
 const mockWeb3AuthProvider = {
-  request: vi.fn(),
+  request: vi.fn()
 }
 
 // Mock Web3Auth Modal client (v10: initModal() replaced by init())
@@ -28,7 +28,7 @@ const mockWeb3Auth = {
   logout: vi.fn(),
   connected: false,
   provider: null as typeof mockWeb3AuthProvider | null,
-  getUserInfo: vi.fn(),
+  getUserInfo: vi.fn()
 }
 
 // Mock Web3Auth Single Factor Auth client
@@ -37,7 +37,7 @@ const mockWeb3AuthSFA = {
   connect: vi.fn(),
   logout: vi.fn(),
   connected: false,
-  provider: null as typeof mockWeb3AuthProvider | null,
+  provider: null as typeof mockWeb3AuthProvider | null
 }
 
 vi.mock('@web3auth/modal', () => ({
@@ -48,16 +48,16 @@ vi.mock('@web3auth/modal', () => ({
     SAPPHIRE_MAINNET: 'sapphire_mainnet',
     SAPPHIRE_DEVNET: 'sapphire_devnet',
     CYAN: 'cyan',
-    AQUA: 'aqua',
-  },
+    AQUA: 'aqua'
+  }
 }))
 
 vi.mock('@web3auth/single-factor-auth', () => ({
-  Web3Auth: vi.fn(() => mockWeb3AuthSFA),
+  Web3Auth: vi.fn(() => mockWeb3AuthSFA)
 }))
 
 vi.mock('@web3auth/base-provider', () => ({
-  CommonPrivateKeyProvider: vi.fn(() => ({})),
+  CommonPrivateKeyProvider: vi.fn(() => ({}))
 }))
 
 const WALLET_ID = 'web3auth'
@@ -68,7 +68,7 @@ const TEST_ADDRESS = '442OU3BLMJL544RVLZDSVIC2JREH422GHQBJ5UYG34XQDNLDNNMHEHK46Y
 
 function createWallet(
   store: AdapterStoreAccessor,
-  options?: Record<string, unknown>,
+  options?: Record<string, unknown>
 ): Web3AuthAdapter {
   return new Web3AuthAdapter({
     id: WALLET_ID,
@@ -78,8 +78,8 @@ function createWallet(
     getAlgodClient: () => ({}) as any,
     options: {
       clientId: 'mock-client-id',
-      ...options,
-    },
+      ...options
+    }
   })
 }
 
@@ -128,7 +128,7 @@ describe('Web3AuthAdapter', () => {
       }),
       removeItem: vi.fn((key: string) => {
         delete localStorageStore[key]
-      }),
+      })
     })
 
     const harness = createTestHarness(WALLET_ID)
@@ -157,8 +157,8 @@ describe('Web3AuthAdapter', () => {
             store: accessor,
             subscribe: vi.fn(),
             getAlgodClient: () => ({}) as any,
-            options: {} as any,
-          }),
+            options: {} as any
+          })
       ).toThrow('Missing required option: clientId')
     })
   })
@@ -178,14 +178,14 @@ describe('Web3AuthAdapter', () => {
 
       expect(store.state.wallets[WALLET_ID]).toEqual({
         accounts: [{ name: 'test@example.com', address: TEST_ADDRESS }],
-        activeAccount: { name: 'test@example.com', address: TEST_ADDRESS },
+        activeAccount: { name: 'test@example.com', address: TEST_ADDRESS }
       })
     })
 
     it('should use name from user info if available', async () => {
       mockWeb3Auth.getUserInfo.mockResolvedValueOnce({
         name: 'Test User',
-        email: 'test@example.com',
+        email: 'test@example.com'
       })
 
       const result = await wallet.connect()
@@ -202,16 +202,14 @@ describe('Web3AuthAdapter', () => {
     it('should throw error if private key retrieval fails', async () => {
       mockWeb3AuthProvider.request.mockResolvedValueOnce(null)
 
-      await expect(wallet.connect()).rejects.toThrow(
-        'Failed to retrieve private key from Web3Auth',
-      )
+      await expect(wallet.connect()).rejects.toThrow('Failed to retrieve private key from Web3Auth')
     })
 
     it('should support custom authentication with idToken and verifierId', async () => {
       const customAuth = {
         idToken: 'mock-firebase-id-token',
         verifierId: 'user@example.com',
-        verifier: 'my-firebase-verifier',
+        verifier: 'my-firebase-verifier'
       }
 
       const result = await wallet.connect(customAuth)
@@ -221,7 +219,7 @@ describe('Web3AuthAdapter', () => {
       expect(mockWeb3AuthSFA.connect).toHaveBeenCalledWith({
         verifier: 'my-firebase-verifier',
         verifierId: 'user@example.com',
-        idToken: 'mock-firebase-id-token',
+        idToken: 'mock-firebase-id-token'
       })
       expect(result.length).toBe(1)
       expect(result[0].address).toBe(TEST_ADDRESS)
@@ -230,12 +228,12 @@ describe('Web3AuthAdapter', () => {
     it('should throw error if custom auth is missing verifier', async () => {
       const customAuth = {
         idToken: 'mock-token',
-        verifierId: 'user@example.com',
+        verifierId: 'user@example.com'
         // no verifier provided
       }
 
       await expect(wallet.connect(customAuth)).rejects.toThrow(
-        'Custom authentication requires a verifier',
+        'Custom authentication requires a verifier'
       )
     })
 
@@ -243,12 +241,12 @@ describe('Web3AuthAdapter', () => {
       // Create wallet with default verifier in options
       const walletWithVerifier = createWallet(accessor, {
         clientId: 'mock-client-id',
-        verifier: 'default-verifier',
+        verifier: 'default-verifier'
       })
 
       const customAuth = {
         idToken: 'mock-token',
-        verifierId: 'user@example.com',
+        verifierId: 'user@example.com'
         // verifier not provided, should use default
       }
 
@@ -258,7 +256,7 @@ describe('Web3AuthAdapter', () => {
       expect(mockWeb3AuthSFA.connect).toHaveBeenCalledWith({
         verifier: 'default-verifier',
         verifierId: 'user@example.com',
-        idToken: 'mock-token',
+        idToken: 'mock-token'
       })
 
       await walletWithVerifier.disconnect()
@@ -297,11 +295,11 @@ describe('Web3AuthAdapter', () => {
     it('should restore cached address without checking Web3Auth (lazy mode)', async () => {
       const walletState: WalletState = {
         accounts: [{ name: 'test@example.com', address: TEST_ADDRESS }],
-        activeAccount: { name: 'test@example.com', address: TEST_ADDRESS },
+        activeAccount: { name: 'test@example.com', address: TEST_ADDRESS }
       }
 
       const harness = createTestHarness(WALLET_ID, {
-        wallets: { [WALLET_ID]: walletState },
+        wallets: { [WALLET_ID]: walletState }
       })
       store = harness.store
       wallet = createWallet(harness.accessor)
@@ -322,11 +320,11 @@ describe('Web3AuthAdapter', () => {
     it('should disconnect if cached session has no address', async () => {
       const walletState: WalletState = {
         accounts: [],
-        activeAccount: null,
+        activeAccount: null
       }
 
       const harness = createTestHarness(WALLET_ID, {
-        wallets: { [WALLET_ID]: walletState },
+        wallets: { [WALLET_ID]: walletState }
       })
       store = harness.store
       wallet = createWallet(harness.accessor)
@@ -343,7 +341,7 @@ describe('Web3AuthAdapter', () => {
     const makePayTxn = ({
       amount = 1000,
       sender = connectedAddress,
-      receiver = connectedAddress,
+      receiver = connectedAddress
     }) => {
       return new algosdk.Transaction({
         type: algosdk.TransactionType.pay,
@@ -353,9 +351,9 @@ describe('Web3AuthAdapter', () => {
           firstValid: 51,
           lastValid: 61,
           minFee: 1000,
-          genesisID: 'testnet-v1.0',
+          genesisID: 'testnet-v1.0'
         },
-        paymentParams: { receiver, amount },
+        paymentParams: { receiver, amount }
       })
     }
 
@@ -457,9 +455,9 @@ describe('Web3AuthAdapter', () => {
           firstValid: 51,
           lastValid: 61,
           minFee: 1000,
-          genesisID: 'testnet-v1.0',
+          genesisID: 'testnet-v1.0'
         },
-        paymentParams: { receiver: TEST_ADDRESS, amount: 1000 },
+        paymentParams: { receiver: TEST_ADDRESS, amount: 1000 }
       })
 
       await wallet.signTransactions([txn])
@@ -475,14 +473,14 @@ describe('Web3AuthAdapter', () => {
       const customAuth = {
         idToken: 'mock-firebase-id-token',
         verifierId: 'user@example.com',
-        verifier: 'my-firebase-verifier',
+        verifier: 'my-firebase-verifier'
       }
 
       await wallet.connect(customAuth)
 
       expect(localStorage.setItem).toHaveBeenCalledWith(
         LOCAL_STORAGE_WEB3AUTH_KEY,
-        JSON.stringify({ usingSFA: true }),
+        JSON.stringify({ usingSFA: true })
       )
     })
 
@@ -491,7 +489,7 @@ describe('Web3AuthAdapter', () => {
 
       expect(localStorage.setItem).toHaveBeenCalledWith(
         LOCAL_STORAGE_WEB3AUTH_KEY,
-        JSON.stringify({ usingSFA: false }),
+        JSON.stringify({ usingSFA: false })
       )
     })
 
@@ -505,11 +503,11 @@ describe('Web3AuthAdapter', () => {
     it('should restore usingSFA from metadata during resumeSession', async () => {
       const walletState: WalletState = {
         accounts: [{ name: 'test@example.com', address: TEST_ADDRESS }],
-        activeAccount: { name: 'test@example.com', address: TEST_ADDRESS },
+        activeAccount: { name: 'test@example.com', address: TEST_ADDRESS }
       }
 
       const harness = createTestHarness(WALLET_ID, {
-        wallets: { [WALLET_ID]: walletState },
+        wallets: { [WALLET_ID]: walletState }
       })
       store = harness.store
 
@@ -531,11 +529,11 @@ describe('Web3AuthAdapter', () => {
     it('should use SFA reconnection after resuming SFA session', async () => {
       const walletState: WalletState = {
         accounts: [{ name: 'user@example.com', address: TEST_ADDRESS }],
-        activeAccount: { name: 'user@example.com', address: TEST_ADDRESS },
+        activeAccount: { name: 'user@example.com', address: TEST_ADDRESS }
       }
 
       const harness = createTestHarness(WALLET_ID, {
-        wallets: { [WALLET_ID]: walletState },
+        wallets: { [WALLET_ID]: walletState }
       })
       store = harness.store
 
@@ -551,9 +549,9 @@ describe('Web3AuthAdapter', () => {
           verifier: 'my-verifier',
           getAuthCredentials: async () => ({
             idToken: 'fresh-token',
-            verifierId: 'user@example.com',
-          }),
-        },
+            verifierId: 'user@example.com'
+          })
+        }
       })
 
       // Mock metadata stored for SFA user
@@ -579,9 +577,9 @@ describe('Web3AuthAdapter', () => {
           firstValid: 51,
           lastValid: 61,
           minFee: 1000,
-          genesisID: 'testnet-v1.0',
+          genesisID: 'testnet-v1.0'
         },
-        paymentParams: { receiver: TEST_ADDRESS, amount: 1000 },
+        paymentParams: { receiver: TEST_ADDRESS, amount: 1000 }
       })
 
       await walletWithCredentials.signTransactions([txn])
@@ -596,11 +594,11 @@ describe('Web3AuthAdapter', () => {
     it('should use modal reconnection after resuming modal session', async () => {
       const walletState: WalletState = {
         accounts: [{ name: 'test@example.com', address: TEST_ADDRESS }],
-        activeAccount: { name: 'test@example.com', address: TEST_ADDRESS },
+        activeAccount: { name: 'test@example.com', address: TEST_ADDRESS }
       }
 
       const harness = createTestHarness(WALLET_ID, {
-        wallets: { [WALLET_ID]: walletState },
+        wallets: { [WALLET_ID]: walletState }
       })
       store = harness.store
 
@@ -628,9 +626,9 @@ describe('Web3AuthAdapter', () => {
           firstValid: 51,
           lastValid: 61,
           minFee: 1000,
-          genesisID: 'testnet-v1.0',
+          genesisID: 'testnet-v1.0'
         },
-        paymentParams: { receiver: TEST_ADDRESS, amount: 1000 },
+        paymentParams: { receiver: TEST_ADDRESS, amount: 1000 }
       })
 
       await wallet.signTransactions([txn])
@@ -643,11 +641,11 @@ describe('Web3AuthAdapter', () => {
     it('should default to modal reconnection when no metadata exists', async () => {
       const walletState: WalletState = {
         accounts: [{ name: 'test@example.com', address: TEST_ADDRESS }],
-        activeAccount: { name: 'test@example.com', address: TEST_ADDRESS },
+        activeAccount: { name: 'test@example.com', address: TEST_ADDRESS }
       }
 
       const harness = createTestHarness(WALLET_ID, {
-        wallets: { [WALLET_ID]: walletState },
+        wallets: { [WALLET_ID]: walletState }
       })
       store = harness.store
 
@@ -670,9 +668,9 @@ describe('Web3AuthAdapter', () => {
           firstValid: 51,
           lastValid: 61,
           minFee: 1000,
-          genesisID: 'testnet-v1.0',
+          genesisID: 'testnet-v1.0'
         },
-        paymentParams: { receiver: TEST_ADDRESS, amount: 1000 },
+        paymentParams: { receiver: TEST_ADDRESS, amount: 1000 }
       })
 
       await wallet.signTransactions([txn])
@@ -689,7 +687,7 @@ describe('Web3AuthAdapter', () => {
 
       expect(localStorage.setItem).not.toHaveBeenCalledWith(
         LOCAL_STORAGE_WEB3AUTH_KEY,
-        expect.any(String),
+        expect.any(String)
       )
     })
 
@@ -697,7 +695,7 @@ describe('Web3AuthAdapter', () => {
       const customAuth = {
         idToken: 'mock-firebase-id-token',
         verifierId: 'user@example.com',
-        verifier: 'my-firebase-verifier',
+        verifier: 'my-firebase-verifier'
       }
 
       mockWeb3AuthSFA.connect.mockRejectedValueOnce(new Error('SFA connection failed'))
@@ -706,7 +704,7 @@ describe('Web3AuthAdapter', () => {
 
       expect(localStorage.setItem).not.toHaveBeenCalledWith(
         LOCAL_STORAGE_WEB3AUTH_KEY,
-        expect.any(String),
+        expect.any(String)
       )
     })
   })
@@ -723,9 +721,9 @@ describe('Web3AuthAdapter', () => {
           firstValid: 51,
           lastValid: 61,
           minFee: 1000,
-          genesisID: 'testnet-v1.0',
+          genesisID: 'testnet-v1.0'
         },
-        paymentParams: { receiver: connectedAddress, amount: 1000 },
+        paymentParams: { receiver: connectedAddress, amount: 1000 }
       })
     }
 
@@ -767,7 +765,7 @@ describe('Web3AuthAdapter', () => {
 
       const txn = makePayTxn()
       await expect(wallet.signTransactions([txn])).rejects.toThrow(
-        'Re-authentication cancelled or failed',
+        'Re-authentication cancelled or failed'
       )
     })
 
@@ -821,7 +819,7 @@ describe('Web3AuthAdapter', () => {
         wallet.withPrivateKey(async (secretKey) => {
           capturedKey = secretKey
           throw new Error('Callback error')
-        }),
+        })
       ).rejects.toThrow('Callback error')
 
       expect(capturedKey!.every((byte) => byte === 0)).toBe(true)

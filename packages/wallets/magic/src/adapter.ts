@@ -10,7 +10,7 @@ import {
   type WalletAccount,
   type WalletMetadata,
   type WalletState,
-  type WalletTransaction,
+  type WalletTransaction
 } from '@txnlab/use-wallet/adapter'
 import type { AlgorandExtension } from '@magic-ext/algorand'
 import type { InstanceWithExtensions, MagicUserMetadata, SDKBase } from 'magic-sdk'
@@ -49,7 +49,7 @@ export class MagicAdapter extends BaseWallet<MagicAuthOptions> {
 
   static defaultMetadata: WalletMetadata = {
     name: 'Magic',
-    icon: ICON,
+    icon: ICON
   }
 
   private async initializeClient(): Promise<MagicAuthClient> {
@@ -59,9 +59,9 @@ export class MagicAdapter extends BaseWallet<MagicAuthOptions> {
     const client = new Magic(this.options!.apiKey as string, {
       extensions: {
         algorand: new AlgorandExtension({
-          rpcUrl: '',
-        }),
-      },
+          rpcUrl: ''
+        })
+      }
     })
     this.client = client
     this.logger.info('Client initialized')
@@ -101,12 +101,12 @@ export class MagicAdapter extends BaseWallet<MagicAuthOptions> {
     this.logger.info('Login successful', userInfo)
     const walletAccount: WalletAccount = {
       name: userInfo.email ?? 'Magic Wallet 1',
-      address: publicAddress,
+      address: publicAddress
     }
 
     const walletState: WalletState = {
       accounts: [walletAccount],
-      activeAccount: walletAccount,
+      activeAccount: walletAccount
     }
 
     this.store.addWallet(walletState)
@@ -164,7 +164,7 @@ export class MagicAdapter extends BaseWallet<MagicAuthOptions> {
 
       const walletAccount: WalletAccount = {
         name: userInfo.email ?? `${this.metadata.name} Account 1`,
-        address: publicAddress,
+        address: publicAddress
       }
 
       const storedAccount = walletState.accounts[0]
@@ -177,7 +177,7 @@ export class MagicAdapter extends BaseWallet<MagicAuthOptions> {
       if (!match) {
         this.logger.warn('Session account mismatch, updating account', {
           prev: storedAccount,
-          current: walletAccount,
+          current: walletAccount
         })
         this.store.setAccounts([walletAccount])
       }
@@ -191,7 +191,7 @@ export class MagicAdapter extends BaseWallet<MagicAuthOptions> {
 
   private processTxns(
     txnGroup: algosdk.Transaction[],
-    indexesToSign?: number[],
+    indexesToSign?: number[]
   ): WalletTransaction[] {
     const txnsToSign: WalletTransaction[] = []
 
@@ -214,7 +214,7 @@ export class MagicAdapter extends BaseWallet<MagicAuthOptions> {
 
   private processEncodedTxns(
     txnGroup: Uint8Array[],
-    indexesToSign?: number[],
+    indexesToSign?: number[]
   ): WalletTransaction[] {
     const txnsToSign: WalletTransaction[] = []
 
@@ -244,7 +244,7 @@ export class MagicAdapter extends BaseWallet<MagicAuthOptions> {
 
   public signTransactions = async <T extends algosdk.Transaction[] | Uint8Array[]>(
     txnGroup: T | T[],
-    indexesToSign?: number[],
+    indexesToSign?: number[]
   ): Promise<(Uint8Array | null)[]> => {
     try {
       this.logger.debug('Signing transactions...', { txnGroup, indexesToSign })
@@ -265,7 +265,7 @@ export class MagicAdapter extends BaseWallet<MagicAuthOptions> {
 
       // Sign transactions
       const signTxnsResult = (await client.algorand.signGroupTransactionV2(
-        txnsToSign,
+        txnsToSign
       )) as SignTxnsResult
 
       this.logger.debug('Received signed transactions from wallet', signTxnsResult)

@@ -6,7 +6,7 @@ export const baseConfig: Options = {
   splitting: false,
   sourcemap: true,
   clean: true,
-  format: ['esm', 'cjs'],
+  format: ['esm', 'cjs']
 }
 
 export default defineConfig(baseConfig)

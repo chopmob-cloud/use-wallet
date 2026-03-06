@@ -31,12 +31,12 @@ const wallets = [
   magic({ apiKey: 'pk_live_D17FD8D89621B5F3' }),
   ...(process.env.NEXT_PUBLIC_WEB3AUTH_CLIENT_ID
     ? [web3auth({ clientId: process.env.NEXT_PUBLIC_WEB3AUTH_CLIENT_ID })]
-    : []),
+    : [])
 ]
 
 const walletManager = new WalletManager({
   wallets,
-  defaultNetwork: 'testnet',
+  defaultNetwork: 'testnet'
 })
 
 export function Providers({ children }: { children: React.ReactNode }) {

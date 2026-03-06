@@ -54,13 +54,13 @@ export const BUILTIN_SKINS: Record<string, WalletConnectSkin> = {
   biatec: {
     id: 'biatec',
     name: 'Biatec Wallet',
-    icon: BIATEC_ICON,
+    icon: BIATEC_ICON
   },
   voiwallet: {
     id: 'voiwallet',
     name: 'Voi Wallet',
-    icon: VOI_WALLET_ICON,
-  },
+    icon: VOI_WALLET_ICON
+  }
 }
 
 // ---------- Custom Skins Registry (Runtime) ---------- //

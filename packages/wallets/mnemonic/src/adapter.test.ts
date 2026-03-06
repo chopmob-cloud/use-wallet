@@ -8,7 +8,7 @@ vi.mock('@txnlab/use-wallet/adapter', async (importOriginal) => {
   const original = await importOriginal<typeof import('@txnlab/use-wallet/adapter')>()
   return {
     ...original,
-    LogLevel: original.LogLevel,
+    LogLevel: original.LogLevel
   }
 })
 
@@ -35,7 +35,7 @@ const mockLocalStorage = {
   get length() {
     return Object.keys(localStorageData).length
   },
-  key: vi.fn((index: number) => Object.keys(localStorageData)[index] ?? null),
+  key: vi.fn((index: number) => Object.keys(localStorageData)[index] ?? null)
 }
 
 function createWallet(
@@ -43,7 +43,7 @@ function createWallet(
   options?: {
     persistToStorage?: boolean
     promptForMnemonic?: () => Promise<string | null>
-  },
+  }
 ): MnemonicAdapter {
   return new MnemonicAdapter({
     id: WALLET_ID,
@@ -51,7 +51,7 @@ function createWallet(
     store,
     subscribe: vi.fn(),
     getAlgodClient: () => ({}) as any,
-    options,
+    options
   })
 }
 
@@ -62,13 +62,13 @@ describe('MnemonicAdapter', () => {
 
   const account1 = {
     name: 'Mnemonic Account',
-    address: TEST_ADDRESS,
+    address: TEST_ADDRESS
   }
 
   const setActiveNetwork = (networkId: string) => {
     store.setState((state) => ({
       ...state,
-      activeNetwork: networkId,
+      activeNetwork: networkId
     }))
   }
 
@@ -102,7 +102,7 @@ describe('MnemonicAdapter', () => {
       expect(accounts).toEqual([account1])
       expect(store.state.wallets[WALLET_ID]).toEqual({
         accounts: [account1],
-        activeAccount: account1,
+        activeAccount: account1
       })
     })
 
@@ -122,7 +122,7 @@ describe('MnemonicAdapter', () => {
 
       expect(mockLocalStorage.setItem).toHaveBeenCalledWith(
         LOCAL_STORAGE_MNEMONIC_KEY,
-        ACCOUNT_MNEMONIC,
+        ACCOUNT_MNEMONIC
       )
     })
 
@@ -156,11 +156,11 @@ describe('MnemonicAdapter', () => {
     it('should disconnect if session is found and persistToStorage is disabled', async () => {
       const walletState: WalletState = {
         accounts: [account1],
-        activeAccount: account1,
+        activeAccount: account1
       }
 
       const harness = createTestHarness(WALLET_ID, {
-        wallets: { [WALLET_ID]: walletState },
+        wallets: { [WALLET_ID]: walletState }
       })
       store = harness.store
       wallet = createWallet(harness.accessor)
@@ -174,13 +174,13 @@ describe('MnemonicAdapter', () => {
     it('should resume session if session is found and persistToStorage is enabled', async () => {
       const walletState: WalletState = {
         accounts: [account1],
-        activeAccount: account1,
+        activeAccount: account1
       }
 
       localStorageData[LOCAL_STORAGE_MNEMONIC_KEY] = ACCOUNT_MNEMONIC
 
       const harness = createTestHarness(WALLET_ID, {
-        wallets: { [WALLET_ID]: walletState },
+        wallets: { [WALLET_ID]: walletState }
       })
       store = harness.store
       wallet = createWallet(harness.accessor, { persistToStorage: true })
@@ -197,11 +197,11 @@ describe('MnemonicAdapter', () => {
 
       const walletState: WalletState = {
         accounts: [account1],
-        activeAccount: account1,
+        activeAccount: account1
       }
 
       const harness = createTestHarness(WALLET_ID, {
-        wallets: { [WALLET_ID]: walletState },
+        wallets: { [WALLET_ID]: walletState }
       })
       store = harness.store
       wallet = createWallet(harness.accessor, { persistToStorage: true })
@@ -215,9 +215,7 @@ describe('MnemonicAdapter', () => {
     it('should throw an error if active network is MainNet', async () => {
       setActiveNetwork('mainnet')
 
-      await expect(wallet.resumeSession()).rejects.toThrow(
-        'Production network detected. Aborting.',
-      )
+      await expect(wallet.resumeSession()).rejects.toThrow('Production network detected. Aborting.')
       expect(store.state.wallets[WALLET_ID]).toBeUndefined()
       expect(wallet.isConnected).toBe(false)
     })
@@ -233,9 +231,9 @@ describe('MnemonicAdapter', () => {
           firstValid: 51,
           lastValid: 61,
           minFee: 1000,
-          genesisID: 'testnet-v1.0',
+          genesisID: 'testnet-v1.0'
         },
-        paymentParams: { receiver, amount },
+        paymentParams: { receiver, amount }
       })
     }
 
@@ -309,10 +307,7 @@ describe('MnemonicAdapter', () => {
         const [gtxn1, gtxn2, gtxn3, gtxn4] = algosdk.assignGroupID([txn1, txn2, txn3, txn4])
         const indexesToSign = [0, 1, 3]
 
-        const result = await wallet.signTransactions(
-          [gtxn1, gtxn2, gtxn3, gtxn4],
-          indexesToSign,
-        )
+        const result = await wallet.signTransactions([gtxn1, gtxn2, gtxn3, gtxn4], indexesToSign)
 
         const expected = [gtxn1, gtxn2, gtxn4].map((txn) => txn.signTxn(sk))
         expect(result).toEqual(expected)
@@ -322,7 +317,7 @@ describe('MnemonicAdapter', () => {
         setActiveNetwork('mainnet')
 
         await expect(wallet.signTransactions([])).rejects.toThrow(
-          'Production network detected. Aborting.',
+          'Production network detected. Aborting.'
         )
         expect(store.state.wallets[WALLET_ID]).toBeUndefined()
         expect(wallet.isConnected).toBe(false)
@@ -345,7 +340,7 @@ describe('MnemonicAdapter', () => {
         setActiveNetwork('mainnet')
 
         await expect(wallet.transactionSigner([], [])).rejects.toThrow(
-          'Production network detected. Aborting.',
+          'Production network detected. Aborting.'
         )
         expect(store.state.wallets[WALLET_ID]).toBeUndefined()
         expect(wallet.isConnected).toBe(false)
@@ -360,7 +355,7 @@ describe('MnemonicAdapter', () => {
     beforeEach(() => {
       wallet = createWallet(accessor, {
         promptForMnemonic: () => Promise.resolve(MOCK_ACCOUNT_MNEMONIC),
-        persistToStorage: true,
+        persistToStorage: true
       })
     })
 
@@ -370,7 +365,7 @@ describe('MnemonicAdapter', () => {
       expect(global.prompt).toHaveBeenCalledTimes(0)
       expect(mockLocalStorage.setItem).toHaveBeenCalledWith(
         LOCAL_STORAGE_MNEMONIC_KEY,
-        MOCK_ACCOUNT_MNEMONIC,
+        MOCK_ACCOUNT_MNEMONIC
       )
     })
   })
@@ -411,9 +406,9 @@ describe('MnemonicAdapter', () => {
           firstValid: 51,
           lastValid: 61,
           minFee: 1000,
-          genesisID: 'testnet-v1.0',
+          genesisID: 'testnet-v1.0'
         },
-        paymentParams: { receiver: TEST_ADDRESS, amount: 1000 },
+        paymentParams: { receiver: TEST_ADDRESS, amount: 1000 }
       })
       const result = await wallet.signTransactions([txn])
       expect(result.length).toBe(1)
@@ -437,7 +432,7 @@ describe('MnemonicAdapter', () => {
         wallet.withPrivateKey(async (secretKey) => {
           capturedKey = secretKey
           throw new Error('Callback error')
-        }),
+        })
       ).rejects.toThrow('Callback error')
 
       expect(capturedKey!.every((byte) => byte === 0)).toBe(true)
@@ -447,7 +442,7 @@ describe('MnemonicAdapter', () => {
       await wallet.disconnect()
 
       await expect(wallet.withPrivateKey(async () => {})).rejects.toThrow(
-        'Mnemonic wallet not connected',
+        'Mnemonic wallet not connected'
       )
     })
 
@@ -455,7 +450,7 @@ describe('MnemonicAdapter', () => {
       setActiveNetwork('mainnet')
 
       await expect(wallet.withPrivateKey(async () => {})).rejects.toThrow(
-        'Production network detected. Aborting.',
+        'Production network detected. Aborting.'
       )
     })
 

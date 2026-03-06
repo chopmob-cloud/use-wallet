@@ -4,6 +4,6 @@ export default defineConfig({
   test: {
     dir: './src',
     watch: false,
-    globals: true,
-  },
+    globals: true
+  }
 })

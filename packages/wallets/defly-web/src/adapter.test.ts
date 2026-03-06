@@ -4,7 +4,7 @@ import {
   type IARC0001Transaction,
   type IDisableResult,
   type IEnableResult,
-  type ISignTransactionsResult,
+  type ISignTransactionsResult
 } from '@agoralabs-sh/avm-web-provider'
 import algosdk from 'algosdk'
 import { DeflyWebAdapter } from './adapter'
@@ -18,7 +18,7 @@ vi.mock('@txnlab/use-wallet/adapter', async (importOriginal) => {
   const original = await importOriginal<typeof import('@txnlab/use-wallet/adapter')>()
   return {
     ...original,
-    LogLevel: original.LogLevel,
+    LogLevel: original.LogLevel
   }
 })
 
@@ -38,9 +38,7 @@ const TESTNET_GENESIS_ID = 'testnet-v1.0'
 const ACCOUNT_1 = '7ZUECA7HFLZTXENRV24SHLU4AVPUTMTTDUFUBNBD64C73F3UHRTHAIOF6Q'
 const ACCOUNT_2 = 'GD64YIY3TWGDMCNPP553DZPPR6LDUSFQOIJVFDPPXWEG3FVOJCCDBBHU5A'
 
-function createWallet(
-  store: AdapterStoreAccessor,
-): DeflyWebAdapter {
+function createWallet(store: AdapterStoreAccessor): DeflyWebAdapter {
   const wallet = new DeflyWebAdapter({
     id: WALLET_ID,
     metadata: DeflyWebAdapter.defaultMetadata,
@@ -49,16 +47,16 @@ function createWallet(
     getAlgodClient: () =>
       ({
         versionsCheck: () => ({
-          do: () => Promise.resolve({ genesis_hash_b64: TESTNET_GENESIS_HASH }),
-        }),
-      }) as any,
+          do: () => Promise.resolve({ genesis_hash_b64: TESTNET_GENESIS_HASH })
+        })
+      }) as any
   })
 
   return wallet
 }
 
 function mockSignTransactionsResponseOnce(
-  stxns: (string | null)[],
+  stxns: (string | null)[]
 ): MockInstance<(txns: IARC0001Transaction[]) => Promise<ISignTransactionsResult>> {
   return vi
     .spyOn(DeflyWebAdapter.prototype as TestableDeflyWebAdapter, '_signTransactions')
@@ -66,8 +64,8 @@ function mockSignTransactionsResponseOnce(
     .mockImplementationOnce(() =>
       Promise.resolve({
         providerId: DEFLY_WEB_PROVIDER_ID,
-        stxns,
-      }),
+        stxns
+      })
     )
 }
 
@@ -78,11 +76,11 @@ describe('DeflyWebAdapter', () => {
 
   const account1 = {
     name: 'Defly Web Account 1',
-    address: ACCOUNT_1,
+    address: ACCOUNT_1
   }
   const account2 = {
     name: 'Defly Web Account 2',
-    address: ACCOUNT_2,
+    address: ACCOUNT_2
   }
 
   beforeEach(() => {
@@ -94,8 +92,8 @@ describe('DeflyWebAdapter', () => {
         Promise.resolve({
           genesisHash: TESTNET_GENESIS_HASH,
           genesisId: TESTNET_GENESIS_ID,
-          providerId: DEFLY_WEB_PROVIDER_ID,
-        }),
+          providerId: DEFLY_WEB_PROVIDER_ID
+        })
       )
     vi.spyOn(DeflyWebAdapter.prototype as TestableDeflyWebAdapter, '_enable')
       .mockReset()
@@ -104,8 +102,8 @@ describe('DeflyWebAdapter', () => {
           accounts: [account1, account2],
           genesisHash: TESTNET_GENESIS_HASH,
           genesisId: TESTNET_GENESIS_ID,
-          providerId: DEFLY_WEB_PROVIDER_ID,
-        }),
+          providerId: DEFLY_WEB_PROVIDER_ID
+        })
       )
 
     const harness = createTestHarness(WALLET_ID)
@@ -127,7 +125,7 @@ describe('DeflyWebAdapter', () => {
       expect(accounts).toEqual([account1, account2])
       expect(store.state.wallets[WALLET_ID]).toEqual({
         accounts: [account1, account2],
-        activeAccount: account1,
+        activeAccount: account1
       })
     })
 
@@ -135,7 +133,7 @@ describe('DeflyWebAdapter', () => {
       const error = new ARC0027MethodCanceledError({
         message: 'user dismissed action',
         method: ARC0027MethodEnum.Enable,
-        providerId: DEFLY_WEB_PROVIDER_ID,
+        providerId: DEFLY_WEB_PROVIDER_ID
       })
 
       vi.spyOn(DeflyWebAdapter.prototype as TestableDeflyWebAdapter, '_enable')
@@ -172,11 +170,11 @@ describe('DeflyWebAdapter', () => {
     it('should call _enable if wallet data is found in the store', async () => {
       const walletState: WalletState = {
         accounts: [account1],
-        activeAccount: account1,
+        activeAccount: account1
       }
 
       const harness = createTestHarness(WALLET_ID, {
-        wallets: { [WALLET_ID]: walletState },
+        wallets: { [WALLET_ID]: walletState }
       })
       store = harness.store
       wallet = createWallet(harness.accessor)
@@ -201,11 +199,11 @@ describe('DeflyWebAdapter', () => {
     it('should update the store if accounts returned by the client do not match', async () => {
       const walletState: WalletState = {
         accounts: [account1, account2],
-        activeAccount: account1,
+        activeAccount: account1
       }
 
       const harness = createTestHarness(WALLET_ID, {
-        wallets: { [WALLET_ID]: walletState },
+        wallets: { [WALLET_ID]: walletState }
       })
       store = harness.store
       wallet = createWallet(harness.accessor)
@@ -218,8 +216,8 @@ describe('DeflyWebAdapter', () => {
             accounts: [account2],
             genesisHash: TESTNET_GENESIS_HASH,
             genesisId: TESTNET_GENESIS_ID,
-            providerId: DEFLY_WEB_PROVIDER_ID,
-          }),
+            providerId: DEFLY_WEB_PROVIDER_ID
+          })
         )
 
       await wallet.resumeSession()
@@ -228,7 +226,7 @@ describe('DeflyWebAdapter', () => {
       expect(wallet['_enable']).toHaveBeenCalled()
       expect(store.state.wallets[WALLET_ID]).toEqual({
         accounts: [account2],
-        activeAccount: account2,
+        activeAccount: account2
       })
     })
   })
@@ -243,9 +241,9 @@ describe('DeflyWebAdapter', () => {
           firstValid: 51,
           lastValid: 61,
           minFee: 1000,
-          genesisID: 'mainnet-v1.0',
+          genesisID: 'mainnet-v1.0'
         },
-        paymentParams: { receiver, amount },
+        paymentParams: { receiver, amount }
       })
     }
 
@@ -264,8 +262,8 @@ describe('DeflyWebAdapter', () => {
         .mockImplementation(() =>
           Promise.resolve({
             providerId: DEFLY_WEB_PROVIDER_ID,
-            stxns: mockSignedTxns,
-          }),
+            stxns: mockSignedTxns
+          })
         )
 
       await wallet.connect()
@@ -276,7 +274,7 @@ describe('DeflyWebAdapter', () => {
         await wallet.signTransactions([txn1])
 
         expect(wallet['_signTransactions']).toHaveBeenCalledWith([
-          { txn: byteArrayToBase64(txn1.toByte()) },
+          { txn: byteArrayToBase64(txn1.toByte()) }
         ])
       })
 
@@ -284,7 +282,7 @@ describe('DeflyWebAdapter', () => {
         await wallet.signTransactions([txn1])
 
         expect(wallet['_signTransactions']).toHaveBeenCalledWith([
-          { txn: byteArrayToBase64(txn1.toByte()) },
+          { txn: byteArrayToBase64(txn1.toByte()) }
         ])
       })
 
@@ -295,7 +293,7 @@ describe('DeflyWebAdapter', () => {
         expect(wallet['_signTransactions']).toHaveBeenCalledWith([
           { txn: byteArrayToBase64(gtxn1.toByte()) },
           { txn: byteArrayToBase64(gtxn2.toByte()) },
-          { txn: byteArrayToBase64(gtxn3.toByte()) },
+          { txn: byteArrayToBase64(gtxn3.toByte()) }
         ])
       })
 
@@ -304,7 +302,7 @@ describe('DeflyWebAdapter', () => {
         await wallet.signTransactions([encodedTxn])
 
         expect(wallet['_signTransactions']).toHaveBeenCalledWith([
-          { txn: byteArrayToBase64(txn1.toByte()) },
+          { txn: byteArrayToBase64(txn1.toByte()) }
         ])
       })
 
@@ -317,7 +315,7 @@ describe('DeflyWebAdapter', () => {
         expect(wallet['_signTransactions']).toHaveBeenCalledWith([
           { txn: byteArrayToBase64(gtxn1) },
           { txn: byteArrayToBase64(gtxn2) },
-          { txn: byteArrayToBase64(gtxn3) },
+          { txn: byteArrayToBase64(gtxn3) }
         ])
       })
 
@@ -330,14 +328,14 @@ describe('DeflyWebAdapter', () => {
 
         await wallet.signTransactions([
           [g1txn1, g1txn2],
-          [g2txn1, g2txn2],
+          [g2txn1, g2txn2]
         ])
 
         expect(wallet['_signTransactions']).toHaveBeenCalledWith([
           { txn: byteArrayToBase64(g1txn1) },
           { txn: byteArrayToBase64(g1txn2) },
           { txn: byteArrayToBase64(g2txn1) },
-          { txn: byteArrayToBase64(g2txn2) },
+          { txn: byteArrayToBase64(g2txn2) }
         ])
       })
 
@@ -356,14 +354,14 @@ describe('DeflyWebAdapter', () => {
           base64ToByteArray(gtxn1String),
           base64ToByteArray(gtxn2String),
           null,
-          base64ToByteArray(gtxn4String),
+          base64ToByteArray(gtxn4String)
         ])
 
         expect(wallet['_signTransactions']).toHaveBeenCalledWith([
           { txn: byteArrayToBase64(gtxn1.toByte()) },
           { txn: byteArrayToBase64(gtxn2.toByte()) },
           { txn: byteArrayToBase64(gtxn3.toByte()), signers: [] },
-          { txn: byteArrayToBase64(gtxn4.toByte()) },
+          { txn: byteArrayToBase64(gtxn4.toByte()) }
         ])
       })
 
@@ -377,7 +375,7 @@ describe('DeflyWebAdapter', () => {
         const [gtxn1, gtxn2, gtxn3] = algosdk.assignGroupID([
           canSignTxn1,
           cannotSignTxn2,
-          canSignTxn3,
+          canSignTxn3
         ])
 
         await wallet.signTransactions([gtxn1, gtxn2, gtxn3])
@@ -385,7 +383,7 @@ describe('DeflyWebAdapter', () => {
         expect(wallet['_signTransactions']).toHaveBeenCalledWith([
           { txn: byteArrayToBase64(gtxn1.toByte()) },
           { txn: byteArrayToBase64(gtxn2.toByte()), signers: [] },
-          { txn: byteArrayToBase64(gtxn3.toByte()) },
+          { txn: byteArrayToBase64(gtxn3.toByte()) }
         ])
       })
     })

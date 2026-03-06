@@ -10,7 +10,7 @@ import {
   type WalletAccount,
   type WalletMetadata,
   type WalletState,
-  type WalletTransaction,
+  type WalletTransaction
 } from '@txnlab/use-wallet/adapter'
 
 /** @see https://docs.exodus.com/api-reference/algorand-provider-arc-api/ */
@@ -61,7 +61,7 @@ export class ExodusAdapter extends BaseWallet<ExodusOptions> {
 
   static defaultMetadata: WalletMetadata = {
     name: 'Exodus',
-    icon: ICON,
+    icon: ICON
   }
 
   private async initializeClient(): Promise<Exodus> {
@@ -88,14 +88,14 @@ export class ExodusAdapter extends BaseWallet<ExodusOptions> {
 
     const walletAccounts = accounts.map((address: string, idx: number) => ({
       name: `${this.metadata.name} Account ${idx + 1}`,
-      address,
+      address
     }))
 
     const activeAccount = walletAccounts[0]
 
     const walletState: WalletState = {
       accounts: walletAccounts,
-      activeAccount,
+      activeAccount
     }
 
     this.store.addWallet(walletState)
@@ -137,7 +137,7 @@ export class ExodusAdapter extends BaseWallet<ExodusOptions> {
 
   private processTxns(
     txnGroup: algosdk.Transaction[],
-    indexesToSign?: number[],
+    indexesToSign?: number[]
   ): WalletTransaction[] {
     const txnsToSign: WalletTransaction[] = []
 
@@ -160,7 +160,7 @@ export class ExodusAdapter extends BaseWallet<ExodusOptions> {
 
   private processEncodedTxns(
     txnGroup: Uint8Array[],
-    indexesToSign?: number[],
+    indexesToSign?: number[]
   ): WalletTransaction[] {
     const txnsToSign: WalletTransaction[] = []
 
@@ -190,7 +190,7 @@ export class ExodusAdapter extends BaseWallet<ExodusOptions> {
 
   public signTransactions = async <T extends algosdk.Transaction[] | Uint8Array[]>(
     txnGroup: T | T[],
-    indexesToSign?: number[],
+    indexesToSign?: number[]
   ): Promise<(Uint8Array | null)[]> => {
     try {
       this.logger.debug('Signing transactions...', { txnGroup, indexesToSign })

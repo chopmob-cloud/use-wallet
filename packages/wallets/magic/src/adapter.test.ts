@@ -9,30 +9,30 @@ vi.mock('@txnlab/use-wallet/adapter', async (importOriginal) => {
   const original = await importOriginal<typeof import('@txnlab/use-wallet/adapter')>()
   return {
     ...original,
-    LogLevel: original.LogLevel,
+    LogLevel: original.LogLevel
   }
 })
 
 const mockMagicClient = {
   auth: {
-    loginWithMagicLink: vi.fn(),
+    loginWithMagicLink: vi.fn()
   },
   user: {
     getInfo: vi.fn(),
     logout: vi.fn(),
-    isLoggedIn: vi.fn(),
+    isLoggedIn: vi.fn()
   },
   algorand: {
-    signGroupTransactionV2: vi.fn(),
-  },
+    signGroupTransactionV2: vi.fn()
+  }
 }
 
 vi.mock('magic-sdk', () => ({
-  Magic: vi.fn(() => mockMagicClient),
+  Magic: vi.fn(() => mockMagicClient)
 }))
 
 vi.mock('@magic-ext/algorand', () => ({
-  AlgorandExtension: vi.fn(),
+  AlgorandExtension: vi.fn()
 }))
 
 const WALLET_ID = 'magic'
@@ -45,8 +45,8 @@ function createWallet(store: AdapterStoreAccessor): MagicAdapter {
     subscribe: vi.fn(),
     getAlgodClient: () => ({}) as any,
     options: {
-      apiKey: 'mock-api-key',
-    },
+      apiKey: 'mock-api-key'
+    }
   })
 
   // @ts-expect-error - Mocking the private client property
@@ -64,12 +64,12 @@ describe('MagicAdapter', () => {
   const publicAddress = 'mockAddress'
   const mockUserInfo = {
     email,
-    wallets: { algorand: { publicAddress, subAccounts: [] } },
+    wallets: { algorand: { publicAddress, subAccounts: [] } }
   }
 
   const account = {
     name: email,
-    address: publicAddress,
+    address: publicAddress
   }
 
   beforeEach(() => {
@@ -81,9 +81,7 @@ describe('MagicAdapter', () => {
 
     wallet = createWallet(accessor)
 
-    mockMagicClient.auth.loginWithMagicLink.mockImplementation(() =>
-      Promise.resolve(),
-    )
+    mockMagicClient.auth.loginWithMagicLink.mockImplementation(() => Promise.resolve())
   })
 
   afterEach(async () => {
@@ -97,48 +95,40 @@ describe('MagicAdapter', () => {
       const result = await wallet.connect({ email })
 
       expect(mockMagicClient.auth.loginWithMagicLink).toHaveBeenCalledWith({
-        email,
+        email
       })
       expect(wallet.isConnected).toBe(true)
       expect(result).toEqual([account])
       expect(store.state.wallets[WALLET_ID]).toEqual({
         accounts: [account],
-        activeAccount: account,
+        activeAccount: account
       })
     })
 
     it('should throw an error if email is missing', async () => {
       await expect(wallet.connect()).rejects.toThrow(
-        'Magic Link provider requires an email (string) to connect',
+        'Magic Link provider requires an email (string) to connect'
       )
     })
 
     it('should throw an error if loginWithMagicLink fails', async () => {
-      mockMagicClient.auth.loginWithMagicLink.mockRejectedValueOnce(
-        new Error('Auth error'),
-      )
+      mockMagicClient.auth.loginWithMagicLink.mockRejectedValueOnce(new Error('Auth error'))
       await expect(wallet.connect({ email })).rejects.toThrow('Auth error')
     })
 
     it('should throw an error if getInfo fails', async () => {
-      mockMagicClient.user.getInfo.mockRejectedValueOnce(
-        new Error('Get info error'),
-      )
+      mockMagicClient.user.getInfo.mockRejectedValueOnce(new Error('Get info error'))
       await expect(wallet.connect({ email })).rejects.toThrow('Get info error')
     })
 
     it('should throw an error if user info is not found', async () => {
       mockMagicClient.user.getInfo.mockResolvedValueOnce(undefined)
-      await expect(wallet.connect({ email })).rejects.toThrow(
-        'User info not found!',
-      )
+      await expect(wallet.connect({ email })).rejects.toThrow('User info not found!')
     })
 
     it('should throw an error if user info does not contain an address', async () => {
       mockMagicClient.user.getInfo.mockResolvedValueOnce({ email, wallets: {} })
-      await expect(wallet.connect({ email })).rejects.toThrow(
-        'No account found!',
-      )
+      await expect(wallet.connect({ email })).rejects.toThrow('No account found!')
     })
   })
 
@@ -166,11 +156,11 @@ describe('MagicAdapter', () => {
     it('should disconnect if user is not logged in', async () => {
       const walletState: WalletState = {
         accounts: [account],
-        activeAccount: account,
+        activeAccount: account
       }
 
       const harness = createTestHarness(WALLET_ID, {
-        wallets: { [WALLET_ID]: walletState },
+        wallets: { [WALLET_ID]: walletState }
       })
       store = harness.store
       wallet = createWallet(harness.accessor)
@@ -188,11 +178,11 @@ describe('MagicAdapter', () => {
     it('should resume session if session is found', async () => {
       const walletState: WalletState = {
         accounts: [account],
-        activeAccount: account,
+        activeAccount: account
       }
 
       const harness = createTestHarness(WALLET_ID, {
-        wallets: { [WALLET_ID]: walletState },
+        wallets: { [WALLET_ID]: walletState }
       })
       store = harness.store
       wallet = createWallet(harness.accessor)
@@ -212,21 +202,21 @@ describe('MagicAdapter', () => {
     it('should update the store if accounts do not match', async () => {
       const prevAccount = {
         name: 'foo@example.com',
-        address: 'mockAddress1',
+        address: 'mockAddress1'
       }
 
       const newAccount = {
         name: 'bar@example.com',
-        address: 'mockAddress2',
+        address: 'mockAddress2'
       }
 
       const walletState: WalletState = {
         accounts: [prevAccount],
-        activeAccount: prevAccount,
+        activeAccount: prevAccount
       }
 
       const harness = createTestHarness(WALLET_ID, {
-        wallets: { [WALLET_ID]: walletState },
+        wallets: { [WALLET_ID]: walletState }
       })
       store = harness.store
       wallet = createWallet(harness.accessor)
@@ -235,32 +225,26 @@ describe('MagicAdapter', () => {
       mockMagicClient.user.getInfo.mockResolvedValueOnce({
         email: newAccount.name,
         wallets: {
-          algorand: { publicAddress: newAccount.address, subAccounts: [] },
-        },
+          algorand: { publicAddress: newAccount.address, subAccounts: [] }
+        }
       })
       await wallet.resumeSession()
 
       expect(store.state.wallets[WALLET_ID]).toEqual({
         accounts: [newAccount],
-        activeAccount: newAccount,
+        activeAccount: newAccount
       })
     })
   })
 
   describe('signing transactions', () => {
     // Connected account
-    const connectedAcct =
-      '7ZUECA7HFLZTXENRV24SHLU4AVPUTMTTDUFUBNBD64C73F3UHRTHAIOF6Q'
+    const connectedAcct = '7ZUECA7HFLZTXENRV24SHLU4AVPUTMTTDUFUBNBD64C73F3UHRTHAIOF6Q'
 
     // Not connected account
-    const notConnectedAcct =
-      'EW64GC6F24M7NDSC5R3ES4YUVE3ZXXNMARJHDCCCLIHZU6TBEOC7XRSBG4'
+    const notConnectedAcct = 'EW64GC6F24M7NDSC5R3ES4YUVE3ZXXNMARJHDCCCLIHZU6TBEOC7XRSBG4'
 
-    const makePayTxn = ({
-      amount = 1000,
-      sender = connectedAcct,
-      receiver = connectedAcct,
-    }) => {
+    const makePayTxn = ({ amount = 1000, sender = connectedAcct, receiver = connectedAcct }) => {
       return new algosdk.Transaction({
         type: algosdk.TransactionType.pay,
         sender,
@@ -269,9 +253,9 @@ describe('MagicAdapter', () => {
           firstValid: 51,
           lastValid: 61,
           minFee: 1000,
-          genesisID: 'mainnet-v1.0',
+          genesisID: 'mainnet-v1.0'
         },
-        paymentParams: { receiver, amount },
+        paymentParams: { receiver, amount }
       })
     }
 
@@ -285,14 +269,12 @@ describe('MagicAdapter', () => {
       mockMagicClient.user.getInfo.mockResolvedValueOnce({
         email,
         wallets: {
-          algorand: { publicAddress: connectedAcct, subAccounts: [] },
-        },
+          algorand: { publicAddress: connectedAcct, subAccounts: [] }
+        }
       })
 
       const mockSignedTxn = byteArrayToBase64(txn1.toByte())
-      mockMagicClient.algorand.signGroupTransactionV2.mockResolvedValue([
-        mockSignedTxn,
-      ])
+      mockMagicClient.algorand.signGroupTransactionV2.mockResolvedValue([mockSignedTxn])
 
       await wallet.connect({ email })
     })
@@ -301,27 +283,19 @@ describe('MagicAdapter', () => {
       it('should correctly process and sign a single algosdk.Transaction', async () => {
         await wallet.signTransactions([txn1])
 
-        expect(
-          mockMagicClient.algorand.signGroupTransactionV2,
-        ).toHaveBeenCalledWith([
-          { txn: byteArrayToBase64(txn1.toByte()) },
+        expect(mockMagicClient.algorand.signGroupTransactionV2).toHaveBeenCalledWith([
+          { txn: byteArrayToBase64(txn1.toByte()) }
         ])
       })
 
       it('should correctly process and sign a single algosdk.Transaction group', async () => {
-        const [gtxn1, gtxn2, gtxn3] = algosdk.assignGroupID([
-          txn1,
-          txn2,
-          txn3,
-        ])
+        const [gtxn1, gtxn2, gtxn3] = algosdk.assignGroupID([txn1, txn2, txn3])
         await wallet.signTransactions([gtxn1, gtxn2, gtxn3])
 
-        expect(
-          mockMagicClient.algorand.signGroupTransactionV2,
-        ).toHaveBeenCalledWith([
+        expect(mockMagicClient.algorand.signGroupTransactionV2).toHaveBeenCalledWith([
           { txn: byteArrayToBase64(gtxn1.toByte()) },
           { txn: byteArrayToBase64(gtxn2.toByte()) },
-          { txn: byteArrayToBase64(gtxn3.toByte()) },
+          { txn: byteArrayToBase64(gtxn3.toByte()) }
         ])
       })
 
@@ -331,16 +305,14 @@ describe('MagicAdapter', () => {
 
         await wallet.signTransactions([
           [g1txn1, g1txn2],
-          [g2txn1, g2txn2],
+          [g2txn1, g2txn2]
         ])
 
-        expect(
-          mockMagicClient.algorand.signGroupTransactionV2,
-        ).toHaveBeenCalledWith([
+        expect(mockMagicClient.algorand.signGroupTransactionV2).toHaveBeenCalledWith([
           { txn: byteArrayToBase64(g1txn1.toByte()) },
           { txn: byteArrayToBase64(g1txn2.toByte()) },
           { txn: byteArrayToBase64(g2txn1.toByte()) },
-          { txn: byteArrayToBase64(g2txn2.toByte()) },
+          { txn: byteArrayToBase64(g2txn2.toByte()) }
         ])
       })
 
@@ -348,10 +320,8 @@ describe('MagicAdapter', () => {
         const encodedTxn = txn1.toByte()
         await wallet.signTransactions([encodedTxn])
 
-        expect(
-          mockMagicClient.algorand.signGroupTransactionV2,
-        ).toHaveBeenCalledWith([
-          { txn: byteArrayToBase64(txn1.toByte()) },
+        expect(mockMagicClient.algorand.signGroupTransactionV2).toHaveBeenCalledWith([
+          { txn: byteArrayToBase64(txn1.toByte()) }
         ])
       })
 
@@ -361,12 +331,10 @@ describe('MagicAdapter', () => {
 
         await wallet.signTransactions([gtxn1, gtxn2, gtxn3])
 
-        expect(
-          mockMagicClient.algorand.signGroupTransactionV2,
-        ).toHaveBeenCalledWith([
+        expect(mockMagicClient.algorand.signGroupTransactionV2).toHaveBeenCalledWith([
           { txn: byteArrayToBase64(gtxn1) },
           { txn: byteArrayToBase64(gtxn2) },
-          { txn: byteArrayToBase64(gtxn3) },
+          { txn: byteArrayToBase64(gtxn3) }
         ])
       })
 
@@ -379,26 +347,19 @@ describe('MagicAdapter', () => {
 
         await wallet.signTransactions([
           [g1txn1, g1txn2],
-          [g2txn1, g2txn2],
+          [g2txn1, g2txn2]
         ])
 
-        expect(
-          mockMagicClient.algorand.signGroupTransactionV2,
-        ).toHaveBeenCalledWith([
+        expect(mockMagicClient.algorand.signGroupTransactionV2).toHaveBeenCalledWith([
           { txn: byteArrayToBase64(g1txn1) },
           { txn: byteArrayToBase64(g1txn2) },
           { txn: byteArrayToBase64(g2txn1) },
-          { txn: byteArrayToBase64(g2txn2) },
+          { txn: byteArrayToBase64(g2txn2) }
         ])
       })
 
       it('should determine which transactions to sign based on indexesToSign', async () => {
-        const [gtxn1, gtxn2, gtxn3, gtxn4] = algosdk.assignGroupID([
-          txn1,
-          txn2,
-          txn3,
-          txn4,
-        ])
+        const [gtxn1, gtxn2, gtxn3, gtxn4] = algosdk.assignGroupID([txn1, txn2, txn3, txn4])
         const txnGroup = [gtxn1, gtxn2, gtxn3, gtxn4]
         const indexesToSign = [0, 1, 3]
 
@@ -410,56 +371,50 @@ describe('MagicAdapter', () => {
           gtxn1String,
           gtxn2String,
           undefined,
-          gtxn4String,
+          gtxn4String
         ])
 
-        await expect(
-          wallet.signTransactions(txnGroup, indexesToSign),
-        ).resolves.toEqual([
+        await expect(wallet.signTransactions(txnGroup, indexesToSign)).resolves.toEqual([
           base64ToByteArray(gtxn1String),
           base64ToByteArray(gtxn2String),
           null,
-          base64ToByteArray(gtxn4String),
+          base64ToByteArray(gtxn4String)
         ])
 
-        expect(
-          mockMagicClient.algorand.signGroupTransactionV2,
-        ).toHaveBeenCalledWith([
+        expect(mockMagicClient.algorand.signGroupTransactionV2).toHaveBeenCalledWith([
           { txn: byteArrayToBase64(gtxn1.toByte()) },
           { txn: byteArrayToBase64(gtxn2.toByte()) },
           { txn: byteArrayToBase64(gtxn3.toByte()), signers: [] },
-          { txn: byteArrayToBase64(gtxn4.toByte()) },
+          { txn: byteArrayToBase64(gtxn4.toByte()) }
         ])
       })
 
       it('should only send transactions with connected signers for signature', async () => {
         const canSignTxn1 = makePayTxn({
           sender: connectedAcct,
-          amount: 1000,
+          amount: 1000
         })
         const cannotSignTxn2 = makePayTxn({
           sender: notConnectedAcct,
-          amount: 2000,
+          amount: 2000
         })
         const canSignTxn3 = makePayTxn({
           sender: connectedAcct,
-          amount: 3000,
+          amount: 3000
         })
 
         const [gtxn1, gtxn2, gtxn3] = algosdk.assignGroupID([
           canSignTxn1,
           cannotSignTxn2,
-          canSignTxn3,
+          canSignTxn3
         ])
 
         await wallet.signTransactions([gtxn1, gtxn2, gtxn3])
 
-        expect(
-          mockMagicClient.algorand.signGroupTransactionV2,
-        ).toHaveBeenCalledWith([
+        expect(mockMagicClient.algorand.signGroupTransactionV2).toHaveBeenCalledWith([
           { txn: byteArrayToBase64(gtxn1.toByte()) },
           { txn: byteArrayToBase64(gtxn2.toByte()), signers: [] },
-          { txn: byteArrayToBase64(gtxn3.toByte()) },
+          { txn: byteArrayToBase64(gtxn3.toByte()) }
         ])
       })
     })

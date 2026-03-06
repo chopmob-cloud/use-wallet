@@ -5,6 +5,6 @@ export default defineConfig({
     name: 'walletconnect',
     dir: './src',
     watch: false,
-    globals: true,
-  },
+    globals: true
+  }
 })

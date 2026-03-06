@@ -9,7 +9,7 @@ import {
   type SignerTransaction,
   type WalletAccount,
   type WalletMetadata,
-  type WalletState,
+  type WalletState
 } from '@txnlab/use-wallet/adapter'
 import type { PeraWalletConnect } from '@perawallet/connect'
 
@@ -33,7 +33,7 @@ export class PeraAdapter extends BaseWallet<PeraOptions> {
 
   static defaultMetadata: WalletMetadata = {
     name: 'Pera',
-    icon: ICON,
+    icon: ICON
   }
 
   private async initializeClient(): Promise<PeraWalletConnect> {
@@ -45,10 +45,7 @@ export class PeraAdapter extends BaseWallet<PeraOptions> {
     return client
   }
 
-  private manageWalletConnectSession(
-    action: 'backup' | 'restore',
-    targetWalletKey?: string,
-  ): void {
+  private manageWalletConnectSession(action: 'backup' | 'restore', targetWalletKey?: string): void {
     const key = targetWalletKey || this.walletKey
     if (typeof localStorage === 'undefined') return
 
@@ -88,14 +85,14 @@ export class PeraAdapter extends BaseWallet<PeraOptions> {
 
     const walletAccounts = accounts.map((address: string, idx: number) => ({
       name: `${this.metadata.name} Account ${idx + 1}`,
-      address,
+      address
     }))
 
     const activeAccount = walletAccounts[0]
 
     const walletState: WalletState = {
       accounts: walletAccounts,
-      activeAccount,
+      activeAccount
     }
 
     this.store.addWallet(walletState)
@@ -177,7 +174,7 @@ export class PeraAdapter extends BaseWallet<PeraOptions> {
 
       const walletAccounts = accounts.map((address: string, idx: number) => ({
         name: `${this.metadata.name} Account ${idx + 1}`,
-        address,
+        address
       }))
 
       const match = compareAccounts(walletAccounts, walletState.accounts)
@@ -185,7 +182,7 @@ export class PeraAdapter extends BaseWallet<PeraOptions> {
       if (!match) {
         this.logger.warn('Session accounts mismatch, updating accounts', {
           prev: walletState.accounts,
-          current: walletAccounts,
+          current: walletAccounts
         })
         this.store.setAccounts(walletAccounts)
       }
@@ -199,7 +196,7 @@ export class PeraAdapter extends BaseWallet<PeraOptions> {
 
   private processTxns(
     txnGroup: algosdk.Transaction[],
-    indexesToSign?: number[],
+    indexesToSign?: number[]
   ): SignerTransaction[] {
     const txnsToSign: SignerTransaction[] = []
 
@@ -220,7 +217,7 @@ export class PeraAdapter extends BaseWallet<PeraOptions> {
 
   private processEncodedTxns(
     txnGroup: Uint8Array[],
-    indexesToSign?: number[],
+    indexesToSign?: number[]
   ): SignerTransaction[] {
     const txnsToSign: SignerTransaction[] = []
 
@@ -248,7 +245,7 @@ export class PeraAdapter extends BaseWallet<PeraOptions> {
 
   public signTransactions = async <T extends algosdk.Transaction[] | Uint8Array[]>(
     txnGroup: T | T[],
-    indexesToSign?: number[],
+    indexesToSign?: number[]
   ): Promise<(Uint8Array | null)[]> => {
     try {
       this.logger.debug('Signing transactions...', { txnGroup, indexesToSign })

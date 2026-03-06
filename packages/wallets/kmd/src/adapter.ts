@@ -7,7 +7,7 @@ import {
   type AdapterConstructorParams,
   type WalletAccount,
   type WalletMetadata,
-  type WalletState,
+  type WalletState
 } from '@txnlab/use-wallet/adapter'
 
 interface KmdConstructor {
@@ -69,7 +69,7 @@ export class KmdAdapter extends BaseWallet<KmdOptions> {
       baseServer = 'http://127.0.0.1',
       port = 4002,
       wallet = 'unencrypted-default-wallet',
-      promptForPassword = () => Promise.resolve(prompt('KMD password') || ''),
+      promptForPassword = () => Promise.resolve(prompt('KMD password') || '')
     } = this.options || {}
 
     this.kmdOptions = { token, baseServer, port, promptForPassword }
@@ -78,7 +78,7 @@ export class KmdAdapter extends BaseWallet<KmdOptions> {
 
   static defaultMetadata: WalletMetadata = {
     name: 'KMD',
-    icon: ICON,
+    icon: ICON
   }
 
   private async initializeClient(): Promise<algosdk.Kmd> {
@@ -107,14 +107,14 @@ export class KmdAdapter extends BaseWallet<KmdOptions> {
 
       const walletAccounts = accounts.map((address: string, idx: number) => ({
         name: `${this.metadata.name} Account ${idx + 1}`,
-        address,
+        address
       }))
 
       const activeAccount = walletAccounts[0]
 
       const walletState: WalletState = {
         accounts: walletAccounts,
-        activeAccount,
+        activeAccount
       }
 
       this.store.addWallet(walletState)
@@ -158,7 +158,7 @@ export class KmdAdapter extends BaseWallet<KmdOptions> {
 
   private processTxns(
     txnGroup: algosdk.Transaction[],
-    indexesToSign?: number[],
+    indexesToSign?: number[]
   ): algosdk.Transaction[] {
     const txnsToSign: algosdk.Transaction[] = []
 
@@ -177,7 +177,7 @@ export class KmdAdapter extends BaseWallet<KmdOptions> {
 
   private processEncodedTxns(
     txnGroup: Uint8Array[],
-    indexesToSign?: number[],
+    indexesToSign?: number[]
   ): algosdk.Transaction[] {
     const txnsToSign: algosdk.Transaction[] = []
 
@@ -203,7 +203,7 @@ export class KmdAdapter extends BaseWallet<KmdOptions> {
 
   public signTransactions = async <T extends algosdk.Transaction[] | Uint8Array[]>(
     txnGroup: T | T[],
-    indexesToSign?: number[],
+    indexesToSign?: number[]
   ): Promise<(Uint8Array | null)[]> => {
     try {
       this.logger.debug('Signing transactions...', { txnGroup, indexesToSign })
@@ -228,7 +228,7 @@ export class KmdAdapter extends BaseWallet<KmdOptions> {
 
       // Sign transactions
       const signedTxns = await Promise.all(
-        txnsToSign.map((txn) => client.signTransaction(token, password, txn)),
+        txnsToSign.map((txn) => client.signTransaction(token, password, txn))
       )
 
       this.logger.debug('Received signed transactions from wallet', signedTxns)
@@ -249,9 +249,7 @@ export class KmdAdapter extends BaseWallet<KmdOptions> {
     const client = this.client || (await this.initializeClient())
 
     const { wallets }: ListWalletsResponse = await client.listWallets()
-    const wallet = wallets.find(
-      (wallet: KmdWalletRecord) => wallet.name === this.walletName,
-    )
+    const wallet = wallets.find((wallet: KmdWalletRecord) => wallet.name === this.walletName)
 
     if (!wallet) {
       this.logger.error(`Wallet "${this.walletName}" not found!`)
@@ -270,8 +268,10 @@ export class KmdAdapter extends BaseWallet<KmdOptions> {
     const walletId = this.kmdWalletId || (await this.fetchWalletId())
     const password = await this.getPassword()
 
-    const { wallet_handle_token }: InitWalletHandleResponse =
-      await client.initWalletHandle(walletId, password)
+    const { wallet_handle_token }: InitWalletHandleResponse = await client.initWalletHandle(
+      walletId,
+      password
+    )
     this.logger.debug('Token fetched successfully')
     return wallet_handle_token
   }

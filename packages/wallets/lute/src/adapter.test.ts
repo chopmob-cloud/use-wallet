@@ -10,7 +10,7 @@ vi.mock('@txnlab/use-wallet/adapter', async (importOriginal) => {
   const original = await importOriginal<typeof import('@txnlab/use-wallet/adapter')>()
   return {
     ...original,
-    LogLevel: original.LogLevel,
+    LogLevel: original.LogLevel
   }
 })
 
@@ -27,7 +27,7 @@ let mockLuteConnect: MockLuteConnect
 
 vi.mock('lute-connect', () => {
   return {
-    default: vi.fn().mockImplementation(() => mockLuteConnect),
+    default: vi.fn().mockImplementation(() => mockLuteConnect)
   }
 })
 
@@ -41,8 +41,8 @@ function createWallet(store: AdapterStoreAccessor): LuteAdapter {
     subscribe: vi.fn(),
     getAlgodClient: () => ({}) as any,
     options: {
-      siteName: 'Mock Site Name',
-    },
+      siteName: 'Mock Site Name'
+    }
   })
 
   // @ts-expect-error - Mocking the private client property
@@ -58,11 +58,11 @@ describe('LuteAdapter', () => {
 
   const account1 = {
     name: 'Lute Account 1',
-    address: 'mockAddress1',
+    address: 'mockAddress1'
   }
   const account2 = {
     name: 'Lute Account 2',
-    address: 'mockAddress2',
+    address: 'mockAddress2'
   }
 
   beforeEach(() => {
@@ -74,7 +74,7 @@ describe('LuteAdapter', () => {
       signData: vi.fn(),
       siteName: 'Mock Site',
       forceWeb: false,
-      isExtensionInstalled: vi.fn().mockResolvedValue(true),
+      isExtensionInstalled: vi.fn().mockResolvedValue(true)
     }
 
     const harness = createTestHarness(WALLET_ID)
@@ -90,10 +90,7 @@ describe('LuteAdapter', () => {
 
   describe('connect', () => {
     it('should initialize client, return accounts, and update store', async () => {
-      mockLuteConnect.connect.mockResolvedValueOnce([
-        account1.address,
-        account2.address,
-      ])
+      mockLuteConnect.connect.mockResolvedValueOnce([account1.address, account2.address])
 
       const accounts = await wallet.connect()
 
@@ -102,7 +99,7 @@ describe('LuteAdapter', () => {
       expect(accounts).toEqual([account1, account2])
       expect(store.state.wallets[WALLET_ID]).toEqual({
         accounts: [account1, account2],
-        activeAccount: account1,
+        activeAccount: account1
       })
     })
 
@@ -145,11 +142,11 @@ describe('LuteAdapter', () => {
     it('should resume session if session is found', async () => {
       const walletState: WalletState = {
         accounts: [account1],
-        activeAccount: account1,
+        activeAccount: account1
       }
 
       const harness = createTestHarness(WALLET_ID, {
-        wallets: { [WALLET_ID]: walletState },
+        wallets: { [WALLET_ID]: walletState }
       })
       store = harness.store
       wallet = createWallet(harness.accessor)
@@ -163,20 +160,13 @@ describe('LuteAdapter', () => {
 
   describe('signing transactions', () => {
     // Connected accounts
-    const connectedAcct1 =
-      '7ZUECA7HFLZTXENRV24SHLU4AVPUTMTTDUFUBNBD64C73F3UHRTHAIOF6Q'
-    const connectedAcct2 =
-      'GD64YIY3TWGDMCNPP553DZPPR6LDUSFQOIJVFDPPXWEG3FVOJCCDBBHU5A'
+    const connectedAcct1 = '7ZUECA7HFLZTXENRV24SHLU4AVPUTMTTDUFUBNBD64C73F3UHRTHAIOF6Q'
+    const connectedAcct2 = 'GD64YIY3TWGDMCNPP553DZPPR6LDUSFQOIJVFDPPXWEG3FVOJCCDBBHU5A'
 
     // Not connected account
-    const notConnectedAcct =
-      'EW64GC6F24M7NDSC5R3ES4YUVE3ZXXNMARJHDCCCLIHZU6TBEOC7XRSBG4'
+    const notConnectedAcct = 'EW64GC6F24M7NDSC5R3ES4YUVE3ZXXNMARJHDCCCLIHZU6TBEOC7XRSBG4'
 
-    const makePayTxn = ({
-      amount = 1000,
-      sender = connectedAcct1,
-      receiver = connectedAcct2,
-    }) => {
+    const makePayTxn = ({ amount = 1000, sender = connectedAcct1, receiver = connectedAcct2 }) => {
       return new algosdk.Transaction({
         type: algosdk.TransactionType.pay,
         sender,
@@ -185,9 +175,9 @@ describe('LuteAdapter', () => {
           firstValid: 51,
           lastValid: 61,
           minFee: 1000,
-          genesisID: 'mainnet-v1.0',
+          genesisID: 'mainnet-v1.0'
         },
-        paymentParams: { receiver, amount },
+        paymentParams: { receiver, amount }
       })
     }
 
@@ -198,26 +188,20 @@ describe('LuteAdapter', () => {
     const txn4 = makePayTxn({ amount: 4000 })
 
     beforeEach(async () => {
-      mockLuteConnect.connect.mockResolvedValueOnce([
-        connectedAcct1,
-        connectedAcct2,
-      ])
+      mockLuteConnect.connect.mockResolvedValueOnce([connectedAcct1, connectedAcct2])
 
       await wallet.connect()
     })
 
     describe('signTransactions', () => {
       it('should re-throw SignTxnsError to the consuming application', async () => {
-        const mockError = Object.assign(
-          new Error('User Rejected Request'),
-          { code: 4001 },
-        )
+        const mockError = Object.assign(new Error('User Rejected Request'), { code: 4001 })
         mockLuteConnect.signTxns.mockRejectedValueOnce(mockError)
 
         await expect(wallet.signTransactions([txn1])).rejects.toMatchObject({
           name: 'SignTxnsError',
           message: 'User Rejected Request',
-          code: 4001,
+          code: 4001
         })
       })
 
@@ -225,22 +209,18 @@ describe('LuteAdapter', () => {
         await wallet.signTransactions([txn1])
 
         expect(mockLuteConnect.signTxns).toHaveBeenCalledWith([
-          { txn: byteArrayToBase64(txn1.toByte()) },
+          { txn: byteArrayToBase64(txn1.toByte()) }
         ])
       })
 
       it('should process and sign a single algosdk.Transaction group', async () => {
-        const [gtxn1, gtxn2, gtxn3] = algosdk.assignGroupID([
-          txn1,
-          txn2,
-          txn3,
-        ])
+        const [gtxn1, gtxn2, gtxn3] = algosdk.assignGroupID([txn1, txn2, txn3])
         await wallet.signTransactions([gtxn1, gtxn2, gtxn3])
 
         expect(mockLuteConnect.signTxns).toHaveBeenCalledWith([
           { txn: byteArrayToBase64(gtxn1.toByte()) },
           { txn: byteArrayToBase64(gtxn2.toByte()) },
-          { txn: byteArrayToBase64(gtxn3.toByte()) },
+          { txn: byteArrayToBase64(gtxn3.toByte()) }
         ])
       })
 
@@ -250,14 +230,14 @@ describe('LuteAdapter', () => {
 
         await wallet.signTransactions([
           [g1txn1, g1txn2],
-          [g2txn1, g2txn2],
+          [g2txn1, g2txn2]
         ])
 
         expect(mockLuteConnect.signTxns).toHaveBeenCalledWith([
           { txn: byteArrayToBase64(g1txn1.toByte()) },
           { txn: byteArrayToBase64(g1txn2.toByte()) },
           { txn: byteArrayToBase64(g2txn1.toByte()) },
-          { txn: byteArrayToBase64(g2txn2.toByte()) },
+          { txn: byteArrayToBase64(g2txn2.toByte()) }
         ])
       })
 
@@ -266,7 +246,7 @@ describe('LuteAdapter', () => {
         await wallet.signTransactions([encodedTxn])
 
         expect(mockLuteConnect.signTxns).toHaveBeenCalledWith([
-          { txn: byteArrayToBase64(txn1.toByte()) },
+          { txn: byteArrayToBase64(txn1.toByte()) }
         ])
       })
 
@@ -279,7 +259,7 @@ describe('LuteAdapter', () => {
         expect(mockLuteConnect.signTxns).toHaveBeenCalledWith([
           { txn: byteArrayToBase64(gtxn1) },
           { txn: byteArrayToBase64(gtxn2) },
-          { txn: byteArrayToBase64(gtxn3) },
+          { txn: byteArrayToBase64(gtxn3) }
         ])
       })
 
@@ -292,24 +272,19 @@ describe('LuteAdapter', () => {
 
         await wallet.signTransactions([
           [g1txn1, g1txn2],
-          [g2txn1, g2txn2],
+          [g2txn1, g2txn2]
         ])
 
         expect(mockLuteConnect.signTxns).toHaveBeenCalledWith([
           { txn: byteArrayToBase64(g1txn1) },
           { txn: byteArrayToBase64(g1txn2) },
           { txn: byteArrayToBase64(g2txn1) },
-          { txn: byteArrayToBase64(g2txn2) },
+          { txn: byteArrayToBase64(g2txn2) }
         ])
       })
 
       it('should determine which transactions to sign based on indexesToSign', async () => {
-        const [gtxn1, gtxn2, gtxn3, gtxn4] = algosdk.assignGroupID([
-          txn1,
-          txn2,
-          txn3,
-          txn4,
-        ])
+        const [gtxn1, gtxn2, gtxn3, gtxn4] = algosdk.assignGroupID([txn1, txn2, txn3, txn4])
         const txnGroup = [gtxn1, gtxn2, gtxn3, gtxn4]
         const indexesToSign = [0, 1, 3]
 
@@ -318,44 +293,42 @@ describe('LuteAdapter', () => {
           gtxn1.toByte(),
           gtxn2.toByte(),
           null,
-          gtxn4.toByte(),
+          gtxn4.toByte()
         ])
 
-        await expect(
-          wallet.signTransactions(txnGroup, indexesToSign),
-        ).resolves.toEqual([
+        await expect(wallet.signTransactions(txnGroup, indexesToSign)).resolves.toEqual([
           gtxn1.toByte(),
           gtxn2.toByte(),
           null,
-          gtxn4.toByte(),
+          gtxn4.toByte()
         ])
 
         expect(mockLuteConnect.signTxns).toHaveBeenCalledWith([
           { txn: byteArrayToBase64(gtxn1.toByte()) },
           { txn: byteArrayToBase64(gtxn2.toByte()) },
           { txn: byteArrayToBase64(gtxn3.toByte()), signers: [] },
-          { txn: byteArrayToBase64(gtxn4.toByte()) },
+          { txn: byteArrayToBase64(gtxn4.toByte()) }
         ])
       })
 
       it('should only send transactions with connected signers for signature', async () => {
         const canSignTxn1 = makePayTxn({
           sender: connectedAcct1,
-          amount: 1000,
+          amount: 1000
         })
         const cannotSignTxn2 = makePayTxn({
           sender: notConnectedAcct,
-          amount: 2000,
+          amount: 2000
         })
         const canSignTxn3 = makePayTxn({
           sender: connectedAcct2,
-          amount: 3000,
+          amount: 3000
         })
 
         const [gtxn1, gtxn2, gtxn3] = algosdk.assignGroupID([
           canSignTxn1,
           cannotSignTxn2,
-          canSignTxn3,
+          canSignTxn3
         ])
 
         await wallet.signTransactions([gtxn1, gtxn2, gtxn3])
@@ -363,7 +336,7 @@ describe('LuteAdapter', () => {
         expect(mockLuteConnect.signTxns).toHaveBeenCalledWith([
           { txn: byteArrayToBase64(gtxn1.toByte()) },
           { txn: byteArrayToBase64(gtxn2.toByte()), signers: [] },
-          { txn: byteArrayToBase64(gtxn3.toByte()) },
+          { txn: byteArrayToBase64(gtxn3.toByte()) }
         ])
       })
     })
@@ -380,10 +353,7 @@ describe('LuteAdapter', () => {
 
         const result = await wallet.transactionSigner(txnGroup, indexesToSign)
 
-        expect(signTransactionsSpy).toHaveBeenCalledWith(
-          txnGroup,
-          indexesToSign,
-        )
+        expect(signTransactionsSpy).toHaveBeenCalledWith(txnGroup, indexesToSign)
         expect(result).toEqual([new Uint8Array([1, 2, 3])])
       })
     })
@@ -391,8 +361,7 @@ describe('LuteAdapter', () => {
 
   describe('signData', () => {
     // Connected account
-    const connectedAcct1 =
-      '7ZUECA7HFLZTXENRV24SHLU4AVPUTMTTDUFUBNBD64C73F3UHRTHAIOF6Q'
+    const connectedAcct1 = '7ZUECA7HFLZTXENRV24SHLU4AVPUTMTTDUFUBNBD64C73F3UHRTHAIOF6Q'
 
     beforeEach(async () => {
       mockLuteConnect.connect.mockResolvedValueOnce([connectedAcct1])
@@ -413,36 +382,30 @@ describe('LuteAdapter', () => {
         signer: new Uint8Array([1, 2, 3]),
         domain: 'test.domain',
         authenticatorData: new Uint8Array([4, 5, 6]),
-        signature: new Uint8Array([7, 8, 9]),
+        signature: new Uint8Array([7, 8, 9])
       }
 
       mockLuteConnect.signData.mockResolvedValue(mockResponse)
 
       const result = await wallet.signData(testData, testMetadata)
 
-      expect(mockLuteConnect.signData).toHaveBeenCalledWith(
-        testData,
-        testMetadata,
-      )
+      expect(mockLuteConnect.signData).toHaveBeenCalledWith(testData, testMetadata)
       expect(result).toEqual(mockResponse)
     })
 
     it('should re-throw SignDataError to the consuming application', async () => {
-      const mockError = Object.assign(
-        new Error('User Rejected Request'),
-        { code: 4300 },
-      )
+      const mockError = Object.assign(new Error('User Rejected Request'), { code: 4300 })
       mockLuteConnect.signData.mockRejectedValueOnce(mockError)
 
       await expect(
         wallet.signData('test-data', {
           scope: ScopeType.AUTH,
-          encoding: 'base64',
-        }),
+          encoding: 'base64'
+        })
       ).rejects.toMatchObject({
         name: 'SignDataError',
         message: 'User Rejected Request',
-        code: 4300,
+        code: 4300
       })
     })
 
@@ -454,16 +417,14 @@ describe('LuteAdapter', () => {
         'issued-at': new Date().toISOString(),
         type: 'ed25519',
         uri: 'https://test.domain',
-        version: '1',
+        version: '1'
       }
 
       const data = btoa(JSON.stringify(siwaRequest))
       const metadata = { scope: ScopeType.AUTH, encoding: 'base64' }
 
       const testAuthData = new Uint8Array(32).fill(1)
-      const testSigner = new Uint8Array(
-        algosdk.Address.fromString(connectedAcct1).publicKey,
-      )
+      const testSigner = new Uint8Array(algosdk.Address.fromString(connectedAcct1).publicKey)
       const testSignature = new Uint8Array(64).fill(9)
 
       const mockResponse = {
@@ -471,7 +432,7 @@ describe('LuteAdapter', () => {
         signer: testSigner,
         domain: 'test.domain',
         authenticatorData: testAuthData,
-        signature: testSignature,
+        signature: testSignature
       }
 
       mockLuteConnect.signData.mockResolvedValue(mockResponse)

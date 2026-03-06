@@ -10,7 +10,7 @@ import {
   type WalletAccount,
   type WalletMetadata,
   type WalletState,
-  type WalletTransaction,
+  type WalletTransaction
 } from '@txnlab/use-wallet/adapter'
 
 export interface W3WalletProvider {
@@ -34,7 +34,7 @@ export class W3WalletAdapter extends BaseWallet {
 
   static defaultMetadata: WalletMetadata = {
     name: 'W3 Wallet',
-    icon: ICON,
+    icon: ICON
   }
 
   private async initializeClient(): Promise<W3WalletProvider> {
@@ -60,7 +60,7 @@ export class W3WalletAdapter extends BaseWallet {
 
     const walletState: WalletState = {
       accounts: [activeAccount],
-      activeAccount,
+      activeAccount
     }
 
     this.store.addWallet(walletState)
@@ -103,7 +103,7 @@ export class W3WalletAdapter extends BaseWallet {
 
   private processTxns(
     txnGroup: algosdk.Transaction[],
-    indexesToSign?: number[],
+    indexesToSign?: number[]
   ): WalletTransaction[] {
     const txnsToSign: WalletTransaction[] = []
 
@@ -126,7 +126,7 @@ export class W3WalletAdapter extends BaseWallet {
 
   private processEncodedTxns(
     txnGroup: Uint8Array[],
-    indexesToSign?: number[],
+    indexesToSign?: number[]
   ): WalletTransaction[] {
     const txnsToSign: WalletTransaction[] = []
 
@@ -156,7 +156,7 @@ export class W3WalletAdapter extends BaseWallet {
 
   public signTransactions = async <T extends algosdk.Transaction[] | Uint8Array[]>(
     txnGroup: T | T[],
-    indexesToSign?: number[],
+    indexesToSign?: number[]
   ): Promise<(Uint8Array | null)[]> => {
     try {
       this.logger.debug('Signing transactions...', { txnGroup, indexesToSign })

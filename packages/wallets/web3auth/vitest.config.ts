@@ -5,6 +5,6 @@ export default defineConfig({
     name: 'web3auth',
     dir: './src',
     watch: false,
-    globals: true,
-  },
+    globals: true
+  }
 })

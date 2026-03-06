@@ -1,12 +1,11 @@
-import { Store } from '@tanstack/store'
 import algosdk from 'algosdk'
 import { logger } from 'src/logger'
-import { createNetworkConfig, DEFAULT_NETWORK_CONFIG, NetworkConfigBuilder } from 'src/network'
+import { DEFAULT_NETWORK_CONFIG, NetworkConfigBuilder } from 'src/network'
 import { LOCAL_STORAGE_KEY, PersistedState, State, DEFAULT_STATE } from 'src/store'
 import { WalletManager } from 'src/manager'
 import { StorageAdapter } from 'src/storage'
 import { BaseWallet } from 'src/wallets/base'
-import type { AdapterConstructorParams, WalletAdapterConfig, WalletAccount } from 'src/wallets/types'
+import type { AdapterConstructorParams, WalletAdapterConfig } from 'src/wallets/types'
 import type { Mock } from 'vitest'
 
 vi.mock('src/logger', () => {

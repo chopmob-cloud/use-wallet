@@ -12,9 +12,9 @@ vi.mock('src/logger', () => ({
       debug: vi.fn(),
       info: vi.fn(),
       warn: vi.fn(),
-      error: vi.fn(),
-    }),
-  },
+      error: vi.fn()
+    })
+  }
 }))
 
 class MockProvider implements CustomProvider {
@@ -32,7 +32,7 @@ const WALLET_ID = 'custom'
 
 function createWallet(
   store: AdapterStoreAccessor,
-  provider: CustomProvider = mockProvider,
+  provider: CustomProvider = mockProvider
 ): CustomWallet {
   return new CustomWallet({
     id: WALLET_ID,
@@ -40,7 +40,7 @@ function createWallet(
     store,
     subscribe: vi.fn(),
     getAlgodClient: () => ({}) as any,
-    options: { provider } as any,
+    options: { provider } as any
   })
 }
 
@@ -51,11 +51,11 @@ describe('CustomWallet', () => {
 
   const account1 = {
     name: 'Account 1',
-    address: 'mockAddress1',
+    address: 'mockAddress1'
   }
   const account2 = {
     name: 'Account 2',
-    address: 'mockAddress2',
+    address: 'mockAddress2'
   }
 
   beforeEach(() => {
@@ -83,15 +83,15 @@ describe('CustomWallet', () => {
             subscribe: vi.fn(),
             getAlgodClient: () => ({}) as any,
             // @ts-expect-error missing provider
-            options: {},
-          }),
+            options: {}
+          })
       ).toThrow('Missing required option: provider')
     })
 
     it('should set canSignData to true when provider supports signData', () => {
       const providerWithSignData: CustomProvider = {
         connect: vi.fn(),
-        signData: vi.fn(),
+        signData: vi.fn()
       }
 
       const w = createWallet(accessor, providerWithSignData)
@@ -100,7 +100,7 @@ describe('CustomWallet', () => {
 
     it('should set canSignData to false when provider does not support signData', () => {
       const providerWithoutSignData: CustomProvider = {
-        connect: vi.fn(),
+        connect: vi.fn()
       }
 
       const w = createWallet(accessor, providerWithoutSignData)
@@ -120,7 +120,7 @@ describe('CustomWallet', () => {
       expect(wallet.isConnected).toBe(true)
       expect(store.state.wallets[WALLET_ID]).toEqual({
         accounts: [account1, account2],
-        activeAccount: account1,
+        activeAccount: account1
       })
     })
 
@@ -140,7 +140,7 @@ describe('CustomWallet', () => {
 
     it('should throw an error if provider.connect is not defined', async () => {
       wallet = createWallet(accessor, {
-        disconnect: vi.fn(),
+        disconnect: vi.fn()
       })
 
       await expect(wallet.connect()).rejects.toThrow('Method not supported: connect')
@@ -161,7 +161,7 @@ describe('CustomWallet', () => {
 
     it('should still work if provider.disconnect is not defined', async () => {
       wallet = createWallet(accessor, {
-        connect: mockProvider.connect,
+        connect: mockProvider.connect
         // disconnect is not defined
       })
 
@@ -186,11 +186,11 @@ describe('CustomWallet', () => {
     it('should call provider.resumeSession if a session is found', async () => {
       const walletState: WalletState = {
         accounts: [account1],
-        activeAccount: account1,
+        activeAccount: account1
       }
 
       const harness = createTestHarness(WALLET_ID, {
-        wallets: { [WALLET_ID]: walletState },
+        wallets: { [WALLET_ID]: walletState }
       })
       store = harness.store
       wallet = createWallet(harness.accessor)
@@ -204,11 +204,11 @@ describe('CustomWallet', () => {
     it('should update the store if provider.resumeSession returns different account(s)', async () => {
       const walletState: WalletState = {
         accounts: [account1],
-        activeAccount: account1,
+        activeAccount: account1
       }
 
       const harness = createTestHarness(WALLET_ID, {
-        wallets: { [WALLET_ID]: walletState },
+        wallets: { [WALLET_ID]: walletState }
       })
       store = harness.store
       wallet = createWallet(harness.accessor)
@@ -219,7 +219,7 @@ describe('CustomWallet', () => {
 
       expect(store.state.wallets[WALLET_ID]).toEqual({
         accounts: [account2, account1],
-        activeAccount: account1,
+        activeAccount: account1
       })
       expect(wallet.isConnected).toBe(true)
     })
@@ -227,15 +227,15 @@ describe('CustomWallet', () => {
     it('should still work if provider.resumeSession is not defined', async () => {
       const walletState: WalletState = {
         accounts: [account1],
-        activeAccount: account1,
+        activeAccount: account1
       }
 
       const harness = createTestHarness(WALLET_ID, {
-        wallets: { [WALLET_ID]: walletState },
+        wallets: { [WALLET_ID]: walletState }
       })
       store = harness.store
       wallet = createWallet(harness.accessor, {
-        connect: mockProvider.connect,
+        connect: mockProvider.connect
         // resumeSession is not defined
       })
 
@@ -254,12 +254,12 @@ describe('CustomWallet', () => {
         firstValid: 51,
         lastValid: 61,
         minFee: 1000,
-        genesisID: 'mainnet-v1.0',
+        genesisID: 'mainnet-v1.0'
       },
       paymentParams: {
         receiver: '7ZUECA7HFLZTXENRV24SHLU4AVPUTMTTDUFUBNBD64C73F3UHRTHAIOF6Q',
-        amount: 1000,
-      },
+        amount: 1000
+      }
     })
 
     const txnGroup = [txn]
@@ -276,11 +276,11 @@ describe('CustomWallet', () => {
       wallet = createWallet(accessor, {
         connect: mockProvider.connect,
         // signTransactions is not defined
-        transactionSigner: mockProvider.transactionSigner,
+        transactionSigner: mockProvider.transactionSigner
       })
 
       await expect(wallet.signTransactions(txnGroup, indexesToSign)).rejects.toThrow(
-        'Method not supported: signTransactions',
+        'Method not supported: signTransactions'
       )
     })
   })
@@ -293,12 +293,12 @@ describe('CustomWallet', () => {
         fee: 10,
         firstValid: 51,
         lastValid: 61,
-        minFee: 10,
+        minFee: 10
       },
       paymentParams: {
         receiver: '7ZUECA7HFLZTXENRV24SHLU4AVPUTMTTDUFUBNBD64C73F3UHRTHAIOF6Q',
-        amount: 1000,
-      },
+        amount: 1000
+      }
     })
 
     const txnGroup = [txn]
@@ -314,12 +314,12 @@ describe('CustomWallet', () => {
     it('should throw an error if provider.transactionSigner is not defined', async () => {
       wallet = createWallet(accessor, {
         connect: mockProvider.connect,
-        signTransactions: mockProvider.signTransactions,
+        signTransactions: mockProvider.signTransactions
         // transactionSigner is not defined
       })
 
       await expect(wallet.transactionSigner(txnGroup, indexesToSign)).rejects.toThrow(
-        'Method not supported: transactionSigner',
+        'Method not supported: transactionSigner'
       )
     })
   })

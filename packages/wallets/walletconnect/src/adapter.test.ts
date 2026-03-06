@@ -10,7 +10,7 @@ vi.mock('@txnlab/use-wallet/adapter', async (importOriginal) => {
   const original = await importOriginal<typeof import('@txnlab/use-wallet/adapter')>()
   return {
     ...original,
-    LogLevel: original.LogLevel,
+    LogLevel: original.LogLevel
   }
 })
 
@@ -22,15 +22,15 @@ const mockSignClient = {
   session: {
     get: vi.fn(),
     keys: [''],
-    length: 0,
-  },
+    length: 0
+  }
 }
 
 vi.mock('@walletconnect/sign-client', () => {
   return {
     SignClient: class {
       static init = vi.fn(() => Promise.resolve(mockSignClient))
-    },
+    }
   }
 })
 
@@ -39,33 +39,30 @@ const mockModal = {
   closeModal: vi.fn(),
   subscribeModal: vi.fn((_callback: (state: any) => void) => {
     return () => {}
-  }),
+  })
 }
 
 vi.mock('@walletconnect/modal', () => {
   return {
-    WalletConnectModal: vi.fn(() => mockModal),
+    WalletConnectModal: vi.fn(() => mockModal)
   }
 })
 
 const WALLET_ID = 'walletconnect'
 
-function createMockSession(
-  accounts: string[],
-  caipChainId: string,
-): SessionTypes.Struct {
+function createMockSession(accounts: string[], caipChainId: string): SessionTypes.Struct {
   return {
     namespaces: {
       algorand: {
         accounts: accounts.map((address) => `${caipChainId}:${address}`),
         methods: ['algo_signTxn'],
-        events: [],
-      },
+        events: []
+      }
     },
     topic: 'mock-topic',
     pairingTopic: '',
     relay: {
-      protocol: '',
+      protocol: ''
     },
     expiry: 0,
     acknowledged: false,
@@ -74,8 +71,8 @@ function createMockSession(
       algorand: {
         chains: [caipChainId],
         methods: ['algo_signTxn'],
-        events: [],
-      },
+        events: []
+      }
     },
     optionalNamespaces: {},
     self: {
@@ -84,8 +81,8 @@ function createMockSession(
         name: '',
         description: '',
         url: '',
-        icons: [],
-      },
+        icons: []
+      }
     },
     peer: {
       publicKey: '',
@@ -93,15 +90,15 @@ function createMockSession(
         name: '',
         description: '',
         url: '',
-        icons: [],
-      },
-    },
+        icons: []
+      }
+    }
   }
 }
 
 function createWallet(
   store: AdapterStoreAccessor,
-  options?: Record<string, unknown>,
+  options?: Record<string, unknown>
 ): WalletConnectAdapter {
   return new WalletConnectAdapter({
     id: WALLET_ID,
@@ -109,7 +106,7 @@ function createWallet(
     store,
     subscribe: vi.fn(),
     getAlgodClient: () => ({}) as any,
-    options: { projectId: 'mockProjectId', ...options } as any,
+    options: { projectId: 'mockProjectId', ...options } as any
   })
 }
 
@@ -120,11 +117,11 @@ describe('WalletConnectAdapter', () => {
 
   const account1 = {
     name: 'WalletConnect Account 1',
-    address: '7ZUECA7HFLZTXENRV24SHLU4AVPUTMTTDUFUBNBD64C73F3UHRTHAIOF6Q',
+    address: '7ZUECA7HFLZTXENRV24SHLU4AVPUTMTTDUFUBNBD64C73F3UHRTHAIOF6Q'
   }
   const account2 = {
     name: 'WalletConnect Account 2',
-    address: 'GD64YIY3TWGDMCNPP553DZPPR6LDUSFQOIJVFDPPXWEG3FVOJCCDBBHU5A',
+    address: 'GD64YIY3TWGDMCNPP553DZPPR6LDUSFQOIJVFDPPXWEG3FVOJCCDBBHU5A'
   }
 
   beforeEach(() => {
@@ -151,8 +148,8 @@ describe('WalletConnectAdapter', () => {
             store: accessor,
             subscribe: vi.fn(),
             getAlgodClient: () => ({}) as any,
-            options: {} as any,
-          }),
+            options: {} as any
+          })
       ).toThrow('Missing required option: projectId')
     })
   })
@@ -160,13 +157,10 @@ describe('WalletConnectAdapter', () => {
   describe('connect', () => {
     it('should initialize client, return accounts, and update store', async () => {
       const caipChainId = wallet.activeChainId
-      const mockSession = createMockSession(
-        [account1.address, account2.address],
-        caipChainId,
-      )
+      const mockSession = createMockSession([account1.address, account2.address], caipChainId)
       mockSignClient.connect.mockResolvedValueOnce({
         uri: 'mock-uri',
-        approval: vi.fn().mockResolvedValue(mockSession),
+        approval: vi.fn().mockResolvedValue(mockSession)
       })
 
       const accounts = await wallet.connect()
@@ -175,7 +169,7 @@ describe('WalletConnectAdapter', () => {
       expect(accounts).toEqual([account1, account2])
       expect(store.state.wallets[WALLET_ID]).toEqual({
         accounts: [account1, account2],
-        activeAccount: account1,
+        activeAccount: account1
       })
     })
 
@@ -183,7 +177,7 @@ describe('WalletConnectAdapter', () => {
       const caipChainId = wallet.activeChainId
       const mockSession = createMockSession([], caipChainId)
       mockSignClient.connect.mockResolvedValueOnce({
-        approval: vi.fn().mockResolvedValue(mockSession),
+        approval: vi.fn().mockResolvedValue(mockSession)
       })
 
       await expect(wallet.connect()).rejects.toThrow('No URI found')
@@ -197,7 +191,7 @@ describe('WalletConnectAdapter', () => {
       const mockSession = createMockSession([], caipChainId)
       mockSignClient.connect.mockResolvedValueOnce({
         uri: 'mock-uri',
-        approval: vi.fn().mockResolvedValue(mockSession),
+        approval: vi.fn().mockResolvedValue(mockSession)
       })
 
       await expect(wallet.connect()).rejects.toThrow('No accounts found!')
@@ -211,7 +205,7 @@ describe('WalletConnectAdapter', () => {
       const mockSession = createMockSession([account1.address], caipChainId)
       mockSignClient.connect.mockResolvedValueOnce({
         uri: 'mock-uri',
-        approval: vi.fn().mockResolvedValue(mockSession),
+        approval: vi.fn().mockResolvedValue(mockSession)
       })
 
       await wallet.connect()
@@ -220,10 +214,10 @@ describe('WalletConnectAdapter', () => {
         expect.objectContaining({
           requiredNamespaces: {
             algorand: expect.objectContaining({
-              chains: [wallet.activeChainId],
-            }),
-          },
-        }),
+              chains: [wallet.activeChainId]
+            })
+          }
+        })
       )
     })
   })
@@ -231,13 +225,10 @@ describe('WalletConnectAdapter', () => {
   describe('disconnect', () => {
     it('should disconnect client and remove wallet from store', async () => {
       const caipChainId = wallet.activeChainId
-      const mockSession = createMockSession(
-        [account1.address, account2.address],
-        caipChainId,
-      )
+      const mockSession = createMockSession([account1.address, account2.address], caipChainId)
       mockSignClient.connect.mockResolvedValueOnce({
         uri: 'mock-uri',
-        approval: vi.fn().mockResolvedValue(mockSession),
+        approval: vi.fn().mockResolvedValue(mockSession)
       })
 
       await wallet.connect()
@@ -259,11 +250,11 @@ describe('WalletConnectAdapter', () => {
     it('should resume session if session is found', async () => {
       const walletState: WalletState = {
         accounts: [account1],
-        activeAccount: account1,
+        activeAccount: account1
       }
 
       const harness = createTestHarness(WALLET_ID, {
-        wallets: { [WALLET_ID]: walletState },
+        wallets: { [WALLET_ID]: walletState }
       })
       store = harness.store
       wallet = createWallet(harness.accessor)
@@ -287,21 +278,21 @@ describe('WalletConnectAdapter', () => {
         accounts: [
           {
             name: 'WalletConnect Account 1',
-            address: '7ZUECA7HFLZTXENRV24SHLU4AVPUTMTTDUFUBNBD64C73F3UHRTHAIOF6Q',
+            address: '7ZUECA7HFLZTXENRV24SHLU4AVPUTMTTDUFUBNBD64C73F3UHRTHAIOF6Q'
           },
           {
             name: 'WalletConnect Account 2',
-            address: 'GD64YIY3TWGDMCNPP553DZPPR6LDUSFQOIJVFDPPXWEG3FVOJCCDBBHU5A',
-          },
+            address: 'GD64YIY3TWGDMCNPP553DZPPR6LDUSFQOIJVFDPPXWEG3FVOJCCDBBHU5A'
+          }
         ],
         activeAccount: {
           name: 'WalletConnect Account 1',
-          address: '7ZUECA7HFLZTXENRV24SHLU4AVPUTMTTDUFUBNBD64C73F3UHRTHAIOF6Q',
-        },
+          address: '7ZUECA7HFLZTXENRV24SHLU4AVPUTMTTDUFUBNBD64C73F3UHRTHAIOF6Q'
+        }
       }
 
       const harness = createTestHarness(WALLET_ID, {
-        wallets: { [WALLET_ID]: prevWalletState },
+        wallets: { [WALLET_ID]: prevWalletState }
       })
       store = harness.store
       wallet = createWallet(harness.accessor)
@@ -321,13 +312,13 @@ describe('WalletConnectAdapter', () => {
         accounts: [
           {
             name: 'WalletConnect Account 1',
-            address: 'GD64YIY3TWGDMCNPP553DZPPR6LDUSFQOIJVFDPPXWEG3FVOJCCDBBHU5A',
-          },
+            address: 'GD64YIY3TWGDMCNPP553DZPPR6LDUSFQOIJVFDPPXWEG3FVOJCCDBBHU5A'
+          }
         ],
         activeAccount: {
           name: 'WalletConnect Account 1',
-          address: 'GD64YIY3TWGDMCNPP553DZPPR6LDUSFQOIJVFDPPXWEG3FVOJCCDBBHU5A',
-        },
+          address: 'GD64YIY3TWGDMCNPP553DZPPR6LDUSFQOIJVFDPPXWEG3FVOJCCDBBHU5A'
+        }
       }
 
       expect(store.state.wallets[WALLET_ID]).toEqual(newWalletState)
@@ -348,9 +339,9 @@ describe('WalletConnectAdapter', () => {
           firstValid: 51,
           lastValid: 61,
           minFee: 1000,
-          genesisID: 'mainnet-v1.0',
+          genesisID: 'mainnet-v1.0'
         },
-        paymentParams: { receiver, amount },
+        paymentParams: { receiver, amount }
       })
     }
 
@@ -366,20 +357,17 @@ describe('WalletConnectAdapter', () => {
         request: expect.objectContaining({
           jsonrpc: '2.0',
           method: 'algo_signTxn',
-          params,
-        }),
+          params
+        })
       }
     }
 
     beforeEach(async () => {
       const caipChainId = wallet.activeChainId
-      const mockSession = createMockSession(
-        [account1.address, account2.address],
-        caipChainId,
-      )
+      const mockSession = createMockSession([account1.address, account2.address], caipChainId)
       mockSignClient.connect.mockResolvedValueOnce({
         uri: 'mock-uri',
-        approval: vi.fn().mockResolvedValue(mockSession),
+        approval: vi.fn().mockResolvedValue(mockSession)
       })
 
       const mockSignedTxn = byteArrayToBase64(txn1.toByte())
@@ -393,7 +381,7 @@ describe('WalletConnectAdapter', () => {
         await wallet.signTransactions([txn1])
 
         expect(mockSignClient.request).toHaveBeenCalledWith(
-          expectedRpcRequest([[{ txn: byteArrayToBase64(txn1.toByte()) }]]),
+          expectedRpcRequest([[{ txn: byteArrayToBase64(txn1.toByte()) }]])
         )
       })
 
@@ -406,9 +394,9 @@ describe('WalletConnectAdapter', () => {
             [
               { txn: byteArrayToBase64(gtxn1.toByte()) },
               { txn: byteArrayToBase64(gtxn2.toByte()) },
-              { txn: byteArrayToBase64(gtxn3.toByte()) },
-            ],
-          ]),
+              { txn: byteArrayToBase64(gtxn3.toByte()) }
+            ]
+          ])
         )
       })
 
@@ -418,7 +406,7 @@ describe('WalletConnectAdapter', () => {
 
         await wallet.signTransactions([
           [g1txn1, g1txn2],
-          [g2txn1, g2txn2],
+          [g2txn1, g2txn2]
         ])
 
         expect(mockSignClient.request).toHaveBeenCalledWith(
@@ -427,9 +415,9 @@ describe('WalletConnectAdapter', () => {
               { txn: byteArrayToBase64(g1txn1.toByte()) },
               { txn: byteArrayToBase64(g1txn2.toByte()) },
               { txn: byteArrayToBase64(g2txn1.toByte()) },
-              { txn: byteArrayToBase64(g2txn2.toByte()) },
-            ],
-          ]),
+              { txn: byteArrayToBase64(g2txn2.toByte()) }
+            ]
+          ])
         )
       })
 
@@ -438,7 +426,7 @@ describe('WalletConnectAdapter', () => {
         await wallet.signTransactions([encodedTxn])
 
         expect(mockSignClient.request).toHaveBeenCalledWith(
-          expectedRpcRequest([[{ txn: byteArrayToBase64(txn1.toByte()) }]]),
+          expectedRpcRequest([[{ txn: byteArrayToBase64(txn1.toByte()) }]])
         )
       })
 
@@ -453,9 +441,9 @@ describe('WalletConnectAdapter', () => {
             [
               { txn: byteArrayToBase64(gtxn1) },
               { txn: byteArrayToBase64(gtxn2) },
-              { txn: byteArrayToBase64(gtxn3) },
-            ],
-          ]),
+              { txn: byteArrayToBase64(gtxn3) }
+            ]
+          ])
         )
       })
 
@@ -468,7 +456,7 @@ describe('WalletConnectAdapter', () => {
 
         await wallet.signTransactions([
           [g1txn1, g1txn2],
-          [g2txn1, g2txn2],
+          [g2txn1, g2txn2]
         ])
 
         expect(mockSignClient.request).toHaveBeenCalledWith(
@@ -477,9 +465,9 @@ describe('WalletConnectAdapter', () => {
               { txn: byteArrayToBase64(g1txn1) },
               { txn: byteArrayToBase64(g1txn2) },
               { txn: byteArrayToBase64(g2txn1) },
-              { txn: byteArrayToBase64(g2txn2) },
-            ],
-          ]),
+              { txn: byteArrayToBase64(g2txn2) }
+            ]
+          ])
         )
       })
 
@@ -498,7 +486,7 @@ describe('WalletConnectAdapter', () => {
           base64ToByteArray(gtxn1String),
           base64ToByteArray(gtxn2String),
           null,
-          base64ToByteArray(gtxn4String),
+          base64ToByteArray(gtxn4String)
         ])
 
         expect(mockSignClient.request).toHaveBeenCalledWith(
@@ -507,9 +495,9 @@ describe('WalletConnectAdapter', () => {
               { txn: byteArrayToBase64(gtxn1.toByte()) },
               { txn: byteArrayToBase64(gtxn2.toByte()) },
               { txn: byteArrayToBase64(gtxn3.toByte()), signers: [] },
-              { txn: byteArrayToBase64(gtxn4.toByte()) },
-            ],
-          ]),
+              { txn: byteArrayToBase64(gtxn4.toByte()) }
+            ]
+          ])
         )
       })
 
@@ -521,7 +509,7 @@ describe('WalletConnectAdapter', () => {
         const [gtxn1, gtxn2, gtxn3] = algosdk.assignGroupID([
           canSignTxn1,
           cannotSignTxn2,
-          canSignTxn3,
+          canSignTxn3
         ])
 
         await wallet.signTransactions([gtxn1, gtxn2, gtxn3])
@@ -531,9 +519,9 @@ describe('WalletConnectAdapter', () => {
             [
               { txn: byteArrayToBase64(gtxn1.toByte()) },
               { txn: byteArrayToBase64(gtxn2.toByte()), signers: [] },
-              { txn: byteArrayToBase64(gtxn3.toByte()) },
-            ],
-          ]),
+              { txn: byteArrayToBase64(gtxn3.toByte()) }
+            ]
+          ])
         )
       })
 
@@ -582,14 +570,14 @@ describe('WalletConnectAdapter', () => {
   describe('activeChainId', () => {
     it('should return the correct CAIP-2 chain ID for the active network', () => {
       expect(wallet.activeChainId).toBe(
-        store.state.networkConfig[store.state.activeNetwork].caipChainId,
+        store.state.networkConfig[store.state.activeNetwork].caipChainId
       )
     })
 
     it('should return an empty string if no CAIP-2 chain ID is found', () => {
       // Create a harness with a custom network that has no caipChainId
       const harness = createTestHarness(WALLET_ID, {
-        activeNetwork: 'invalid-network',
+        activeNetwork: 'invalid-network'
       })
       store = harness.store
       wallet = createWallet(harness.accessor)

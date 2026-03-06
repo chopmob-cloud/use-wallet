@@ -8,7 +8,7 @@ vi.mock('@txnlab/use-wallet/adapter', async (importOriginal) => {
   const original = await importOriginal<typeof import('@txnlab/use-wallet/adapter')>()
   return {
     ...original,
-    LogLevel: original.LogLevel,
+    LogLevel: original.LogLevel
   }
 })
 
@@ -19,25 +19,23 @@ const mockDeflyWallet = {
   signTransaction: vi.fn(),
   connector: {
     on: vi.fn(),
-    off: vi.fn(),
-  },
+    off: vi.fn()
+  }
 }
 
 vi.mock('@blockshake/defly-connect', () => ({
-  DeflyWalletConnect: vi.fn(() => mockDeflyWallet),
+  DeflyWalletConnect: vi.fn(() => mockDeflyWallet)
 }))
 
 const WALLET_ID = 'defly'
 
-function createWallet(
-  store: AdapterStoreAccessor,
-): DeflyAdapter {
+function createWallet(store: AdapterStoreAccessor): DeflyAdapter {
   const wallet = new DeflyAdapter({
     id: WALLET_ID,
     metadata: DeflyAdapter.defaultMetadata,
     store,
     subscribe: vi.fn(),
-    getAlgodClient: () => ({}) as any,
+    getAlgodClient: () => ({}) as any
   })
 
   // @ts-expect-error - Mocking the private client property
@@ -53,11 +51,11 @@ describe('DeflyAdapter', () => {
 
   const account1 = {
     name: 'Defly Account 1',
-    address: 'mockAddress1',
+    address: 'mockAddress1'
   }
   const account2 = {
     name: 'Defly Account 2',
-    address: 'mockAddress2',
+    address: 'mockAddress2'
   }
 
   beforeEach(() => {
@@ -69,7 +67,7 @@ describe('DeflyAdapter', () => {
       getItem: (key: string) => storage.get(key) ?? null,
       setItem: (key: string, value: string) => storage.set(key, value),
       removeItem: (key: string) => storage.delete(key),
-      clear: () => storage.clear(),
+      clear: () => storage.clear()
     })
 
     const harness = createTestHarness(WALLET_ID)
@@ -93,7 +91,7 @@ describe('DeflyAdapter', () => {
       expect(accounts).toEqual([account1, account2])
       expect(store.state.wallets[WALLET_ID]).toEqual({
         accounts: [account1, account2],
-        activeAccount: account1,
+        activeAccount: account1
       })
     })
 
@@ -129,7 +127,7 @@ describe('DeflyAdapter', () => {
 
       // Set Pera as the active wallet
       const harness = createTestHarness(WALLET_ID, {
-        activeWallet: 'pera',
+        activeWallet: 'pera'
       })
       store = harness.store
       wallet = createWallet(harness.accessor)
@@ -173,7 +171,7 @@ describe('DeflyAdapter', () => {
       await wallet.connect()
 
       const disconnectHandler = mockDeflyWallet.connector.on.mock.calls.find(
-        (call) => call[0] === 'disconnect',
+        (call) => call[0] === 'disconnect'
       )?.[1] as (() => void) | undefined
 
       expect(disconnectHandler).toBeDefined()
@@ -197,11 +195,11 @@ describe('DeflyAdapter', () => {
     it('should resume session if session is found', async () => {
       const walletState: WalletState = {
         accounts: [account1],
-        activeAccount: account1,
+        activeAccount: account1
       }
 
       const harness = createTestHarness(WALLET_ID, {
-        wallets: { [WALLET_ID]: walletState },
+        wallets: { [WALLET_ID]: walletState }
       })
       store = harness.store
       wallet = createWallet(harness.accessor)
@@ -219,13 +217,13 @@ describe('DeflyAdapter', () => {
       const prevWalletState: WalletState = {
         accounts: [
           { name: 'Defly Account 1', address: 'mockAddress1' },
-          { name: 'Defly Account 2', address: 'mockAddress2' },
+          { name: 'Defly Account 2', address: 'mockAddress2' }
         ],
-        activeAccount: { name: 'Defly Account 1', address: 'mockAddress1' },
+        activeAccount: { name: 'Defly Account 1', address: 'mockAddress1' }
       }
 
       const harness = createTestHarness(WALLET_ID, {
-        wallets: { [WALLET_ID]: prevWalletState },
+        wallets: { [WALLET_ID]: prevWalletState }
       })
       store = harness.store
       wallet = createWallet(harness.accessor)
@@ -237,7 +235,7 @@ describe('DeflyAdapter', () => {
 
       const newWalletState: WalletState = {
         accounts: [{ name: 'Defly Account 1', address: 'mockAddress2' }],
-        activeAccount: { name: 'Defly Account 1', address: 'mockAddress2' },
+        activeAccount: { name: 'Defly Account 1', address: 'mockAddress2' }
       }
 
       expect(store.state.wallets[WALLET_ID]).toEqual(newWalletState)
@@ -246,11 +244,11 @@ describe('DeflyAdapter', () => {
     it('should throw an error and disconnect if reconnectSession fails', async () => {
       const walletState: WalletState = {
         accounts: [account1],
-        activeAccount: account1,
+        activeAccount: account1
       }
 
       const harness = createTestHarness(WALLET_ID, {
-        wallets: { [WALLET_ID]: walletState },
+        wallets: { [WALLET_ID]: walletState }
       })
       store = harness.store
       wallet = createWallet(harness.accessor)
@@ -265,11 +263,11 @@ describe('DeflyAdapter', () => {
     it('should throw an error and disconnect if no accounts are found', async () => {
       const walletState: WalletState = {
         accounts: [account1],
-        activeAccount: account1,
+        activeAccount: account1
       }
 
       const harness = createTestHarness(WALLET_ID, {
-        wallets: { [WALLET_ID]: walletState },
+        wallets: { [WALLET_ID]: walletState }
       })
       store = harness.store
       wallet = createWallet(harness.accessor)
@@ -284,12 +282,12 @@ describe('DeflyAdapter', () => {
     it('should skip reconnectSession if Pera is active', async () => {
       const walletState: WalletState = {
         accounts: [account1],
-        activeAccount: account1,
+        activeAccount: account1
       }
 
       const harness = createTestHarness(WALLET_ID, {
         activeWallet: 'pera',
-        wallets: { [WALLET_ID]: walletState },
+        wallets: { [WALLET_ID]: walletState }
       })
       store = harness.store
       wallet = createWallet(harness.accessor)
@@ -353,9 +351,9 @@ describe('DeflyAdapter', () => {
           firstValid: 51,
           lastValid: 61,
           minFee: 1000,
-          genesisID: 'mainnet-v1.0',
+          genesisID: 'mainnet-v1.0'
         },
-        paymentParams: { receiver, amount },
+        paymentParams: { receiver, amount }
       })
     }
 
@@ -388,7 +386,7 @@ describe('DeflyAdapter', () => {
         await wallet.signTransactions([gtxn1, gtxn2, gtxn3])
 
         expect(mockDeflyWallet.signTransaction).toHaveBeenCalledWith([
-          [{ txn: gtxn1 }, { txn: gtxn2 }, { txn: gtxn3 }],
+          [{ txn: gtxn1 }, { txn: gtxn2 }, { txn: gtxn3 }]
         ])
       })
 
@@ -400,11 +398,11 @@ describe('DeflyAdapter', () => {
 
         await wallet.signTransactions([
           [g1txn1, g1txn2],
-          [g2txn1, g2txn2],
+          [g2txn1, g2txn2]
         ])
 
         expect(mockDeflyWallet.signTransaction).toHaveBeenCalledWith([
-          [{ txn: g1txn1 }, { txn: g1txn2 }, { txn: g2txn1 }, { txn: g2txn2 }],
+          [{ txn: g1txn1 }, { txn: g1txn2 }, { txn: g2txn1 }, { txn: g2txn2 }]
         ])
       })
 
@@ -416,7 +414,7 @@ describe('DeflyAdapter', () => {
         await wallet.signTransactions([encodedTxn])
 
         expect(mockDeflyWallet.signTransaction).toHaveBeenCalledWith([
-          [{ txn: algosdk.decodeUnsignedTransaction(encodedTxn) }],
+          [{ txn: algosdk.decodeUnsignedTransaction(encodedTxn) }]
         ])
       })
 
@@ -432,11 +430,11 @@ describe('DeflyAdapter', () => {
           sTxn,
           sTxn,
           null,
-          sTxn,
+          sTxn
         ])
 
         expect(mockDeflyWallet.signTransaction).toHaveBeenCalledWith([
-          [{ txn: gtxn1 }, { txn: gtxn2 }, { txn: gtxn3, signers: [] }, { txn: gtxn4 }],
+          [{ txn: gtxn1 }, { txn: gtxn2 }, { txn: gtxn3, signers: [] }, { txn: gtxn4 }]
         ])
       })
 
@@ -448,7 +446,7 @@ describe('DeflyAdapter', () => {
         const [gtxn1, gtxn2, gtxn3] = algosdk.assignGroupID([
           canSignTxn1,
           cannotSignTxn2,
-          canSignTxn3,
+          canSignTxn3
         ])
 
         mockDeflyWallet.signTransaction.mockResolvedValueOnce([sTxn, sTxn])
@@ -456,11 +454,11 @@ describe('DeflyAdapter', () => {
         await expect(wallet.signTransactions([gtxn1, gtxn2, gtxn3])).resolves.toEqual([
           sTxn,
           null,
-          sTxn,
+          sTxn
         ])
 
         expect(mockDeflyWallet.signTransaction).toHaveBeenCalledWith([
-          [{ txn: gtxn1 }, { txn: gtxn2, signers: [] }, { txn: gtxn3 }],
+          [{ txn: gtxn1 }, { txn: gtxn2, signers: [] }, { txn: gtxn3 }]
         ])
       })
     })

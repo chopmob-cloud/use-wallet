@@ -308,7 +308,11 @@ describe('useWallet', () => {
         <div data-testid="active-wallet-addresses">
           {activeWalletAddresses()?.join(', ') || 'null'}
         </div>
-        <div data-testid="wallets">{wallets().map((wallet) => wallet.id).join(', ')}</div>
+        <div data-testid="wallets">
+          {wallets()
+            .map((wallet) => wallet.id)
+            .join(', ')}
+        </div>
         <div data-testid="algod-client">{JSON.stringify(algodClient())}</div>
 
         <For each={wallets()}>
@@ -316,11 +320,7 @@ describe('useWallet', () => {
             <div data-testid="wallet">
               <h4 data-testid={`wallet-name-${wallet.id}`}>{wallet.metadata.name}</h4>
               <p data-testid={`wallet-status-${wallet.id}`}>
-                {wallet.isActive
-                  ? 'Active'
-                  : wallet.isConnected
-                    ? 'Connected'
-                    : 'Disconnected'}
+                {wallet.isActive ? 'Active' : wallet.isConnected ? 'Connected' : 'Disconnected'}
               </p>
               <button
                 data-testid={`connect-btn-${wallet.id}`}
@@ -535,11 +535,7 @@ describe('useWallet', () => {
 
     const ReactiveTestComponent = () => {
       const { wallets } = useWallet()
-      return (
-        <For each={wallets()}>
-          {(wallet) => <WalletStatus wallet={wallet} />}
-        </For>
-      )
+      return <For each={wallets()}>{(wallet) => <WalletStatus wallet={wallet} />}</For>
     }
 
     render(() => (

@@ -9,7 +9,7 @@ export function defly(options?: DeflyOptions): WalletAdapterConfig {
     id: WALLET_ID,
     metadata: DeflyAdapter.defaultMetadata,
     Adapter: DeflyAdapter as unknown as WalletAdapterConfig['Adapter'],
-    options: options as unknown as Record<string, unknown> | undefined,
+    options: options as unknown as Record<string, unknown> | undefined
   }
 }
 

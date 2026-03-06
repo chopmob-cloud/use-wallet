@@ -20,7 +20,9 @@
       "require": "./dist/index.cjs"
     }
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "peerDependencies": {
     "@txnlab/use-wallet": "^5.0.0",
     "algosdk": "^3.0.0"

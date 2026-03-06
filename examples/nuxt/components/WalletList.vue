@@ -39,7 +39,7 @@ const isMagicConnectDisabled = (wallet: Wallet) => {
         'rounded-xl border p-3 transition-colors',
         wallet.isActive
           ? 'border-blue-200 bg-blue-50'
-          : 'border-gray-200 bg-white hover:border-gray-300',
+          : 'border-gray-200 bg-white hover:border-gray-300'
       ]"
     >
       <div class="flex items-center gap-3">

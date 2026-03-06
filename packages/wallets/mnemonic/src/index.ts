@@ -9,7 +9,7 @@ export function mnemonic(options?: MnemonicOptions): WalletAdapterConfig {
     id: WALLET_ID,
     metadata: MnemonicAdapter.defaultMetadata,
     Adapter: MnemonicAdapter as unknown as WalletAdapterConfig['Adapter'],
-    options: options as unknown as Record<string, unknown> | undefined,
+    options: options as unknown as Record<string, unknown> | undefined
   }
 }
 

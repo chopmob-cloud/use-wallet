@@ -12,13 +12,13 @@ import {
   type SignMetadata,
   type WalletAccount,
   type WalletMetadata,
-  type WalletState,
+  type WalletState
 } from '@txnlab/use-wallet/adapter'
 import type LuteConnect from 'lute-connect'
 import {
   SignDataError as ISignDataError,
   type SignTxnsError as ISignTxnsError,
-  type WalletTransaction,
+  type WalletTransaction
 } from 'lute-connect'
 
 export interface LuteConnectOptions {
@@ -46,7 +46,7 @@ export class LuteAdapter extends BaseWallet<LuteConnectOptions> {
 
   static defaultMetadata: WalletMetadata = {
     name: 'Lute',
-    icon: ICON,
+    icon: ICON
   }
 
   private async initializeClient(): Promise<LuteConnect> {
@@ -69,7 +69,7 @@ export class LuteAdapter extends BaseWallet<LuteConnectOptions> {
     const algodClient = this.getAlgodClient()
     const genesisStr = await algodClient.genesis().do()
     const genesis = algosdk.parseJSON(genesisStr, {
-      intDecoding: algosdk.IntDecoding.MIXED,
+      intDecoding: algosdk.IntDecoding.MIXED
     })
     return `${genesis.network}-${genesis.id}`
   }
@@ -87,14 +87,14 @@ export class LuteAdapter extends BaseWallet<LuteConnectOptions> {
 
     const walletAccounts = accounts.map((address: string, idx: number) => ({
       name: `${this.metadata.name} Account ${idx + 1}`,
-      address,
+      address
     }))
 
     const activeAccount = walletAccounts[0]
 
     const walletState: WalletState = {
       accounts: walletAccounts,
-      activeAccount,
+      activeAccount
     }
 
     this.store.addWallet(walletState)
@@ -130,7 +130,7 @@ export class LuteAdapter extends BaseWallet<LuteConnectOptions> {
 
   private processTxns(
     txnGroup: algosdk.Transaction[],
-    indexesToSign?: number[],
+    indexesToSign?: number[]
   ): WalletTransaction[] {
     const txnsToSign: WalletTransaction[] = []
 
@@ -153,7 +153,7 @@ export class LuteAdapter extends BaseWallet<LuteConnectOptions> {
 
   private processEncodedTxns(
     txnGroup: Uint8Array[],
-    indexesToSign?: number[],
+    indexesToSign?: number[]
   ): WalletTransaction[] {
     const txnsToSign: WalletTransaction[] = []
 
@@ -183,7 +183,7 @@ export class LuteAdapter extends BaseWallet<LuteConnectOptions> {
 
   public signTransactions = async <T extends algosdk.Transaction[] | Uint8Array[]>(
     txnGroup: T | T[],
-    indexesToSign?: number[],
+    indexesToSign?: number[]
   ): Promise<(Uint8Array | null)[]> => {
     try {
       this.logger.debug('Signing transactions...', { txnGroup, indexesToSign })

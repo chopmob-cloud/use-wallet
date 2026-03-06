@@ -32,12 +32,12 @@ const wallets = [
   magic({ apiKey: 'pk_live_D17FD8D89621B5F3' }),
   ...(import.meta.env.VITE_WEB3AUTH_CLIENT_ID
     ? [web3auth({ clientId: import.meta.env.VITE_WEB3AUTH_CLIENT_ID })]
-    : []),
+    : [])
 ]
 
 const manager = new WalletManager({
   wallets,
-  defaultNetwork: 'testnet',
+  defaultNetwork: 'testnet'
 })
 
 let connectingId: string | null = null
@@ -51,7 +51,11 @@ function getState() {
 }
 
 function escapeHtml(str: string) {
-  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
 }
 
 function renderNetworkSwitch() {
@@ -66,7 +70,7 @@ function renderNetworkSwitch() {
           id === state.activeNetwork
             ? 'bg-white text-gray-900 shadow-sm'
             : 'text-gray-500 hover:text-gray-700'
-        }">${id}</button>`,
+        }">${id}</button>`
         )
         .join('')}
     </div>`
@@ -88,7 +92,9 @@ function renderWalletList() {
         }
         buttons += `<button data-disconnect="${wallet.walletKey}" class="rounded-lg border border-red-200 bg-red-50 px-2.5 py-1 text-xs font-medium text-red-500 hover:bg-red-100 transition-colors">Disconnect</button>`
       } else {
-        const isDisabled = connectingId === wallet.id || (wallet.id === MAGIC_ID && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(magicEmail))
+        const isDisabled =
+          connectingId === wallet.id ||
+          (wallet.id === MAGIC_ID && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(magicEmail))
         buttons += `<button data-connect="${wallet.walletKey}" ${isDisabled ? 'disabled' : ''} class="rounded-lg bg-gray-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-gray-800 disabled:opacity-50 transition-colors">${connectingId === wallet.id ? 'Connecting...' : 'Connect'}</button>`
       }
 
@@ -145,7 +151,7 @@ function renderActiveWallet() {
     const options = walletState.accounts
       .map(
         (a) =>
-          `<option value="${a.address}" ${a.address === activeAccount.address ? 'selected' : ''}>${a.address.slice(0, 12)}...${a.address.slice(-8)}</option>`,
+          `<option value="${a.address}" ${a.address === activeAccount.address ? 'selected' : ''}>${a.address.slice(0, 12)}...${a.address.slice(-8)}</option>`
       )
       .join('')
     accountSwitcher = `
@@ -171,7 +177,11 @@ function renderActiveWallet() {
   }
 
   const btnLabel =
-    txnStatus === 'signing' ? 'Signing...' : txnStatus === 'confirming' ? 'Confirming...' : 'Send 0 ALGO'
+    txnStatus === 'signing'
+      ? 'Signing...'
+      : txnStatus === 'confirming'
+        ? 'Confirming...'
+        : 'Send 0 ALGO'
   const btnDisabled = txnStatus === 'signing' || txnStatus === 'confirming'
 
   return `
@@ -244,7 +254,7 @@ function attachEventListeners() {
       manager.store.setState((state) => ({
         ...state,
         activeNetwork: networkId,
-        algodClient: newClient,
+        algodClient: newClient
       }))
     })
   })
@@ -336,14 +346,14 @@ async function handleSendTransaction() {
       sender: activeAccount.address,
       receiver: activeAccount.address,
       amount: 0,
-      suggestedParams,
+      suggestedParams
     })
 
     const atc = new algosdk.AtomicTransactionComposer()
     atc.addTransaction({
       txn,
       signer: (txnGroup: algosdk.Transaction[], indexesToSign: number[]) =>
-        wallet.transactionSigner(txnGroup, indexesToSign),
+        wallet.transactionSigner(txnGroup, indexesToSign)
     })
 
     txnStatus = 'confirming'

@@ -9,7 +9,7 @@ export function magic(options?: MagicAuthOptions): WalletAdapterConfig {
     id: WALLET_ID,
     metadata: MagicAdapter.defaultMetadata,
     Adapter: MagicAdapter as unknown as WalletAdapterConfig['Adapter'],
-    options: options as unknown as Record<string, unknown> | undefined,
+    options: options as unknown as Record<string, unknown> | undefined
   }
 }
 

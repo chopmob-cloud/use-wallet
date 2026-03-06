@@ -49,10 +49,7 @@ const { activeWallet, activeAccount } = useWallet()
           </div>
         </div>
 
-        <AccountSwitcher
-          v-if="activeWallet.accounts.length > 1"
-          :wallet="activeWallet"
-        />
+        <AccountSwitcher v-if="activeWallet.accounts.length > 1" :wallet="activeWallet" />
       </div>
     </div>
 

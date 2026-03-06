@@ -44,7 +44,7 @@ describe('WalletConnect Skins', () => {
       const customSkin: WalletConnectSkin = {
         id: 'test-custom-skin',
         name: 'Test Custom Wallet',
-        icon: 'data:image/svg+xml;base64,test',
+        icon: 'data:image/svg+xml;base64,test'
       }
 
       registerSkin(customSkin)
@@ -59,7 +59,7 @@ describe('WalletConnect Skins', () => {
       const overrideSkin: WalletConnectSkin = {
         id: 'biatec',
         name: 'Fake Biatec',
-        icon: 'fake-icon',
+        icon: 'fake-icon'
       }
 
       expect(() => registerSkin(overrideSkin)).toThrow('Cannot override built-in skin: biatec')
@@ -69,7 +69,7 @@ describe('WalletConnect Skins', () => {
       const overrideSkin: WalletConnectSkin = {
         id: 'voiwallet',
         name: 'Fake Voi Wallet',
-        icon: 'fake-icon',
+        icon: 'fake-icon'
       }
 
       expect(() => registerSkin(overrideSkin)).toThrow('Cannot override built-in skin: voiwallet')
@@ -100,7 +100,7 @@ describe('WalletConnect Skins', () => {
       const customSkin: WalletConnectSkin = {
         id: 'inline-custom-skin',
         name: 'Inline Custom Wallet',
-        icon: 'data:image/svg+xml;base64,inline',
+        icon: 'data:image/svg+xml;base64,inline'
       }
 
       const resolved = resolveSkin(customSkin)
@@ -118,7 +118,7 @@ describe('WalletConnect Skins', () => {
       const skin: WalletConnectSkin = {
         id: 'biatec',
         name: 'Different Name',
-        icon: 'different-icon',
+        icon: 'different-icon'
       }
 
       // Should return the original skin object passed in

@@ -10,7 +10,7 @@ import type {
   WalletAccount,
   WalletManager,
   WalletMetadata,
-  WalletKey,
+  WalletKey
 } from '@txnlab/use-wallet'
 
 export * from '@txnlab/use-wallet'
@@ -170,7 +170,7 @@ export const useWallet = () => {
       connect: (args) => wallet.connect(args),
       disconnect: () => wallet.disconnect(),
       setActive: () => wallet.setActive(),
-      setActiveAccount: (addr) => wallet.setActiveAccount(addr),
+      setActiveAccount: (addr) => wallet.setActiveAccount(addr)
     }
   }
 
@@ -183,15 +183,15 @@ export const useWallet = () => {
 
   const activeWallet = createMemo(() => {
     const id = activeWalletId()
-    return id ? wallets.find((w) => w.walletKey === id) ?? null : null
+    return id ? (wallets.find((w) => w.walletKey === id) ?? null) : null
   })
 
   const activeWalletAccounts = createMemo(() => {
     const state = walletStateMap()[activeWalletId()!]
     return state?.accounts ?? null
   })
-  const activeWalletAddresses = createMemo(() =>
-    activeWalletAccounts()?.map((account) => account.address) ?? null
+  const activeWalletAddresses = createMemo(
+    () => activeWalletAccounts()?.map((account) => account.address) ?? null
   )
   const activeAccount = createMemo(() => {
     const state = walletStateMap()[activeWalletId()!]
@@ -249,6 +249,6 @@ export const useWallet = () => {
     signData,
     withPrivateKey,
     signTransactions,
-    transactionSigner,
+    transactionSigner
   }
 }

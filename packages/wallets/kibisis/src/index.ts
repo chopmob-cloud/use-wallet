@@ -7,7 +7,7 @@ export function kibisis(): WalletAdapterConfig {
   return {
     id: WALLET_ID,
     metadata: KibisisAdapter.defaultMetadata,
-    Adapter: KibisisAdapter as unknown as WalletAdapterConfig['Adapter'],
+    Adapter: KibisisAdapter as unknown as WalletAdapterConfig['Adapter']
   }
 }
 

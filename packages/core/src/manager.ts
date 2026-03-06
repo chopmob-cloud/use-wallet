@@ -244,8 +244,7 @@ export class WalletManager {
       addWallet: (wallet) => addWallet(this.store, { walletId: walletKey, wallet }),
       removeWallet: () => removeWallet(this.store, { walletId: walletKey }),
       setAccounts: (accounts) => setAccounts(this.store, { walletId: walletKey, accounts }),
-      setActiveAccount: (address) =>
-        setActiveAccount(this.store, { walletId: walletKey, address }),
+      setActiveAccount: (address) => setActiveAccount(this.store, { walletId: walletKey, address }),
       setActive: () => setActiveWallet(this.store, { walletId: walletKey })
     }
   }

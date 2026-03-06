@@ -8,7 +8,7 @@ import type {
   WalletAccount,
   WalletAdapterConfig,
   WalletMetadata,
-  WalletState,
+  WalletState
 } from './types'
 
 export type CustomProvider = {
@@ -17,11 +17,11 @@ export type CustomProvider = {
   resumeSession?(): Promise<WalletAccount[] | void>
   signTransactions?<T extends algosdk.Transaction[] | Uint8Array[]>(
     txnGroup: T | T[],
-    indexesToSign?: number[],
+    indexesToSign?: number[]
   ): Promise<(Uint8Array | null)[]>
   transactionSigner?(
     txnGroup: algosdk.Transaction[],
-    indexesToSign: number[],
+    indexesToSign: number[]
   ): Promise<Uint8Array[]>
   signData?(data: string, metadata: SignMetadata): Promise<SignDataResponse>
 }
@@ -57,14 +57,12 @@ export class CustomWallet extends BaseWallet<CustomWalletOptions> {
 
   static defaultMetadata: WalletMetadata = {
     name: 'Custom',
-    icon: ICON,
+    icon: ICON
   }
 
   // ---------- Public Methods ----------------------------------------- //
 
-  public connect = async (
-    args?: Record<string, any>,
-  ): Promise<WalletAccount[]> => {
+  public connect = async (args?: Record<string, any>): Promise<WalletAccount[]> => {
     this.logger.info('Connecting...')
     try {
       if (!this.provider.connect) {
@@ -83,7 +81,7 @@ export class CustomWallet extends BaseWallet<CustomWalletOptions> {
 
       const walletState: WalletState = {
         accounts: walletAccounts,
-        activeAccount,
+        activeAccount
       }
 
       this.store.addWallet(walletState)
@@ -129,7 +127,7 @@ export class CustomWallet extends BaseWallet<CustomWalletOptions> {
         if (!match) {
           this.logger.warn('Session accounts mismatch, updating accounts', {
             prev: walletState.accounts,
-            current: walletAccounts,
+            current: walletAccounts
           })
           this.store.setAccounts(walletAccounts)
         }
@@ -143,11 +141,9 @@ export class CustomWallet extends BaseWallet<CustomWalletOptions> {
 
   // ---------- Transaction Signing ------------------------------------ //
 
-  public signTransactions = async <
-    T extends algosdk.Transaction[] | Uint8Array[],
-  >(
+  public signTransactions = async <T extends algosdk.Transaction[] | Uint8Array[]>(
     txnGroup: T | T[],
-    indexesToSign?: number[],
+    indexesToSign?: number[]
   ): Promise<(Uint8Array | null)[]> => {
     if (!this.provider.signTransactions) {
       this.logger.error('Method not supported: signTransactions')
@@ -159,7 +155,7 @@ export class CustomWallet extends BaseWallet<CustomWalletOptions> {
 
   public transactionSigner = async (
     txnGroup: algosdk.Transaction[],
-    indexesToSign: number[],
+    indexesToSign: number[]
   ): Promise<Uint8Array[]> => {
     if (!this.provider.transactionSigner) {
       this.logger.error('Method not supported: transactionSigner')
@@ -167,17 +163,14 @@ export class CustomWallet extends BaseWallet<CustomWalletOptions> {
     }
     this.logger.debug('Transaction signer called...', {
       txnGroup,
-      indexesToSign,
+      indexesToSign
     })
     return await this.provider.transactionSigner(txnGroup, indexesToSign)
   }
 
   // ---------- Sign Data ---------------------------------------------- //
 
-  public signData = async (
-    data: string,
-    metadata: SignMetadata,
-  ): Promise<SignDataResponse> => {
+  public signData = async (data: string, metadata: SignMetadata): Promise<SignDataResponse> => {
     if (!this.provider.signData) {
       this.logger.error('Method not supported: signData')
       throw new Error('Method not supported: signData')
@@ -194,6 +187,6 @@ export function custom(options: CustomWalletOptions): WalletAdapterConfig {
     id: CUSTOM_WALLET_ID,
     metadata: CustomWallet.defaultMetadata,
     Adapter: CustomWallet as unknown as WalletAdapterConfig['Adapter'],
-    options: options as unknown as Record<string, unknown>,
+    options: options as unknown as Record<string, unknown>
   }
 }

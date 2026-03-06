@@ -5,6 +5,6 @@ export default defineConfig({
     name: 'kibisis',
     dir: './src',
     watch: false,
-    globals: true,
-  },
+    globals: true
+  }
 })

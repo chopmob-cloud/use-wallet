@@ -23,7 +23,7 @@ import {
   type AdapterConstructorParams,
   type WalletAccount,
   type WalletMetadata,
-  type WalletState,
+  type WalletState
 } from '@txnlab/use-wallet/adapter'
 
 const LOCAL_STORAGE_WEB3AUTH_KEY = '@txnlab/use-wallet:v5:web3auth'
@@ -126,13 +126,7 @@ export interface Web3AuthOptions {
    * Web3Auth network (mainnet, testnet, sapphire_mainnet, sapphire_devnet, cyan, aqua)
    * @default 'sapphire_mainnet'
    */
-  web3AuthNetwork?:
-    | 'mainnet'
-    | 'testnet'
-    | 'sapphire_mainnet'
-    | 'sapphire_devnet'
-    | 'cyan'
-    | 'aqua'
+  web3AuthNetwork?: 'mainnet' | 'testnet' | 'sapphire_mainnet' | 'sapphire_devnet' | 'cyan' | 'aqua'
 
   /**
    * Login provider to use (google, facebook, twitter, discord, etc.)
@@ -235,13 +229,13 @@ export class Web3AuthAdapter extends BaseWallet<Web3AuthOptions> {
     this.options = {
       web3AuthNetwork: 'sapphire_mainnet',
       usePopup: true,
-      ...params.options,
+      ...params.options
     }
   }
 
   static defaultMetadata: WalletMetadata = {
     name: 'Web3Auth',
-    icon: ICON,
+    icon: ICON
   }
 
   // ---------- Metadata Persistence ----------------------------------- //
@@ -288,9 +282,7 @@ export class Web3AuthAdapter extends BaseWallet<Web3AuthOptions> {
       WEB3AUTH_NETWORK = modal.WEB3AUTH_NETWORK
     } catch (error) {
       this.logger.error('Failed to load Web3Auth.', error)
-      throw new Error(
-        'Web3Auth package not found. Please install @web3auth/modal',
-      )
+      throw new Error('Web3Auth package not found. Please install @web3auth/modal')
     }
 
     const networkMap: Record<string, string> = {
@@ -299,7 +291,7 @@ export class Web3AuthAdapter extends BaseWallet<Web3AuthOptions> {
       sapphire_mainnet: WEB3AUTH_NETWORK.SAPPHIRE_MAINNET,
       sapphire_devnet: WEB3AUTH_NETWORK.SAPPHIRE_DEVNET,
       cyan: WEB3AUTH_NETWORK.CYAN,
-      aqua: WEB3AUTH_NETWORK.AQUA,
+      aqua: WEB3AUTH_NETWORK.AQUA
     }
 
     // v10: Chain config and provider are handled internally for non-EVM chains.
@@ -309,7 +301,7 @@ export class Web3AuthAdapter extends BaseWallet<Web3AuthOptions> {
       web3AuthNetwork:
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         networkMap[this.options.web3AuthNetwork || 'sapphire_mainnet'] as any,
-      uiConfig: this.options.uiConfig,
+      uiConfig: this.options.uiConfig
     })
 
     await web3auth.init()
@@ -345,11 +337,11 @@ export class Web3AuthAdapter extends BaseWallet<Web3AuthOptions> {
     } catch {
       this.logger.error(
         'Failed to load Web3Auth SFA. Make sure @web3auth/single-factor-auth ' +
-          'and @web3auth/base-provider are installed.',
+          'and @web3auth/base-provider are installed.'
       )
       throw new Error(
         'Web3Auth SFA packages not found. Please install @web3auth/single-factor-auth ' +
-          'and @web3auth/base-provider',
+          'and @web3auth/base-provider'
       )
     }
 
@@ -360,7 +352,7 @@ export class Web3AuthAdapter extends BaseWallet<Web3AuthOptions> {
       displayName: 'Algorand',
       blockExplorerUrl: 'https://lora.algokit.io/mainnet',
       ticker: 'ALGO',
-      tickerName: 'Algorand',
+      tickerName: 'Algorand'
     }
 
     const networkMap: Record<string, string> = {
@@ -369,12 +361,12 @@ export class Web3AuthAdapter extends BaseWallet<Web3AuthOptions> {
       sapphire_mainnet: WEB3AUTH_NETWORK.SAPPHIRE_MAINNET,
       sapphire_devnet: WEB3AUTH_NETWORK.SAPPHIRE_DEVNET,
       cyan: WEB3AUTH_NETWORK.CYAN,
-      aqua: WEB3AUTH_NETWORK.AQUA,
+      aqua: WEB3AUTH_NETWORK.AQUA
     }
 
     // SFA v9 still requires CommonPrivateKeyProvider for non-EVM chains
     const privateKeyProvider = new CommonPrivateKeyProvider({
-      config: { chainConfig },
+      config: { chainConfig }
     })
 
     const web3authSFA = new Web3Auth({
@@ -382,7 +374,7 @@ export class Web3AuthAdapter extends BaseWallet<Web3AuthOptions> {
       web3AuthNetwork:
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         networkMap[this.options.web3AuthNetwork || 'sapphire_mainnet'] as any,
-      privateKeyProvider,
+      privateKeyProvider
     })
 
     await web3authSFA.init()
@@ -402,9 +394,7 @@ export class Web3AuthAdapter extends BaseWallet<Web3AuthOptions> {
    */
   private async getSecureKey(): Promise<SecureKeyContainer> {
     // Get the provider from either the modal SDK or SFA SDK
-    const provider = this.usingSFA
-      ? this.web3authSFA?.provider
-      : this.web3auth?.provider
+    const provider = this.usingSFA ? this.web3authSFA?.provider : this.web3auth?.provider
 
     if (!provider) {
       throw new Error('Web3Auth not connected')
@@ -415,7 +405,7 @@ export class Web3AuthAdapter extends BaseWallet<Web3AuthOptions> {
     // Request the private key from Web3Auth
     // For non-EVM chains, Web3Auth returns the raw ed25519 private key
     const privateKeyHex = await provider.request<string>({
-      method: 'private_key',
+      method: 'private_key'
     })
 
     if (!privateKeyHex || typeof privateKeyHex !== 'string') {
@@ -475,9 +465,7 @@ export class Web3AuthAdapter extends BaseWallet<Web3AuthOptions> {
       return
     }
 
-    this.logger.info(
-      'Web3Auth session expired or not initialized, re-authenticating...',
-    )
+    this.logger.info('Web3Auth session expired or not initialized, re-authenticating...')
 
     if (this.usingSFA) {
       await this.reconnectSFA()
@@ -495,12 +483,10 @@ export class Web3AuthAdapter extends BaseWallet<Web3AuthOptions> {
    */
   private async reconnectSFA(): Promise<void> {
     if (!this.options.getAuthCredentials) {
-      this.logger.error(
-        'Cannot re-authenticate: getAuthCredentials callback not configured',
-      )
+      this.logger.error('Cannot re-authenticate: getAuthCredentials callback not configured')
       throw new Error(
         'Web3Auth session expired. Configure getAuthCredentials option for automatic re-auth, ' +
-          'or call disconnect() and connect() with fresh credentials.',
+          'or call disconnect() and connect() with fresh credentials.'
       )
     }
 
@@ -511,19 +497,13 @@ export class Web3AuthAdapter extends BaseWallet<Web3AuthOptions> {
       credentials = await this.options.getAuthCredentials()
     } catch (error: any) {
       // User is no longer authenticated with the identity provider (e.g., logged out of Firebase)
-      this.logger.warn(
-        'Failed to get auth credentials, user may have logged out:',
-        error.message,
-      )
+      this.logger.warn('Failed to get auth credentials, user may have logged out:', error.message)
       this.onDisconnect()
-      throw new Error(
-        'Authentication provider session expired. Please log in again.',
-      )
+      throw new Error('Authentication provider session expired. Please log in again.')
     }
 
     // Initialize SFA client if needed
-    const web3authSFA =
-      this.web3authSFA || (await this.initializeSFAClient())
+    const web3authSFA = this.web3authSFA || (await this.initializeSFAClient())
 
     // Logout first if still connected (stale session)
     if (web3authSFA.connected) {
@@ -543,7 +523,7 @@ export class Web3AuthAdapter extends BaseWallet<Web3AuthOptions> {
     const provider = await web3authSFA.connect({
       verifier,
       verifierId: credentials.verifierId,
-      idToken: credentials.idToken,
+      idToken: credentials.idToken
     })
 
     if (!provider) {
@@ -611,20 +591,17 @@ export class Web3AuthAdapter extends BaseWallet<Web3AuthOptions> {
       })
 
       if (currentAddress !== this._address) {
-        this.logger.warn(
-          'Re-authenticated as different user, disconnecting wallet',
-          {
-            expected: this._address,
-            actual: currentAddress,
-          },
-        )
+        this.logger.warn('Re-authenticated as different user, disconnecting wallet', {
+          expected: this._address,
+          actual: currentAddress
+        })
 
         // Different user = different wallet. Full disconnect required.
         this.onDisconnect()
 
         throw new Error(
           `Re-authenticated as a different account. Expected ${this._address}, ` +
-            `got ${currentAddress}. Please connect again with the correct account.`,
+            `got ${currentAddress}. Please connect again with the correct account.`
         )
       }
 
@@ -656,9 +633,7 @@ export class Web3AuthAdapter extends BaseWallet<Web3AuthOptions> {
    *   verifier: 'my-firebase-verifier'
    * })
    */
-  public connect = async (
-    args?: Record<string, any>,
-  ): Promise<WalletAccount[]> => {
+  public connect = async (args?: Record<string, any>): Promise<WalletAccount[]> => {
     this.logger.info('Connecting to Web3Auth...')
 
     try {
@@ -667,25 +642,23 @@ export class Web3AuthAdapter extends BaseWallet<Web3AuthOptions> {
       // Check if custom authentication params are provided
       const idToken = args?.idToken as string | undefined
       const verifierId = args?.verifierId as string | undefined
-      const verifier =
-        (args?.verifier as string | undefined) || this.options.verifier
+      const verifier = (args?.verifier as string | undefined) || this.options.verifier
 
       if (idToken && verifierId) {
         // Custom authentication flow using Single Factor Auth (e.g., Firebase)
         if (!verifier) {
           throw new Error(
-            'Custom authentication requires a verifier. Provide it in connect() args or options.verifier',
+            'Custom authentication requires a verifier. Provide it in connect() args or options.verifier'
           )
         }
 
         this.logger.info('Connecting with custom authentication (SFA)...', {
           verifier,
-          verifierId,
+          verifierId
         })
 
         // Initialize the SFA client
-        const web3authSFA =
-          this.web3authSFA || (await this.initializeSFAClient())
+        const web3authSFA = this.web3authSFA || (await this.initializeSFAClient())
 
         // If already connected, logout first to allow reconnection with potentially different credentials
         if (web3authSFA.connected) {
@@ -701,7 +674,7 @@ export class Web3AuthAdapter extends BaseWallet<Web3AuthOptions> {
         provider = await web3authSFA.connect({
           verifier,
           verifierId,
-          idToken,
+          idToken
         })
 
         this.usingSFA = true
@@ -718,7 +691,7 @@ export class Web3AuthAdapter extends BaseWallet<Web3AuthOptions> {
         // Get user info for display purposes (modal SDK only)
         this.userInfo = await web3auth.getUserInfo()
         this.logger.debug('User info retrieved', {
-          email: this.userInfo.email,
+          email: this.userInfo.email
         })
       }
 
@@ -745,16 +718,13 @@ export class Web3AuthAdapter extends BaseWallet<Web3AuthOptions> {
       }
 
       const walletAccount: WalletAccount = {
-        name:
-          this.userInfo.name ||
-          this.userInfo.email ||
-          `${this.metadata.name} Account`,
-        address: this._address,
+        name: this.userInfo.name || this.userInfo.email || `${this.metadata.name} Account`,
+        address: this._address
       }
 
       const walletState: WalletState = {
         accounts: [walletAccount],
-        activeAccount: walletAccount,
+        activeAccount: walletAccount
       }
 
       this.store.addWallet(walletState)
@@ -831,7 +801,7 @@ export class Web3AuthAdapter extends BaseWallet<Web3AuthOptions> {
       }
 
       this.logger.info('Session restored from cache (lazy mode)', {
-        address: this._address,
+        address: this._address
       })
     } catch (error: any) {
       this.logger.error('Error resuming session:', error.message)
@@ -864,7 +834,7 @@ export class Web3AuthAdapter extends BaseWallet<Web3AuthOptions> {
    * ```
    */
   public withPrivateKey = async <T>(
-    callback: (secretKey: Uint8Array) => Promise<T>,
+    callback: (secretKey: Uint8Array) => Promise<T>
   ): Promise<T> => {
     this.logger.debug('withPrivateKey: Providing private key access...')
 
@@ -904,7 +874,7 @@ export class Web3AuthAdapter extends BaseWallet<Web3AuthOptions> {
    */
   private processTxns(
     txnGroup: algosdk.Transaction[],
-    indexesToSign?: number[],
+    indexesToSign?: number[]
   ): algosdk.Transaction[] {
     const txnsToSign: algosdk.Transaction[] = []
 
@@ -926,7 +896,7 @@ export class Web3AuthAdapter extends BaseWallet<Web3AuthOptions> {
    */
   private processEncodedTxns(
     txnGroup: Uint8Array[],
-    indexesToSign?: number[],
+    indexesToSign?: number[]
   ): algosdk.Transaction[] {
     const txnsToSign: algosdk.Transaction[] = []
 
@@ -960,16 +930,14 @@ export class Web3AuthAdapter extends BaseWallet<Web3AuthOptions> {
    * and immediately cleared from memory. The key is never stored
    * between signing operations.
    */
-  public signTransactions = async <
-    T extends algosdk.Transaction[] | Uint8Array[],
-  >(
+  public signTransactions = async <T extends algosdk.Transaction[] | Uint8Array[]>(
     txnGroup: T | T[],
-    indexesToSign?: number[],
+    indexesToSign?: number[]
   ): Promise<(Uint8Array | null)[]> => {
     try {
       this.logger.debug('Signing transactions...', {
         txnGroup,
-        indexesToSign,
+        indexesToSign
       })
 
       // Ensure Web3Auth is connected (re-authenticates if session expired)
@@ -982,9 +950,7 @@ export class Web3AuthAdapter extends BaseWallet<Web3AuthOptions> {
         const flatTxns: algosdk.Transaction[] = flattenTxnGroup(txnGroup)
         txnsToSign = this.processTxns(flatTxns, indexesToSign)
       } else {
-        const flatTxns: Uint8Array[] = flattenTxnGroup(
-          txnGroup as Uint8Array[],
-        )
+        const flatTxns: Uint8Array[] = flattenTxnGroup(txnGroup as Uint8Array[])
         txnsToSign = this.processEncodedTxns(flatTxns, indexesToSign)
       }
 
@@ -1016,7 +982,7 @@ export class Web3AuthAdapter extends BaseWallet<Web3AuthOptions> {
       }
 
       this.logger.debug('Transactions signed successfully', {
-        count: signedTxns.length,
+        count: signedTxns.length
       })
       return signedTxns
     } catch (error: any) {

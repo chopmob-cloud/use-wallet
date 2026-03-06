@@ -12,7 +12,7 @@ import {
   type WalletAccount,
   type WalletMetadata,
   type WalletState,
-  type WalletTransaction,
+  type WalletTransaction
 } from '@txnlab/use-wallet/adapter'
 import type { WalletConnectModal, WalletConnectModalConfig } from '@walletconnect/modal'
 import type SignClient from '@walletconnect/sign-client'
@@ -89,13 +89,13 @@ export class WalletConnectAdapter extends BaseWallet<WalletConnectOptions> {
 
     const clientMetadata: SignClientTypes.Metadata = {
       ...this.getWindowMetadata(),
-      ...metadataOptions,
+      ...metadataOptions
     }
 
     this.clientOptions = {
       projectId,
       relayUrl,
-      metadata: clientMetadata,
+      metadata: clientMetadata
     }
 
     this.modalOptions = modalOptions
@@ -103,7 +103,7 @@ export class WalletConnectAdapter extends BaseWallet<WalletConnectOptions> {
 
   static defaultMetadata: WalletMetadata = {
     name: 'WalletConnect',
-    icon: ICON,
+    icon: ICON
   }
 
   /**
@@ -119,7 +119,7 @@ export class WalletConnectAdapter extends BaseWallet<WalletConnectOptions> {
       name: '',
       description: '',
       url: '',
-      icons: [],
+      icons: []
     }
 
     function getFromWindow<T>(name: string): T | undefined {
@@ -225,12 +225,7 @@ export class WalletConnectAdapter extends BaseWallet<WalletConnectOptions> {
     }
 
     function getName(): string {
-      let name: string = getWindowMetadataOfAny(
-        'name',
-        'og:site_name',
-        'og:title',
-        'twitter:title',
-      )
+      let name: string = getWindowMetadataOfAny('name', 'og:site_name', 'og:title', 'twitter:title')
 
       if (!name) {
         name = doc.title
@@ -244,7 +239,7 @@ export class WalletConnectAdapter extends BaseWallet<WalletConnectOptions> {
         'description',
         'og:description',
         'twitter:description',
-        'keywords',
+        'keywords'
       )
 
       return description
@@ -259,7 +254,7 @@ export class WalletConnectAdapter extends BaseWallet<WalletConnectOptions> {
       description,
       url,
       icons,
-      name,
+      name
     }
 
     return meta
@@ -297,7 +292,7 @@ export class WalletConnectAdapter extends BaseWallet<WalletConnectOptions> {
     const WalletConnectModal = (await import('@walletconnect/modal')).WalletConnectModal
     const modal = new WalletConnectModal({
       projectId: this.clientOptions.projectId,
-      ...this.modalOptions,
+      ...this.modalOptions
     })
 
     modal.subscribeModal((state) => this.logger.info(`Modal ${state.open ? 'open' : 'closed'}`))
@@ -322,7 +317,7 @@ export class WalletConnectAdapter extends BaseWallet<WalletConnectOptions> {
 
     const walletAccounts = accounts.map((address: string, idx: number) => ({
       name: `${this.metadata.name} Account ${idx + 1}`,
-      address,
+      address
     }))
 
     const walletState = this.store.getWalletState()
@@ -330,7 +325,7 @@ export class WalletConnectAdapter extends BaseWallet<WalletConnectOptions> {
     if (!walletState) {
       const newWalletState: WalletState = {
         accounts: walletAccounts,
-        activeAccount: walletAccounts[0],
+        activeAccount: walletAccounts[0]
       }
 
       this.store.addWallet(newWalletState)
@@ -342,7 +337,7 @@ export class WalletConnectAdapter extends BaseWallet<WalletConnectOptions> {
       if (!match) {
         this.logger.warn('Session accounts mismatch, updating accounts', {
           prev: walletState.accounts,
-          current: walletAccounts,
+          current: walletAccounts
         })
         this.store.setAccounts(walletAccounts)
       }
@@ -371,8 +366,8 @@ export class WalletConnectAdapter extends BaseWallet<WalletConnectOptions> {
         algorand: {
           chains: [this.activeChainId],
           methods: ['algo_signTxn'],
-          events: [],
-        },
+          events: []
+        }
       }
 
       const { uri, approval } = await client.connect({ requiredNamespaces })
@@ -406,8 +401,8 @@ export class WalletConnectAdapter extends BaseWallet<WalletConnectOptions> {
           topic: this.session.topic,
           reason: {
             message: 'User disconnected.',
-            code: 6000,
-          },
+            code: 6000
+          }
         })
       }
       this.logger.info('Disconnected')
@@ -446,7 +441,7 @@ export class WalletConnectAdapter extends BaseWallet<WalletConnectOptions> {
 
   private processTxns(
     txnGroup: algosdk.Transaction[],
-    indexesToSign?: number[],
+    indexesToSign?: number[]
   ): WalletTransaction[] {
     const txnsToSign: WalletTransaction[] = []
 
@@ -469,7 +464,7 @@ export class WalletConnectAdapter extends BaseWallet<WalletConnectOptions> {
 
   private processEncodedTxns(
     txnGroup: Uint8Array[],
-    indexesToSign?: number[],
+    indexesToSign?: number[]
   ): WalletTransaction[] {
     const txnsToSign: WalletTransaction[] = []
 
@@ -499,7 +494,7 @@ export class WalletConnectAdapter extends BaseWallet<WalletConnectOptions> {
 
   public signTransactions = async <T extends algosdk.Transaction[] | Uint8Array[]>(
     txnGroup: T | T[],
-    indexesToSign?: number[],
+    indexesToSign?: number[]
   ): Promise<(Uint8Array | null)[]> => {
     try {
       if (!this.session) {
@@ -531,7 +526,7 @@ export class WalletConnectAdapter extends BaseWallet<WalletConnectOptions> {
       const signTxnsResult = await client.request<SignTxnsResponse>({
         chainId: this.activeChainId,
         topic: this.session.topic,
-        request,
+        request
       })
 
       this.logger.debug('Received signed transactions from wallet', signTxnsResult)

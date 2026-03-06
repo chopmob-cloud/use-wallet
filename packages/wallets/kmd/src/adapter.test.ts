@@ -8,7 +8,7 @@ vi.mock('@txnlab/use-wallet/adapter', async (importOriginal) => {
   const original = await importOriginal<typeof import('@txnlab/use-wallet/adapter')>()
   return {
     ...original,
-    LogLevel: original.LogLevel,
+    LogLevel: original.LogLevel
   }
 })
 
@@ -17,7 +17,7 @@ const mockKmd = {
   initWalletHandle: vi.fn(),
   listKeys: vi.fn(),
   releaseWalletHandle: vi.fn(),
-  signTransaction: vi.fn(),
+  signTransaction: vi.fn()
 }
 
 vi.mock('algosdk', async (importOriginal) => {
@@ -26,8 +26,8 @@ vi.mock('algosdk', async (importOriginal) => {
     ...module,
     default: {
       ...module,
-      Kmd: vi.fn(() => mockKmd),
-    },
+      Kmd: vi.fn(() => mockKmd)
+    }
   }
 })
 
@@ -39,7 +39,7 @@ const mockToken = 'token'
 
 function createWallet(
   store: AdapterStoreAccessor,
-  options?: { promptForPassword?: () => Promise<string>; wallet?: string },
+  options?: { promptForPassword?: () => Promise<string>; wallet?: string }
 ): KmdAdapter {
   const wallet = new KmdAdapter({
     id: WALLET_ID,
@@ -47,7 +47,7 @@ function createWallet(
     store,
     subscribe: vi.fn(),
     getAlgodClient: () => ({}) as any,
-    options,
+    options
   })
 
   // @ts-expect-error - Mocking the private client property
@@ -63,11 +63,11 @@ describe('KmdAdapter', () => {
 
   const account1 = {
     name: 'KMD Account 1',
-    address: 'mockAddress1',
+    address: 'mockAddress1'
   }
   const account2 = {
     name: 'KMD Account 2',
-    address: 'mockAddress2',
+    address: 'mockAddress2'
   }
 
   beforeEach(() => {
@@ -105,7 +105,7 @@ describe('KmdAdapter', () => {
       expect(accounts).toEqual([account1, account2])
       expect(store.state.wallets[WALLET_ID]).toEqual({
         accounts: [account1, account2],
-        activeAccount: account1,
+        activeAccount: account1
       })
     })
 
@@ -156,11 +156,11 @@ describe('KmdAdapter', () => {
     it('should resume session if session is found', async () => {
       const walletState: WalletState = {
         accounts: [account1],
-        activeAccount: account1,
+        activeAccount: account1
       }
 
       const harness = createTestHarness(WALLET_ID, {
-        wallets: { [WALLET_ID]: walletState },
+        wallets: { [WALLET_ID]: walletState }
       })
       store = harness.store
       wallet = createWallet(harness.accessor)
@@ -186,9 +186,9 @@ describe('KmdAdapter', () => {
           firstValid: 51,
           lastValid: 61,
           minFee: 1000,
-          genesisID: 'testnet-v1.0',
+          genesisID: 'testnet-v1.0'
         },
-        paymentParams: { receiver, amount },
+        paymentParams: { receiver, amount }
       })
     }
 
@@ -199,7 +199,7 @@ describe('KmdAdapter', () => {
 
     beforeEach(async () => {
       mockKmd.listKeys.mockResolvedValueOnce({
-        addresses: [connectedAcct1, connectedAcct2],
+        addresses: [connectedAcct1, connectedAcct2]
       })
 
       await wallet.connect()
@@ -228,7 +228,7 @@ describe('KmdAdapter', () => {
 
         await wallet.signTransactions([
           [g1txn1, g1txn2],
-          [g2txn1, g2txn2],
+          [g2txn1, g2txn2]
         ])
 
         expect(mockKmd.signTransaction).toHaveBeenCalledTimes(4)
@@ -245,7 +245,7 @@ describe('KmdAdapter', () => {
         expect(mockKmd.signTransaction).toHaveBeenCalledWith(
           mockToken,
           mockPassword,
-          algosdk.decodeUnsignedTransaction(encodedTxn),
+          algosdk.decodeUnsignedTransaction(encodedTxn)
         )
       })
 
@@ -260,19 +260,19 @@ describe('KmdAdapter', () => {
           1,
           mockToken,
           mockPassword,
-          algosdk.decodeUnsignedTransaction(gtxn1),
+          algosdk.decodeUnsignedTransaction(gtxn1)
         )
         expect(mockKmd.signTransaction).toHaveBeenNthCalledWith(
           2,
           mockToken,
           mockPassword,
-          algosdk.decodeUnsignedTransaction(gtxn2),
+          algosdk.decodeUnsignedTransaction(gtxn2)
         )
         expect(mockKmd.signTransaction).toHaveBeenNthCalledWith(
           3,
           mockToken,
           mockPassword,
-          algosdk.decodeUnsignedTransaction(gtxn3),
+          algosdk.decodeUnsignedTransaction(gtxn3)
         )
       })
 
@@ -285,7 +285,7 @@ describe('KmdAdapter', () => {
 
         await wallet.signTransactions([
           [g1txn1, g1txn2],
-          [g2txn1, g2txn2],
+          [g2txn1, g2txn2]
         ])
 
         expect(mockKmd.signTransaction).toHaveBeenCalledTimes(4)
@@ -293,25 +293,25 @@ describe('KmdAdapter', () => {
           1,
           mockToken,
           mockPassword,
-          algosdk.decodeUnsignedTransaction(g1txn1),
+          algosdk.decodeUnsignedTransaction(g1txn1)
         )
         expect(mockKmd.signTransaction).toHaveBeenNthCalledWith(
           2,
           mockToken,
           mockPassword,
-          algosdk.decodeUnsignedTransaction(g1txn2),
+          algosdk.decodeUnsignedTransaction(g1txn2)
         )
         expect(mockKmd.signTransaction).toHaveBeenNthCalledWith(
           3,
           mockToken,
           mockPassword,
-          algosdk.decodeUnsignedTransaction(g2txn1),
+          algosdk.decodeUnsignedTransaction(g2txn1)
         )
         expect(mockKmd.signTransaction).toHaveBeenNthCalledWith(
           4,
           mockToken,
           mockPassword,
-          algosdk.decodeUnsignedTransaction(g2txn2),
+          algosdk.decodeUnsignedTransaction(g2txn2)
         )
       })
 
@@ -335,7 +335,7 @@ describe('KmdAdapter', () => {
         const [gtxn1, gtxn2, gtxn3] = algosdk.assignGroupID([
           canSignTxn1,
           cannotSignTxn2,
-          canSignTxn3,
+          canSignTxn3
         ])
 
         await wallet.signTransactions([gtxn1, gtxn2, gtxn3])
@@ -396,7 +396,7 @@ describe('KmdAdapter', () => {
 
     beforeEach(() => {
       wallet = createWallet(accessor, {
-        promptForPassword: () => Promise.resolve(customPassword),
+        promptForPassword: () => Promise.resolve(customPassword)
       })
     })
 

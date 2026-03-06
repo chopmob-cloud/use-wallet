@@ -9,13 +9,11 @@ import {
   isTransactionArray,
   type AdapterConstructorParams,
   type WalletAccount,
-  type WalletState,
+  type WalletState
 } from '@txnlab/use-wallet/adapter'
 import type AVMWebProviderSDK from '@agoralabs-sh/avm-web-provider'
 
-export function isAVMWebProviderSDKError(
-  error: any,
-): error is AVMWebProviderSDK.BaseARC0027Error {
+export function isAVMWebProviderSDKError(error: any): error is AVMWebProviderSDK.BaseARC0027Error {
   return typeof error === 'object' && 'code' in error && 'message' in error
 }
 
@@ -38,13 +36,13 @@ export abstract class AVMProvider extends BaseWallet {
 
       if (!this.avmWebProviderSDK) {
         throw new Error(
-          'Failed to initialize, the @agoralabs-sh/avm-web-provider SDK was not provided',
+          'Failed to initialize, the @agoralabs-sh/avm-web-provider SDK was not provided'
         )
       }
 
       if (!this.avmWebProviderSDK.AVMWebClient) {
         throw new Error(
-          'Failed to initialize, AVMWebClient missing from @agoralabs-sh/avm-web-provider SDK',
+          'Failed to initialize, AVMWebClient missing from @agoralabs-sh/avm-web-provider SDK'
         )
       }
       this.logger.info('@agoralabs-sh/avm-web-provider SDK initialized')
@@ -83,17 +81,17 @@ export abstract class AVMProvider extends BaseWallet {
   }
 
   protected _mapAVMWebProviderAccountToWalletAccounts(
-    accounts: AVMWebProviderSDK.IAccount[],
+    accounts: AVMWebProviderSDK.IAccount[]
   ): WalletAccount[] {
     return accounts.map(({ address, name }, idx) => ({
       name: name || `[${this.metadata.name}] Account ${idx + 1}`,
-      address,
+      address
     }))
   }
 
   protected processTxns(
     txnGroup: algosdk.Transaction[],
-    indexesToSign?: number[],
+    indexesToSign?: number[]
   ): AVMWebProviderSDK.IARC0001Transaction[] {
     const txnsToSign: AVMWebProviderSDK.IARC0001Transaction[] = []
 
@@ -116,7 +114,7 @@ export abstract class AVMProvider extends BaseWallet {
 
   protected processEncodedTxns(
     txnGroup: Uint8Array[],
-    indexesToSign?: number[],
+    indexesToSign?: number[]
   ): AVMWebProviderSDK.IARC0001Transaction[] {
     const txnsToSign: AVMWebProviderSDK.IARC0001Transaction[] = []
 
@@ -151,7 +149,7 @@ export abstract class AVMProvider extends BaseWallet {
   protected abstract _enable(): Promise<AVMWebProviderSDK.IEnableResult>
   protected abstract _disable(): Promise<AVMWebProviderSDK.IDisableResult>
   protected abstract _signTransactions(
-    txns: AVMWebProviderSDK.IARC0001Transaction[],
+    txns: AVMWebProviderSDK.IARC0001Transaction[]
   ): Promise<AVMWebProviderSDK.ISignTransactionsResult>
 
   /**
@@ -168,7 +166,7 @@ export abstract class AVMProvider extends BaseWallet {
 
       const walletState: WalletState = {
         accounts: walletAccounts,
-        activeAccount: walletAccounts[0],
+        activeAccount: walletAccounts[0]
       }
 
       this.store.addWallet(walletState)
@@ -178,9 +176,7 @@ export abstract class AVMProvider extends BaseWallet {
     } catch (error: any) {
       this.logger.error(
         'Error connecting: ',
-        isAVMWebProviderSDKError(error)
-          ? `${error.message} (code: ${error.code})`
-          : error.message,
+        isAVMWebProviderSDKError(error) ? `${error.message} (code: ${error.code})` : error.message
       )
       throw error
     }
@@ -194,14 +190,12 @@ export abstract class AVMProvider extends BaseWallet {
       const result = await this._disable()
 
       this.logger.info(
-        `Successfully disconnected${result.sessionIds && result.sessionIds.length ? ` sessions [${result.sessionIds.join(',')}]` : ''} on network "${result.genesisId}"`,
+        `Successfully disconnected${result.sessionIds && result.sessionIds.length ? ` sessions [${result.sessionIds.join(',')}]` : ''} on network "${result.genesisId}"`
       )
     } catch (error: any) {
       this.logger.error(
         'Error disconnecting: ',
-        isAVMWebProviderSDKError(error)
-          ? `${error.message} (code: ${error.code})`
-          : error.message,
+        isAVMWebProviderSDKError(error) ? `${error.message} (code: ${error.code})` : error.message
       )
       throw error
     }
@@ -230,7 +224,7 @@ export abstract class AVMProvider extends BaseWallet {
       if (!match) {
         this.logger.warn('Session accounts mismatch, updating accounts', {
           prev: walletState.accounts,
-          current: walletAccounts,
+          current: walletAccounts
         })
 
         this.store.setAccounts(walletAccounts)
@@ -239,9 +233,7 @@ export abstract class AVMProvider extends BaseWallet {
     } catch (error: any) {
       this.logger.error(
         'Error resuming session: ',
-        isAVMWebProviderSDKError(error)
-          ? `${error.message} (code: ${error.code})`
-          : error.message,
+        isAVMWebProviderSDKError(error) ? `${error.message} (code: ${error.code})` : error.message
       )
       this.onDisconnect()
       throw error
@@ -250,7 +242,7 @@ export abstract class AVMProvider extends BaseWallet {
 
   public async signTransactions<T extends algosdk.Transaction[] | Uint8Array[]>(
     txnGroup: T | T[],
-    indexesToSign?: number[],
+    indexesToSign?: number[]
   ): Promise<(Uint8Array | null)[]> {
     try {
       this.logger.debug('Signing transactions...', { txnGroup, indexesToSign })
@@ -284,9 +276,7 @@ export abstract class AVMProvider extends BaseWallet {
     } catch (error: any) {
       this.logger.error(
         'Error signing transactions: ',
-        isAVMWebProviderSDKError(error)
-          ? `${error.message} (code: ${error.code})`
-          : error.message,
+        isAVMWebProviderSDKError(error) ? `${error.message} (code: ${error.code})` : error.message
       )
       throw error
     }

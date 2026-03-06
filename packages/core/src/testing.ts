@@ -50,13 +50,10 @@ export function createMockStoreAccessor(
     getActiveWallet: () => store.state.activeWallet,
     getActiveNetwork: () => store.state.activeNetwork,
     getState: () => store.state,
-    addWallet: (wallet: WalletState) =>
-      addWallet(store, { walletId: walletKey, wallet }),
+    addWallet: (wallet: WalletState) => addWallet(store, { walletId: walletKey, wallet }),
     removeWallet: () => removeWallet(store, { walletId: walletKey }),
-    setAccounts: (accounts) =>
-      setAccounts(store, { walletId: walletKey, accounts }),
-    setActiveAccount: (address) =>
-      setActiveAccount(store, { walletId: walletKey, address }),
+    setAccounts: (accounts) => setAccounts(store, { walletId: walletKey, accounts }),
+    setActiveAccount: (address) => setActiveAccount(store, { walletId: walletKey, address }),
     setActive: () => setActiveWallet(store, { walletId: walletKey })
   }
 
@@ -79,13 +76,10 @@ export function createTestHarness(
     getActiveWallet: () => store.state.activeWallet,
     getActiveNetwork: () => store.state.activeNetwork,
     getState: () => store.state,
-    addWallet: (wallet: WalletState) =>
-      addWallet(store, { walletId: walletKey, wallet }),
+    addWallet: (wallet: WalletState) => addWallet(store, { walletId: walletKey, wallet }),
     removeWallet: () => removeWallet(store, { walletId: walletKey }),
-    setAccounts: (accounts) =>
-      setAccounts(store, { walletId: walletKey, accounts }),
-    setActiveAccount: (address) =>
-      setActiveAccount(store, { walletId: walletKey, address }),
+    setAccounts: (accounts) => setAccounts(store, { walletId: walletKey, accounts }),
+    setActiveAccount: (address) => setActiveAccount(store, { walletId: walletKey, address }),
     setActive: () => setActiveWallet(store, { walletId: walletKey })
   }
 

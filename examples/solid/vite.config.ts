@@ -4,5 +4,5 @@ import tailwindcss from '@tailwindcss/vite'
 import { nodePolyfills } from 'vite-plugin-node-polyfills'
 
 export default defineConfig({
-  plugins: [solid(), tailwindcss(), nodePolyfills()],
+  plugins: [solid(), tailwindcss(), nodePolyfills()]
 })

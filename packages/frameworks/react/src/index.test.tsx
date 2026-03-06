@@ -8,7 +8,7 @@ import {
   type WalletAccount,
   type WalletAdapterConfig,
   type AdapterConstructorParams,
-  type Wallet,
+  type Wallet
 } from '@txnlab/use-wallet'
 import algosdk from 'algosdk'
 import * as React from 'react'
@@ -62,7 +62,7 @@ function mockAdapterA(): WalletAdapterConfig {
   return {
     id: 'wallet-a',
     metadata: MockWalletA.defaultMetadata,
-    Adapter: MockWalletA as unknown as WalletAdapterConfig['Adapter'],
+    Adapter: MockWalletA as unknown as WalletAdapterConfig['Adapter']
   }
 }
 
@@ -70,7 +70,7 @@ function mockAdapterB(): WalletAdapterConfig {
   return {
     id: 'wallet-b',
     metadata: MockWalletB.defaultMetadata,
-    Adapter: MockWalletB as unknown as WalletAdapterConfig['Adapter'],
+    Adapter: MockWalletB as unknown as WalletAdapterConfig['Adapter']
   }
 }
 

@@ -30,7 +30,7 @@ export default defineNuxtPlugin((nuxtApp) => {
     magic({ apiKey: 'pk_live_D17FD8D89621B5F3' }),
     ...(import.meta.env.VITE_WEB3AUTH_CLIENT_ID
       ? [web3auth({ clientId: import.meta.env.VITE_WEB3AUTH_CLIENT_ID })]
-      : []),
+      : [])
   ]
 
   nuxtApp.vueApp.use(WalletManagerPlugin, { wallets, defaultNetwork: 'testnet' })

@@ -3,11 +3,11 @@ import { Providers } from './providers'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'use-wallet v5 | Next.js',
+  title: 'use-wallet v5 | Next.js'
 }
 
 export default function RootLayout({
-  children,
+  children
 }: Readonly<{
   children: React.ReactNode
 }>) {

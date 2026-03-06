@@ -5,6 +5,6 @@ export default defineConfig({
     name: 'exodus',
     dir: './src',
     watch: false,
-    globals: true,
-  },
+    globals: true
+  }
 })

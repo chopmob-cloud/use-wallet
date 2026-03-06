@@ -16,7 +16,7 @@ export function walletConnect(options: WalletConnectOptions): WalletAdapterConfi
     id,
     metadata,
     Adapter: WalletConnectAdapter as unknown as WalletAdapterConfig['Adapter'],
-    options: options as unknown as Record<string, unknown> | undefined,
+    options: options as unknown as Record<string, unknown> | undefined
   }
 }
 

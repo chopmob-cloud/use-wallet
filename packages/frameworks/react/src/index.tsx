@@ -6,7 +6,7 @@ import {
   SignDataResponse,
   SignMetadata,
   type Wallet,
-  WalletManager,
+  WalletManager
 } from '@txnlab/use-wallet'
 import algosdk from 'algosdk'
 import * as React from 'react'

@@ -3,8 +3,6 @@ import {
   BaseWallet,
   NetworkId,
   WalletManager,
-  DEFAULT_NETWORK_CONFIG,
-  type State,
   type WalletAccount,
   type SignDataResponse,
   type WalletAdapterConfig,

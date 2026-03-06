@@ -7,7 +7,7 @@ export function w3wallet(): WalletAdapterConfig {
   return {
     id: WALLET_ID,
     metadata: W3WalletAdapter.defaultMetadata,
-    Adapter: W3WalletAdapter as unknown as WalletAdapterConfig['Adapter'],
+    Adapter: W3WalletAdapter as unknown as WalletAdapterConfig['Adapter']
   }
 }
 

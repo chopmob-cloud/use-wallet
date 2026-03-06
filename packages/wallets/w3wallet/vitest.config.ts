@@ -5,6 +5,6 @@ export default defineConfig({
     name: 'w3wallet',
     dir: './src',
     watch: false,
-    globals: true,
-  },
+    globals: true
+  }
 })

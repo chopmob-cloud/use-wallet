@@ -26,7 +26,7 @@ export function SendTransaction() {
         sender: activeAddress,
         receiver: activeAddress,
         amount: 0,
-        suggestedParams,
+        suggestedParams
       })
 
       const atc = new algosdk.AtomicTransactionComposer()

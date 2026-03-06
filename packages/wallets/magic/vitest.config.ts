@@ -5,6 +5,6 @@ export default defineConfig({
     name: 'magic',
     dir: './src',
     watch: false,
-    globals: true,
-  },
+    globals: true
+  }
 })

@@ -60,7 +60,6 @@ const setupMocks = () => {
   mockWalletManager = new WalletManager({
     wallets: [mockAdapter()]
   })
-
   ;(inject as Mock).mockImplementation((token: string | InjectionKey<unknown>) => {
     if (token === 'walletManager') return mockWalletManager
     if (token === 'setAlgodClient') return mockSetAlgodClient

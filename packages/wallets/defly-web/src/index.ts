@@ -7,7 +7,7 @@ export function deflyWeb(): WalletAdapterConfig {
   return {
     id: WALLET_ID,
     metadata: DeflyWebAdapter.defaultMetadata,
-    Adapter: DeflyWebAdapter as unknown as WalletAdapterConfig['Adapter'],
+    Adapter: DeflyWebAdapter as unknown as WalletAdapterConfig['Adapter']
   }
 }
 

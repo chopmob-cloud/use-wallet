@@ -61,7 +61,7 @@ function WalletRow({
   isConnecting,
   connectDisabled,
   onConnect,
-  children,
+  children
 }: {
   wallet: Wallet
   isConnecting: boolean

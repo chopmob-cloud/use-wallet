@@ -24,7 +24,7 @@ const handleSend = async () => {
       sender: activeAddress.value,
       receiver: activeAddress.value,
       amount: 0,
-      suggestedParams,
+      suggestedParams
     })
 
     const atc = new algosdk.AtomicTransactionComposer()

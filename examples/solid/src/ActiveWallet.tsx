@@ -24,9 +24,7 @@ export function ActiveWallet() {
               class="h-12 w-12 rounded-xl"
             />
             <div>
-              <h2 class="text-lg font-semibold text-gray-900">
-                {activeWallet()!.metadata.name}
-              </h2>
+              <h2 class="text-lg font-semibold text-gray-900">{activeWallet()!.metadata.name}</h2>
               <div class="flex items-center gap-1.5">
                 <span class="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600">
                   Connected

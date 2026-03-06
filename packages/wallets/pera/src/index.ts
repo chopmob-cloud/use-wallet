@@ -9,7 +9,7 @@ export function pera(options?: PeraOptions): WalletAdapterConfig {
     id: WALLET_ID,
     metadata: PeraAdapter.defaultMetadata,
     Adapter: PeraAdapter as unknown as WalletAdapterConfig['Adapter'],
-    options: options as unknown as Record<string, unknown> | undefined,
+    options: options as unknown as Record<string, unknown> | undefined
   }
 }
 

@@ -8,7 +8,7 @@ import {
   type AdapterConstructorParams,
   type WalletAccount,
   type WalletMetadata,
-  type WalletState,
+  type WalletState
 } from '@txnlab/use-wallet/adapter'
 
 interface MnemonicConstructor {
@@ -34,22 +34,21 @@ export class MnemonicAdapter extends BaseWallet<MnemonicOptions> {
 
     const {
       persistToStorage = false,
-      promptForMnemonic = () =>
-        Promise.resolve(prompt('Enter 25-word mnemonic passphrase:')),
+      promptForMnemonic = () => Promise.resolve(prompt('Enter 25-word mnemonic passphrase:'))
     } = this.options || {}
 
     this.mnemonicOptions = { persistToStorage, promptForMnemonic }
 
     if (this.mnemonicOptions.persistToStorage) {
       this.logger.warn(
-        'Persisting mnemonics to storage is insecure. Any private key mnemonics used should never hold real Algos (i.e., on MainNet). Use with caution!',
+        'Persisting mnemonics to storage is insecure. Any private key mnemonics used should never hold real Algos (i.e., on MainNet). Use with caution!'
       )
     }
   }
 
   static defaultMetadata: WalletMetadata = {
     name: 'Mnemonic',
-    icon: ICON,
+    icon: ICON
   }
 
   private loadMnemonicFromStorage(): string | null {
@@ -72,7 +71,7 @@ export class MnemonicAdapter extends BaseWallet<MnemonicOptions> {
       const network = this.activeNetworkConfig
       if (!network.isTestnet) {
         this.logger.warn(
-          'The Mnemonic wallet provider is insecure and intended for testing only. Any private key mnemonics used should never hold real Algos (i.e., on MainNet).',
+          'The Mnemonic wallet provider is insecure and intended for testing only. Any private key mnemonics used should never hold real Algos (i.e., on MainNet).'
         )
         throw new Error('Production network detected. Aborting.')
       }
@@ -112,12 +111,12 @@ export class MnemonicAdapter extends BaseWallet<MnemonicOptions> {
 
     const walletAccount = {
       name: `${this.metadata.name} Account`,
-      address: account.addr.toString(),
+      address: account.addr.toString()
     }
 
     const walletState: WalletState = {
       accounts: [walletAccount],
-      activeAccount: walletAccount,
+      activeAccount: walletAccount
     }
 
     this.store.addWallet(walletState)
@@ -167,7 +166,7 @@ export class MnemonicAdapter extends BaseWallet<MnemonicOptions> {
 
   private processTxns(
     txnGroup: algosdk.Transaction[],
-    indexesToSign?: number[],
+    indexesToSign?: number[]
   ): algosdk.Transaction[] {
     const txnsToSign: algosdk.Transaction[] = []
 
@@ -186,7 +185,7 @@ export class MnemonicAdapter extends BaseWallet<MnemonicOptions> {
 
   private processEncodedTxns(
     txnGroup: Uint8Array[],
-    indexesToSign?: number[],
+    indexesToSign?: number[]
   ): algosdk.Transaction[] {
     const txnsToSign: algosdk.Transaction[] = []
 
@@ -233,7 +232,7 @@ export class MnemonicAdapter extends BaseWallet<MnemonicOptions> {
    * ```
    */
   public withPrivateKey = async <T>(
-    callback: (secretKey: Uint8Array) => Promise<T>,
+    callback: (secretKey: Uint8Array) => Promise<T>
   ): Promise<T> => {
     // Throw error if MainNet is active
     this.checkMainnet()
@@ -258,7 +257,7 @@ export class MnemonicAdapter extends BaseWallet<MnemonicOptions> {
 
   public signTransactions = async <T extends algosdk.Transaction[] | Uint8Array[]>(
     txnGroup: T | T[],
-    indexesToSign?: number[],
+    indexesToSign?: number[]
   ): Promise<(Uint8Array | null)[]> => {
     // Throw error if MainNet is active
     this.checkMainnet()

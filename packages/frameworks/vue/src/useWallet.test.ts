@@ -1,10 +1,7 @@
 /* eslint-disable no-extra-semi */
 import {
   BaseWallet,
-  NetworkId,
   WalletManager,
-  DEFAULT_STATE,
-  type State,
   type WalletAccount,
   type WalletAdapterConfig,
   type AdapterConstructorParams
@@ -94,7 +91,6 @@ beforeEach(() => {
   mockWalletManager = new WalletManager({
     wallets: [mockAdapterA(), mockAdapterB()]
   })
-
   ;(inject as Mock).mockImplementation((token: string | InjectionKey<unknown>) => {
     if (token === 'walletManager') return mockWalletManager
     if (token === 'algodClient') return mockAlgodClient
