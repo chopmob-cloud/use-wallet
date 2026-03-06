@@ -18,7 +18,7 @@
     "prettier": "prettier --check .",
     "typecheck": "pnpm -r typecheck",
     "example:ts": "pnpm --filter \"./examples/vanilla-ts\" dev",
-    "example:react": "pnpm --filter \"./examples/react-ts\" dev",
+    "example:react": "pnpm --filter \"./examples/react\" dev",
     "example:solid": "pnpm --filter \"./examples/solid-ts\" dev",
     "example:vue": "pnpm --filter \"./examples/vue-ts\" dev",
     "example:nextjs": "pnpm --filter \"./examples/nextjs\" dev",
