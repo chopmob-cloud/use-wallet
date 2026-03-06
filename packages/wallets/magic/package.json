@@ -26,9 +26,8 @@
     "algosdk": "^3.0.0"
   },
   "dependencies": {
-    "magic-sdk": "^28.0.0",
-    "@magic-sdk/provider": "^28.0.0",
-    "@magic-ext/algorand": "^23.0.0"
+    "magic-sdk": "^33.5.0",
+    "@magic-ext/algorand": "^28.4.0"
   },
   "devDependencies": {
     "@txnlab/use-wallet": "workspace:*",

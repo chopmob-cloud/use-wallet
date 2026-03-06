@@ -12,9 +12,8 @@ import {
   type WalletState,
   type WalletTransaction,
 } from '@txnlab/use-wallet/adapter'
-import type { InstanceWithExtensions, SDKBase } from '@magic-sdk/provider'
 import type { AlgorandExtension } from '@magic-ext/algorand'
-import type { MagicUserMetadata } from 'magic-sdk'
+import type { InstanceWithExtensions, MagicUserMetadata, SDKBase } from 'magic-sdk'
 
 /** @see https://magic.link/docs/blockchains/other-chains/other/algorand */
 
@@ -90,7 +89,9 @@ export class MagicAdapter extends BaseWallet<MagicAuthOptions> {
       throw new Error('User info not found!')
     }
 
-    if (!userInfo.publicAddress) {
+    const publicAddress = userInfo.wallets?.algorand?.publicAddress
+
+    if (!publicAddress) {
       this.logger.error('No account found!')
       throw new Error('No account found!')
     }
@@ -100,7 +101,7 @@ export class MagicAdapter extends BaseWallet<MagicAuthOptions> {
     this.logger.info('Login successful', userInfo)
     const walletAccount: WalletAccount = {
       name: userInfo.email ?? 'Magic Wallet 1',
-      address: userInfo.publicAddress,
+      address: publicAddress,
     }
 
     const walletState: WalletState = {
@@ -151,7 +152,9 @@ export class MagicAdapter extends BaseWallet<MagicAuthOptions> {
         throw new Error('User info not found!')
       }
 
-      if (!userInfo.publicAddress) {
+      const publicAddress = userInfo.wallets?.algorand?.publicAddress
+
+      if (!publicAddress) {
         await client.user.logout()
         this.logger.error('No account found!')
         throw new Error('No account found!')
@@ -161,7 +164,7 @@ export class MagicAdapter extends BaseWallet<MagicAuthOptions> {
 
       const walletAccount: WalletAccount = {
         name: userInfo.email ?? `${this.metadata.name} Account 1`,
-        address: userInfo.publicAddress,
+        address: publicAddress,
       }
 
       const storedAccount = walletState.accounts[0]

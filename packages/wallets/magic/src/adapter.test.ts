@@ -62,6 +62,10 @@ describe('MagicAdapter', () => {
 
   const email = 'test@example.com'
   const publicAddress = 'mockAddress'
+  const mockUserInfo = {
+    email,
+    wallets: { algorand: { publicAddress, subAccounts: [] } },
+  }
 
   const account = {
     name: email,
@@ -88,10 +92,7 @@ describe('MagicAdapter', () => {
 
   describe('connect', () => {
     it('should initialize client, auth, return account, and update store', async () => {
-      mockMagicClient.user.getInfo.mockResolvedValueOnce({
-        email,
-        publicAddress,
-      })
+      mockMagicClient.user.getInfo.mockResolvedValueOnce(mockUserInfo)
 
       const result = await wallet.connect({ email })
 
@@ -134,7 +135,7 @@ describe('MagicAdapter', () => {
     })
 
     it('should throw an error if user info does not contain an address', async () => {
-      mockMagicClient.user.getInfo.mockResolvedValueOnce({ email })
+      mockMagicClient.user.getInfo.mockResolvedValueOnce({ email, wallets: {} })
       await expect(wallet.connect({ email })).rejects.toThrow(
         'No account found!',
       )
@@ -143,10 +144,7 @@ describe('MagicAdapter', () => {
 
   describe('disconnect', () => {
     it('should log out user and update store', async () => {
-      mockMagicClient.user.getInfo.mockResolvedValueOnce({
-        email,
-        publicAddress,
-      })
+      mockMagicClient.user.getInfo.mockResolvedValueOnce(mockUserInfo)
 
       await wallet.connect({ email })
       await wallet.disconnect()
@@ -200,10 +198,7 @@ describe('MagicAdapter', () => {
       wallet = createWallet(harness.accessor)
 
       mockMagicClient.user.isLoggedIn.mockResolvedValueOnce(true)
-      mockMagicClient.user.getInfo.mockResolvedValueOnce({
-        email,
-        publicAddress,
-      })
+      mockMagicClient.user.getInfo.mockResolvedValueOnce(mockUserInfo)
 
       await wallet.resumeSession()
 
@@ -239,7 +234,9 @@ describe('MagicAdapter', () => {
       mockMagicClient.user.isLoggedIn.mockResolvedValueOnce(true)
       mockMagicClient.user.getInfo.mockResolvedValueOnce({
         email: newAccount.name,
-        publicAddress: newAccount.address,
+        wallets: {
+          algorand: { publicAddress: newAccount.address, subAccounts: [] },
+        },
       })
       await wallet.resumeSession()
 
@@ -287,7 +284,9 @@ describe('MagicAdapter', () => {
     beforeEach(async () => {
       mockMagicClient.user.getInfo.mockResolvedValueOnce({
         email,
-        publicAddress: connectedAcct,
+        wallets: {
+          algorand: { publicAddress: connectedAcct, subAccounts: [] },
+        },
       })
 
       const mockSignedTxn = byteArrayToBase64(txn1.toByte())
