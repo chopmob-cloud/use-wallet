@@ -1,13 +1,13 @@
 export { LogLevel } from './logger'
-export { WalletManager, WalletManagerConfig, WalletManagerOptions } from './manager'
+export { WalletManager, type WalletManagerConfig, type WalletManagerOptions } from './manager'
 export {
-  AlgodConfig,
-  NetworkConfig,
   NetworkConfigBuilder,
   NetworkId,
-  DEFAULT_NETWORK_CONFIG
+  DEFAULT_NETWORK_CONFIG,
+  type AlgodConfig,
+  type NetworkConfig
 } from './network'
-export { State, WalletState, ManagerStatus, DEFAULT_STATE } from './store'
+export { DEFAULT_STATE, type State, type WalletState, type ManagerStatus } from './store'
 export { StorageAdapter } from './storage'
 export {
   SecureKeyContainer,

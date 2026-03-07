@@ -14,13 +14,17 @@
     "directory": "packages/frameworks/vue"
   },
   "type": "module",
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.js",
-  "exports": "./dist/index.js",
+  "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
   "scripts": {
-    "build": "tsup",
-    "start": "tsup src/index.ts --watch",
+    "build": "tsdown",
+    "start": "tsdown --watch",
     "test": "vitest run",
     "test:watch": "vitest --watch",
     "lint": "eslint \"src/**/*.{js,ts}\"",
@@ -40,7 +44,7 @@
   },
   "devDependencies": {
     "algosdk": "3.5.2",
-    "tsup": "8.5.1",
+    "tsdown": "^0.21.0",
     "typescript": "5.9.3",
     "vue": "3.5.27"
   },

@@ -14,29 +14,25 @@
     "directory": "packages/core"
   },
   "type": "module",
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.js",
+  "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
+      "default": "./dist/index.js"
     },
     "./adapter": {
       "types": "./dist/adapter.d.ts",
-      "import": "./dist/adapter.js",
-      "require": "./dist/adapter.cjs"
+      "default": "./dist/adapter.js"
     },
     "./testing": {
       "types": "./dist/testing.d.ts",
-      "import": "./dist/testing.js",
-      "require": "./dist/testing.cjs"
+      "default": "./dist/testing.js"
     }
   },
   "scripts": {
-    "build": "tsup",
-    "start": "tsup src/index.ts --watch",
+    "build": "tsdown",
+    "start": "tsdown --watch",
     "test": "vitest run",
     "test:watch": "pnpm run test --watch",
     "lint": "eslint \"src/**/*.{js,ts}\"",
@@ -52,13 +48,13 @@
     "dist"
   ],
   "dependencies": {
-    "@tanstack/store": "0.9.1"
+    "@tanstack/store": "0.9.1",
+    "tweetnacl": "1.0.3"
   },
   "devDependencies": {
     "@types/node": "20.11.30",
     "algosdk": "3.5.2",
-    "tsup": "8.5.1",
-    "tweetnacl": "1.0.3",
+    "tsdown": "^0.21.0",
     "typescript": "5.9.3"
   },
   "peerDependencies": {

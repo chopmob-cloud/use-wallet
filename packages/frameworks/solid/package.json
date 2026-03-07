@@ -14,36 +14,25 @@
     "directory": "packages/frameworks/solid"
   },
   "type": "module",
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.js",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
-    "solid": {
-      "development": "./dist/dev.jsx",
-      "import": "./dist/index.jsx"
-    },
-    "development": {
-      "import": {
+    ".": {
+      "solid": {
+        "development": "./dist/dev.jsx",
+        "import": "./dist/index.jsx"
+      },
+      "development": {
         "types": "./dist/index.d.ts",
         "default": "./dist/dev.js"
       },
-      "require": {
-        "types": "./dist/index.d.cts",
-        "default": "./dist/dev.cjs"
-      }
-    },
-    "import": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
-    },
-    "require": {
-      "types": "./dist/index.d.cts",
-      "default": "./dist/index.cjs"
     }
   },
-  "types": "./dist/index.d.ts",
   "scripts": {
-    "build": "tsup",
-    "start": "tsup src/index.tsx --watch",
+    "build": "tsdown",
+    "start": "tsdown --watch",
     "test": "vitest run",
     "test:watch": "vitest --watch",
     "lint": "eslint \"src/**/*.{js,ts,tsx}\"",
@@ -65,13 +54,10 @@
     "@solidjs/testing-library": "0.8.10",
     "algosdk": "3.5.2",
     "solid-js": "1.9.11",
-    "tsup": "8.5.1",
-    "tsup-preset-solid": "2.2.0",
+    "tsdown": "^0.21.0",
     "typescript": "5.9.3"
   },
   "peerDependencies": {
     "algosdk": "^3.0.0"
-  },
-  "browser": {},
-  "typesVersions": {}
+  }
 }

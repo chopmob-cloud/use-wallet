@@ -14,14 +14,12 @@
     "directory": "packages/wallets/kmd"
   },
   "type": "module",
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.js",
+  "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
+      "default": "./dist/index.js"
     }
   },
   "files": [
@@ -34,12 +32,12 @@
   "devDependencies": {
     "@txnlab/use-wallet": "workspace:*",
     "algosdk": "3.5.2",
-    "tsup": "8.5.1",
+    "tsdown": "^0.21.0",
     "typescript": "5.9.3"
   },
   "scripts": {
-    "build": "tsup",
-    "start": "tsup src/index.ts --watch",
+    "build": "tsdown",
+    "start": "tsdown --watch",
     "test": "vitest run",
     "test:watch": "vitest --watch",
     "lint": "eslint \"src/**/*.{js,ts}\"",

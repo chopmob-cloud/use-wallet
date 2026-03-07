@@ -1,10 +1,10 @@
-import { defineConfig } from 'tsup'
+import { defineConfig } from 'tsdown'
 
 export default defineConfig({
   entry: ['src/index.ts', 'src/adapter.ts', 'src/testing.ts'],
   dts: true,
-  splitting: false,
+  fixedExtension: false,
   sourcemap: true,
   clean: true,
-  format: ['esm', 'cjs']
+  format: ['esm']
 })

@@ -14,13 +14,17 @@
     "directory": "packages/frameworks/react"
   },
   "type": "module",
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.js",
-  "exports": "./dist/index.js",
+  "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
   "scripts": {
-    "build": "tsup",
-    "start": "tsup src/index.tsx --watch",
+    "build": "tsdown",
+    "start": "tsdown --watch",
     "test": "vitest run",
     "test:watch": "vitest --watch",
     "lint": "eslint \"src/**/*.{js,ts,tsx}\"",
@@ -44,7 +48,7 @@
     "jsdom": "26.1.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
-    "tsup": "8.5.1",
+    "tsdown": "^0.21.0",
     "typescript": "5.9.3"
   },
   "peerDependencies": {
