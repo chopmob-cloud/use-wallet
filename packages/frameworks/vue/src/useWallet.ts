@@ -51,6 +51,14 @@ export function useWallet() {
     return [...manager.wallets.values()].map(transformToWallet)
   })
 
+  const activeNetwork = useStore(manager.store, (state) => state.activeNetwork)
+
+  const availableWallets = computed(() => {
+    // Access activeNetwork.value to trigger recomputation on network change
+    void activeNetwork.value
+    return manager.availableWallets.map(transformToWallet)
+  })
+
   const activeWallet = computed(() => {
     const wallet = activeWalletId.value ? manager.getWallet(activeWalletId.value) || null : null
     return wallet ? transformToWallet(wallet) : null
@@ -117,6 +125,7 @@ export function useWallet() {
 
   return {
     wallets,
+    availableWallets,
     isReady,
     algodClient: computed(() => {
       if (!algodClient.value) {

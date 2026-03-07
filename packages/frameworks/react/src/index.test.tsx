@@ -71,6 +71,15 @@ function mockAdapterB(): WalletAdapterConfig {
   }
 }
 
+function mockAdapterMainnetOnly(): WalletAdapterConfig {
+  return {
+    id: 'wallet-a',
+    metadata: MockWalletA.defaultMetadata,
+    Adapter: MockWalletA as unknown as WalletAdapterConfig['Adapter'],
+    capabilities: { supportedNetworks: ['mainnet'] }
+  }
+}
+
 describe('WalletProvider', () => {
   it('provides context to child components', async () => {
     const TestComponent = () => {
@@ -343,5 +352,62 @@ describe('useWallet', () => {
     })
 
     expect(result.current.algodClient).toBe(newAlgodClient)
+  })
+})
+
+describe('useWallet - availableWallets', () => {
+  it('filters wallets by active network capabilities', async () => {
+    const manager = new WalletManager({
+      wallets: [mockAdapterMainnetOnly(), mockAdapterB()],
+      defaultNetwork: 'testnet'
+    })
+
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <WalletProvider manager={manager}>{children}</WalletProvider>
+    )
+
+    const { result } = renderHook(() => useWallet(), { wrapper })
+
+    // testnet: wallet-a (mainnet only) ✗, wallet-b (all) ✓
+    expect(result.current.wallets).toHaveLength(2)
+    expect(result.current.availableWallets).toHaveLength(1)
+    expect(result.current.availableWallets[0].id).toBe('wallet-b')
+  })
+
+  it('re-filters when active network changes', async () => {
+    const manager = new WalletManager({
+      wallets: [mockAdapterMainnetOnly(), mockAdapterB()],
+      defaultNetwork: 'testnet'
+    })
+
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <WalletProvider manager={manager}>{children}</WalletProvider>
+    )
+
+    const { result } = renderHook(() => useWallet(), { wrapper })
+
+    expect(result.current.availableWallets).toHaveLength(1)
+
+    await act(async () => {
+      await manager.setActiveNetwork('mainnet')
+    })
+
+    // mainnet: wallet-a ✓, wallet-b ✓
+    expect(result.current.availableWallets).toHaveLength(2)
+  })
+
+  it('returns all wallets when none have capabilities', () => {
+    const manager = new WalletManager({
+      wallets: [mockAdapterA(), mockAdapterB()]
+    })
+
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <WalletProvider manager={manager}>{children}</WalletProvider>
+    )
+
+    const { result } = renderHook(() => useWallet(), { wrapper })
+
+    expect(result.current.availableWallets).toHaveLength(2)
+    expect(result.current.wallets).toHaveLength(2)
   })
 })

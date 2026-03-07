@@ -146,6 +146,16 @@ export const useWallet = () => {
   }
 
   const wallets = [...manager.wallets].map(transformToWallet)
+  const activeNetwork = useStore(manager.store, (state) => state.activeNetwork)
+  const availableWallets = {
+    get current() {
+      // Access activeNetwork.current to ensure reactivity on network change
+      void activeNetwork.current
+      return wallets.filter((w) =>
+        manager.availableWallets.some((aw) => aw.walletKey === w.walletKey)
+      )
+    }
+  }
   const activeWalletId = useStore(manager.store, (state) => state.activeWallet)
   const managerStatus = useStore(manager.store, (state) => state.managerStatus)
   const isReady = () => managerStatus.current === 'ready'
@@ -207,6 +217,7 @@ export const useWallet = () => {
 
   return {
     wallets,
+    availableWallets,
     isReady,
     algodClient,
     activeWallet,

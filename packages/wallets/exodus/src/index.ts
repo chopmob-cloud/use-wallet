@@ -9,7 +9,8 @@ export function exodus(options?: ExodusOptions): WalletAdapterConfig {
     id: WALLET_ID,
     metadata: ExodusAdapter.defaultMetadata,
     Adapter: ExodusAdapter as unknown as WalletAdapterConfig['Adapter'],
-    options: options as unknown as Record<string, unknown> | undefined
+    options: options as unknown as Record<string, unknown> | undefined,
+    capabilities: { supportedNetworks: ['mainnet'] }
   }
 }
 

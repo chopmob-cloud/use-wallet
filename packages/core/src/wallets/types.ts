@@ -30,6 +30,25 @@ export type WalletAccount = {
   metadata?: Record<string, unknown>
 }
 
+// ---------- Wallet Capabilities ----------------------------------- //
+
+/**
+ * Declares which networks a wallet adapter supports.
+ *
+ * Design: Option 5 — `supportedNetworks` + `excludedNetworks`.
+ *
+ * Most wallets list the networks they work with via `supportedNetworks`.
+ * Omitting both means "all networks". For wallets that work on all
+ * networks *except* specific ones (e.g. Mnemonic excludes MainNet for
+ * security), use `excludedNetworks`. Setting both is invalid.
+ */
+export interface WalletCapabilities {
+  /** If set, the wallet is only available on these networks. */
+  supportedNetworks?: string[]
+  /** If set, the wallet is available on all networks EXCEPT these. */
+  excludedNetworks?: string[]
+}
+
 // ---------- Adapter Interfaces ------------------------------------- //
 
 /**
@@ -78,6 +97,8 @@ export interface WalletAdapterConfig {
   Adapter: new (params: AdapterConstructorParams) => BaseWallet
   /** Wallet-specific options, passed through to the adapter constructor */
   options?: Record<string, unknown>
+  /** Network capabilities — which networks this wallet supports */
+  capabilities?: WalletCapabilities
 }
 
 // ---------- Wallet Interface (public-facing) ----------------------- //

@@ -119,6 +119,15 @@ function mockAdapterB(): WalletAdapterConfig {
   }
 }
 
+function mockAdapterMainnetOnly(): WalletAdapterConfig {
+  return {
+    id: 'wallet-a',
+    metadata: MockWalletA.defaultMetadata,
+    Adapter: MockWalletA as unknown as WalletAdapterConfig['Adapter'],
+    capabilities: { supportedNetworks: ['mainnet'] }
+  }
+}
+
 let mockWalletManager: WalletManager
 
 const setupMocks = () => {
@@ -497,5 +506,52 @@ describe('useWallet', () => {
     await wallet.signData(data, metadata)
 
     expect(mocks.signData).toHaveBeenCalledWith(data, metadata)
+  })
+})
+
+describe('useWallet - availableWallets', () => {
+  it('filters wallets by active network capabilities', () => {
+    const manager = new WalletManager({
+      wallets: [mockAdapterMainnetOnly(), mockAdapterB()],
+      defaultNetwork: 'testnet'
+    })
+
+    vi.spyOn(manager, 'resumeSessions').mockResolvedValue()
+    ;(getContext as Mock).mockReturnValue(manager)
+
+    const wallet = useWallet()
+
+    // testnet: wallet-a (mainnet only) ✗, wallet-b (all) ✓
+    expect(wallet.wallets).toHaveLength(2)
+    expect(wallet.availableWallets.current).toHaveLength(1)
+    expect(wallet.availableWallets.current[0].id).toBe('wallet-b')
+  })
+
+  it('re-filters when active network changes', async () => {
+    const manager = new WalletManager({
+      wallets: [mockAdapterMainnetOnly(), mockAdapterB()],
+      defaultNetwork: 'testnet'
+    })
+
+    vi.spyOn(manager, 'resumeSessions').mockResolvedValue()
+    ;(getContext as Mock).mockReturnValue(manager)
+
+    const wallet = useWallet()
+
+    expect(wallet.availableWallets.current).toHaveLength(1)
+
+    await manager.setActiveNetwork('mainnet')
+
+    // mainnet: wallet-a ✓, wallet-b ✓
+    expect(wallet.availableWallets.current).toHaveLength(2)
+  })
+
+  it('returns all wallets when none have capabilities', () => {
+    ;(getContext as Mock).mockReturnValue(mockWalletManager)
+
+    const wallet = useWallet()
+
+    expect(wallet.availableWallets.current).toHaveLength(2)
+    expect(wallet.wallets).toHaveLength(2)
   })
 })

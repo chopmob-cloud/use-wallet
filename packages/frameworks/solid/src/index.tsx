@@ -176,6 +176,16 @@ export const useWallet = () => {
 
   const wallets = [...manager().wallets].map(transformToWallet)
 
+  const activeNetwork = useStore(manager().store, (state) => state.activeNetwork)
+
+  const availableWallets = createMemo(() => {
+    // Access activeNetwork() to trigger recomputation on network change
+    void activeNetwork()
+    return wallets.filter((w) =>
+      manager().availableWallets.some((aw) => aw.walletKey === w.walletKey)
+    )
+  })
+
   const activeBaseWallet = createMemo(() => {
     const id = activeWalletId()
     return id ? manager().getWallet(id) || null : null
@@ -239,6 +249,7 @@ export const useWallet = () => {
 
   return {
     wallets: () => wallets,
+    availableWallets,
     isReady,
     algodClient,
     activeWallet,

@@ -30,6 +30,7 @@ import type {
   AdapterStoreAccessor,
   WalletAccount,
   WalletAdapterConfig,
+  WalletCapabilities,
   WalletKey
 } from 'src/wallets/types'
 
@@ -48,6 +49,7 @@ export interface WalletManagerConfig {
 
 export class WalletManager {
   public _clients: Map<WalletKey, BaseWallet> = new Map()
+  private _capabilities: Map<WalletKey, WalletCapabilities> = new Map()
   private baseNetworkConfig: Record<string, NetworkConfig>
   public store: Store<State>
   public subscribe: (callback: (state: State) => void) => () => void
@@ -289,6 +291,11 @@ export class WalletManager {
       const instance = new config.Adapter(params)
 
       this._clients.set(walletKey, instance)
+
+      if (config.capabilities) {
+        this._capabilities.set(walletKey, config.capabilities)
+      }
+
       this.logger.info(`Initialized ${walletKey}`)
     }
 
@@ -312,6 +319,36 @@ export class WalletManager {
 
   public get wallets(): BaseWallet[] {
     return [...this._clients.values()]
+  }
+
+  private isWalletAvailable(walletKey: WalletKey, networkId: string): boolean {
+    const capabilities = this._capabilities.get(walletKey)
+    if (!capabilities) return true
+
+    const { supportedNetworks, excludedNetworks } = capabilities
+
+    if (supportedNetworks && excludedNetworks) {
+      this.logger.warn(
+        `Wallet "${walletKey}" has both supportedNetworks and excludedNetworks set. ` +
+          `Using supportedNetworks.`
+      )
+      return supportedNetworks.includes(networkId)
+    }
+
+    if (supportedNetworks) {
+      return supportedNetworks.includes(networkId)
+    }
+
+    if (excludedNetworks) {
+      return !excludedNetworks.includes(networkId)
+    }
+
+    return true
+  }
+
+  public get availableWallets(): BaseWallet[] {
+    const activeNetwork = this.store.state.activeNetwork
+    return this.wallets.filter((w) => this.isWalletAvailable(w.walletKey, activeNetwork))
   }
 
   public getWallet(walletKey: WalletKey): BaseWallet | undefined {

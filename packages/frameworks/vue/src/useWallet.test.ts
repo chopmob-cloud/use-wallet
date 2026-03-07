@@ -80,6 +80,15 @@ function mockAdapterB(): WalletAdapterConfig {
   }
 }
 
+function mockAdapterMainnetOnly(): WalletAdapterConfig {
+  return {
+    id: 'wallet-a',
+    metadata: MockWalletA.defaultMetadata,
+    Adapter: MockWalletA as unknown as WalletAdapterConfig['Adapter'],
+    capabilities: { supportedNetworks: ['mainnet'] }
+  }
+}
+
 let mockWalletManager: WalletManager
 const mockAlgodClient = ref(new algosdk.Algodv2('', 'https://testnet-api.algonode.cloud', ''))
 
@@ -312,5 +321,57 @@ describe('useWallet', () => {
 
     // Should show ready after status change
     expect(wrapper.get('[data-testid="is-ready"]').text()).toBe('true')
+  })
+})
+
+describe('useWallet - availableWallets', () => {
+  it('filters wallets by active network capabilities', () => {
+    const manager = new WalletManager({
+      wallets: [mockAdapterMainnetOnly(), mockAdapterB()],
+      defaultNetwork: 'testnet'
+    })
+
+    ;(inject as Mock).mockImplementation((token: string | InjectionKey<unknown>) => {
+      if (token === 'walletManager') return manager
+      if (token === 'algodClient') return mockAlgodClient
+      return null
+    })
+
+    const { wallets, availableWallets } = useWallet()
+
+    // testnet: wallet-a (mainnet only) ✗, wallet-b (all) ✓
+    expect(wallets.value).toHaveLength(2)
+    expect(availableWallets.value).toHaveLength(1)
+    expect(availableWallets.value[0].id).toBe('wallet-b')
+  })
+
+  it('re-filters when active network changes', async () => {
+    const manager = new WalletManager({
+      wallets: [mockAdapterMainnetOnly(), mockAdapterB()],
+      defaultNetwork: 'testnet'
+    })
+
+    ;(inject as Mock).mockImplementation((token: string | InjectionKey<unknown>) => {
+      if (token === 'walletManager') return manager
+      if (token === 'algodClient') return mockAlgodClient
+      return null
+    })
+
+    const { availableWallets } = useWallet()
+
+    expect(availableWallets.value).toHaveLength(1)
+
+    await manager.setActiveNetwork('mainnet')
+    await nextTick()
+
+    // mainnet: wallet-a ✓, wallet-b ✓
+    expect(availableWallets.value).toHaveLength(2)
+  })
+
+  it('returns all wallets when none have capabilities', () => {
+    const { wallets, availableWallets } = useWallet()
+
+    expect(availableWallets.value).toHaveLength(2)
+    expect(wallets.value).toHaveLength(2)
   })
 })

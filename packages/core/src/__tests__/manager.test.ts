@@ -103,6 +103,57 @@ function kibisis(): WalletAdapterConfig {
   }
 }
 
+class MockMnemonicAdapter extends BaseWallet {
+  static defaultMetadata = { name: 'Mnemonic', icon: 'icon-data' }
+  public resumeSession = vi.fn().mockResolvedValue(undefined)
+  public disconnect = vi.fn().mockResolvedValue(undefined)
+  public connect = vi.fn().mockResolvedValue([])
+  public signTransactions = vi.fn().mockResolvedValue([])
+
+  constructor(params: AdapterConstructorParams) {
+    super(params)
+  }
+}
+
+class MockExodusAdapter extends BaseWallet {
+  static defaultMetadata = { name: 'Exodus', icon: 'icon-data' }
+  public resumeSession = vi.fn().mockResolvedValue(undefined)
+  public disconnect = vi.fn().mockResolvedValue(undefined)
+  public connect = vi.fn().mockResolvedValue([])
+  public signTransactions = vi.fn().mockResolvedValue([])
+
+  constructor(params: AdapterConstructorParams) {
+    super(params)
+  }
+}
+
+function mnemonicAdapter(): WalletAdapterConfig {
+  return {
+    id: 'mnemonic',
+    metadata: MockMnemonicAdapter.defaultMetadata,
+    Adapter: MockMnemonicAdapter,
+    capabilities: { excludedNetworks: ['mainnet'] }
+  }
+}
+
+function exodusAdapter(): WalletAdapterConfig {
+  return {
+    id: 'exodus',
+    metadata: MockExodusAdapter.defaultMetadata,
+    Adapter: MockExodusAdapter,
+    capabilities: { supportedNetworks: ['mainnet'] }
+  }
+}
+
+function deflyWithCapabilities(): WalletAdapterConfig {
+  return {
+    id: 'defly',
+    metadata: MockDeflyAdapter.defaultMetadata,
+    Adapter: MockDeflyAdapter,
+    capabilities: { supportedNetworks: ['mainnet', 'testnet'] }
+  }
+}
+
 describe('WalletManager', () => {
   let mockInitialState: State | null = null
 
@@ -516,6 +567,77 @@ describe('WalletManager', () => {
       unsubscribe()
       await manager.setActiveNetwork('testnet')
       expect(handler).toHaveBeenCalledTimes(1) // Not called again
+    })
+  })
+
+  describe('availableWallets', () => {
+    it('returns all wallets when none have capabilities', () => {
+      const manager = new WalletManager({
+        wallets: [defly(), kibisis()]
+      })
+      expect(manager.availableWallets.length).toBe(2)
+    })
+
+    it('filters wallets by supportedNetworks on active network', () => {
+      const manager = new WalletManager({
+        wallets: [deflyWithCapabilities(), kibisis(), exodusAdapter()],
+        defaultNetwork: 'testnet'
+      })
+      // testnet: defly (mainnet+testnet) ✓, kibisis (all) ✓, exodus (mainnet only) ✗
+      expect(manager.availableWallets.length).toBe(2)
+      expect(manager.availableWallets.map((w) => w.id)).toEqual(['defly', 'kibisis'])
+    })
+
+    it('filters wallets by excludedNetworks on active network', async () => {
+      const manager = new WalletManager({
+        wallets: [mnemonicAdapter(), kibisis()],
+        defaultNetwork: 'testnet'
+      })
+      // testnet: mnemonic (excludes mainnet) ✓, kibisis (all) ✓
+      expect(manager.availableWallets.length).toBe(2)
+
+      await manager.setActiveNetwork('mainnet')
+      // mainnet: mnemonic (excludes mainnet) ✗, kibisis (all) ✓
+      expect(manager.availableWallets.length).toBe(1)
+      expect(manager.availableWallets[0]?.id).toBe('kibisis')
+    })
+
+    it('updates when active network changes', async () => {
+      const manager = new WalletManager({
+        wallets: [exodusAdapter(), kibisis()],
+        defaultNetwork: 'testnet'
+      })
+      // testnet: exodus ✗, kibisis ✓
+      expect(manager.availableWallets.length).toBe(1)
+
+      await manager.setActiveNetwork('mainnet')
+      // mainnet: exodus ✓, kibisis ✓
+      expect(manager.availableWallets.length).toBe(2)
+    })
+
+    it('wallets getter still returns all wallets (unchanged)', () => {
+      const manager = new WalletManager({
+        wallets: [exodusAdapter(), kibisis()],
+        defaultNetwork: 'testnet'
+      })
+      // wallets returns all, regardless of network
+      expect(manager.wallets.length).toBe(2)
+      // availableWallets filters
+      expect(manager.availableWallets.length).toBe(1)
+    })
+
+    it('resumeSessions runs for all wallets including filtered ones', async () => {
+      const manager = new WalletManager({
+        wallets: [exodusAdapter(), kibisis()],
+        defaultNetwork: 'testnet'
+      })
+
+      await manager.resumeSessions()
+
+      // All wallets should have resumeSession called, not just available ones
+      for (const wallet of manager.wallets) {
+        expect(wallet.resumeSession).toHaveBeenCalled()
+      }
     })
   })
 

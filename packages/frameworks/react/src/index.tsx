@@ -134,6 +134,7 @@ export const useWallet = () => {
 
   const walletStateMap = useStore(manager.store, (state) => state.wallets)
   const activeWalletId = useStore(manager.store, (state) => state.activeWallet)
+  const activeNetwork = useStore(manager.store, (state) => state.activeNetwork)
 
   const transformToWallet = React.useCallback(
     (wallet: BaseWallet): Wallet => {
@@ -160,6 +161,10 @@ export const useWallet = () => {
   const wallets = React.useMemo(() => {
     return [...manager.wallets.values()].map(transformToWallet)
   }, [manager, transformToWallet])
+
+  const availableWallets = React.useMemo(() => {
+    return manager.availableWallets.map(transformToWallet)
+  }, [manager, transformToWallet, activeNetwork])
 
   const activeBaseWallet = activeWalletId ? manager.getWallet(activeWalletId) || null : null
   const activeWallet = React.useMemo(() => {
@@ -207,6 +212,7 @@ export const useWallet = () => {
 
   return {
     wallets,
+    availableWallets,
     isReady,
     algodClient,
     setAlgodClient,

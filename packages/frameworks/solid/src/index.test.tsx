@@ -71,6 +71,15 @@ function mockAdapterB(): WalletAdapterConfig {
   }
 }
 
+function mockAdapterMainnetOnly(): WalletAdapterConfig {
+  return {
+    id: 'wallet-a',
+    metadata: MockWalletA.defaultMetadata,
+    Adapter: MockWalletA as unknown as WalletAdapterConfig['Adapter'],
+    capabilities: { supportedNetworks: ['mainnet'] }
+  }
+}
+
 const testAccount1 = { name: 'Account 1', address: 'address1' }
 const testAccount2 = { name: 'Account 2', address: 'address2' }
 
@@ -645,6 +654,66 @@ describe('useWallet', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('is-ready')).toHaveTextContent('false')
+    })
+  })
+})
+
+describe('useWallet - availableWallets', () => {
+  it('filters wallets by active network capabilities', () => {
+    const manager = new WalletManager({
+      wallets: [mockAdapterMainnetOnly(), mockAdapterB()],
+      defaultNetwork: 'testnet'
+    })
+
+    const TestComponent = () => {
+      const { wallets, availableWallets } = useWallet()
+      return (
+        <div>
+          <div data-testid="wallets-count">{wallets().length}</div>
+          <div data-testid="available-count">{availableWallets().length}</div>
+          <div data-testid="available-ids">
+            {availableWallets()
+              .map((w) => w.id)
+              .join(',')}
+          </div>
+        </div>
+      )
+    }
+
+    render(() => (
+      <WalletProvider manager={manager}>
+        <TestComponent />
+      </WalletProvider>
+    ))
+
+    expect(screen.getByTestId('wallets-count')).toHaveTextContent('2')
+    expect(screen.getByTestId('available-count')).toHaveTextContent('1')
+    expect(screen.getByTestId('available-ids')).toHaveTextContent('wallet-b')
+  })
+
+  it('re-filters when active network changes', async () => {
+    const manager = new WalletManager({
+      wallets: [mockAdapterMainnetOnly(), mockAdapterB()],
+      defaultNetwork: 'testnet'
+    })
+
+    const TestComponent = () => {
+      const { availableWallets } = useWallet()
+      return <div data-testid="available-count">{availableWallets().length}</div>
+    }
+
+    render(() => (
+      <WalletProvider manager={manager}>
+        <TestComponent />
+      </WalletProvider>
+    ))
+
+    expect(screen.getByTestId('available-count')).toHaveTextContent('1')
+
+    await manager.setActiveNetwork('mainnet')
+
+    await waitFor(() => {
+      expect(screen.getByTestId('available-count')).toHaveTextContent('2')
     })
   })
 })
