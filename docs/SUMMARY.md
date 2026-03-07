@@ -25,6 +25,7 @@
 * [Using Private Keys Safely](guides/using-private-keys-safely.md)
 * [Custom Provider](guides/custom-provider.md)
 * [Migrating from v3.x](guides/migrating-from-v3.x.md)
+* [Migrating from v4.x](guides/migrating-from-v4.x.md)
 
 ## API Reference
 
