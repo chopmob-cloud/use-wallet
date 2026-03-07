@@ -10,7 +10,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/txnlab/use-wallet.git",
+    "url": "git+https://github.com/txnlab/use-wallet.git",
     "directory": "packages/frameworks/svelte"
   },
   "type": "module",
@@ -46,7 +46,7 @@
     "@testing-library/svelte": "5.3.1",
     "algosdk": "3.5.2",
     "svelte": "5.49.1",
-    "tsdown": "^0.21.0",
+    "tsdown": "0.21.0",
     "typescript": "5.9.3"
   },
   "peerDependencies": {

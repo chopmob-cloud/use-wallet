@@ -10,7 +10,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/txnlab/use-wallet.git",
+    "url": "git+https://github.com/txnlab/use-wallet.git",
     "directory": "packages/wallets/w3wallet"
   },
   "type": "module",
@@ -32,7 +32,7 @@
   "devDependencies": {
     "@txnlab/use-wallet": "workspace:*",
     "algosdk": "3.5.2",
-    "tsdown": "^0.21.0",
+    "tsdown": "0.21.0",
     "typescript": "5.9.3"
   },
   "scripts": {

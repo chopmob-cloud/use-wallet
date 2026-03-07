@@ -10,7 +10,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/txnlab/use-wallet.git",
+    "url": "git+https://github.com/txnlab/use-wallet.git",
     "directory": "packages/frameworks/solid"
   },
   "type": "module",
@@ -54,7 +54,7 @@
     "@solidjs/testing-library": "0.8.10",
     "algosdk": "3.5.2",
     "solid-js": "1.9.11",
-    "tsdown": "^0.21.0",
+    "tsdown": "0.21.0",
     "typescript": "5.9.3"
   },
   "peerDependencies": {

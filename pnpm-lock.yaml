@@ -629,7 +629,7 @@ importers:
         specifier: 3.5.2
         version: 3.5.2
       tsdown:
-        specifier: ^0.21.0
+        specifier: 0.21.0
         version: 0.21.0(publint@0.3.18)(typescript@5.9.3)(vue-tsc@3.2.5(typescript@5.9.3))
       typescript:
         specifier: 5.9.3
@@ -645,7 +645,7 @@ importers:
         version: link:../../core
     devDependencies:
       '@types/react':
-        specifier: ^19.2.7
+        specifier: 19.2.14
         version: 19.2.14
       algosdk:
         specifier: 3.5.2
@@ -654,13 +654,13 @@ importers:
         specifier: 26.1.0
         version: 26.1.0(bufferutil@4.1.0)(utf-8-validate@6.0.6)
       react:
-        specifier: ^19.2.0
+        specifier: 19.2.4
         version: 19.2.4
       react-dom:
-        specifier: ^19.2.0
+        specifier: 19.2.4
         version: 19.2.4(react@19.2.4)
       tsdown:
-        specifier: ^0.21.0
+        specifier: 0.21.0
         version: 0.21.0(publint@0.3.18)(typescript@5.9.3)(vue-tsc@3.2.5(typescript@5.9.3))
       typescript:
         specifier: 5.9.3
@@ -685,7 +685,7 @@ importers:
         specifier: 1.9.11
         version: 1.9.11
       tsdown:
-        specifier: ^0.21.0
+        specifier: 0.21.0
         version: 0.21.0(publint@0.3.18)(typescript@5.9.3)(vue-tsc@3.2.5(typescript@5.9.3))
       typescript:
         specifier: 5.9.3
@@ -710,7 +710,7 @@ importers:
         specifier: 5.49.1
         version: 5.49.1
       tsdown:
-        specifier: ^0.21.0
+        specifier: 0.21.0
         version: 0.21.0(publint@0.3.18)(typescript@5.9.3)(vue-tsc@3.2.5(typescript@5.9.3))
       typescript:
         specifier: 5.9.3
@@ -729,7 +729,7 @@ importers:
         specifier: 3.5.2
         version: 3.5.2
       tsdown:
-        specifier: ^0.21.0
+        specifier: 0.21.0
         version: 0.21.0(publint@0.3.18)(typescript@5.9.3)(vue-tsc@3.2.5(typescript@5.9.3))
       typescript:
         specifier: 5.9.3
@@ -741,7 +741,7 @@ importers:
   packages/wallets/defly:
     dependencies:
       '@blockshake/defly-connect':
-        specifier: ^1.0.3
+        specifier: 1.2.1
         version: 1.2.1(algosdk@3.5.2)(bufferutil@4.1.0)(utf-8-validate@5.0.10)
     devDependencies:
       '@txnlab/use-wallet':
@@ -751,7 +751,7 @@ importers:
         specifier: 3.5.2
         version: 3.5.2
       tsdown:
-        specifier: ^0.21.0
+        specifier: 0.21.0
         version: 0.21.0(publint@0.3.18)(typescript@5.9.3)(vue-tsc@3.2.5(typescript@5.9.3))
       typescript:
         specifier: 5.9.3
@@ -760,7 +760,7 @@ importers:
   packages/wallets/defly-web:
     dependencies:
       '@agoralabs-sh/avm-web-provider':
-        specifier: ^1.7.0
+        specifier: 1.7.0
         version: 1.7.0
     devDependencies:
       '@txnlab/use-wallet':
@@ -770,7 +770,7 @@ importers:
         specifier: 3.5.2
         version: 3.5.2
       tsdown:
-        specifier: ^0.21.0
+        specifier: 0.21.0
         version: 0.21.0(publint@0.3.18)(typescript@5.9.3)(vue-tsc@3.2.5(typescript@5.9.3))
       typescript:
         specifier: 5.9.3
@@ -785,7 +785,7 @@ importers:
         specifier: 3.5.2
         version: 3.5.2
       tsdown:
-        specifier: ^0.21.0
+        specifier: 0.21.0
         version: 0.21.0(publint@0.3.18)(typescript@5.9.3)(vue-tsc@3.2.5(typescript@5.9.3))
       typescript:
         specifier: 5.9.3
@@ -794,7 +794,7 @@ importers:
   packages/wallets/kibisis:
     dependencies:
       '@agoralabs-sh/avm-web-provider':
-        specifier: ^1.7.0
+        specifier: 1.7.0
         version: 1.7.0
     devDependencies:
       '@txnlab/use-wallet':
@@ -804,7 +804,7 @@ importers:
         specifier: 3.5.2
         version: 3.5.2
       tsdown:
-        specifier: ^0.21.0
+        specifier: 0.21.0
         version: 0.21.0(publint@0.3.18)(typescript@5.9.3)(vue-tsc@3.2.5(typescript@5.9.3))
       typescript:
         specifier: 5.9.3
@@ -819,7 +819,7 @@ importers:
         specifier: 3.5.2
         version: 3.5.2
       tsdown:
-        specifier: ^0.21.0
+        specifier: 0.21.0
         version: 0.21.0(publint@0.3.18)(typescript@5.9.3)(vue-tsc@3.2.5(typescript@5.9.3))
       typescript:
         specifier: 5.9.3
@@ -828,7 +828,7 @@ importers:
   packages/wallets/lute:
     dependencies:
       lute-connect:
-        specifier: ^1.4.1
+        specifier: 1.6.3
         version: 1.6.3
     devDependencies:
       '@txnlab/use-wallet':
@@ -838,7 +838,7 @@ importers:
         specifier: 3.5.2
         version: 3.5.2
       tsdown:
-        specifier: ^0.21.0
+        specifier: 0.21.0
         version: 0.21.0(publint@0.3.18)(typescript@5.9.3)(vue-tsc@3.2.5(typescript@5.9.3))
       typescript:
         specifier: 5.9.3
@@ -847,10 +847,10 @@ importers:
   packages/wallets/magic:
     dependencies:
       '@magic-ext/algorand':
-        specifier: ^28.4.0
+        specifier: 28.4.0
         version: 28.4.0
       magic-sdk:
-        specifier: ^33.5.0
+        specifier: 33.5.0
         version: 33.5.0
     devDependencies:
       '@txnlab/use-wallet':
@@ -860,7 +860,7 @@ importers:
         specifier: 3.5.2
         version: 3.5.2
       tsdown:
-        specifier: ^0.21.0
+        specifier: 0.21.0
         version: 0.21.0(publint@0.3.18)(typescript@5.9.3)(vue-tsc@3.2.5(typescript@5.9.3))
       typescript:
         specifier: 5.9.3
@@ -875,7 +875,7 @@ importers:
         specifier: 3.5.2
         version: 3.5.2
       tsdown:
-        specifier: ^0.21.0
+        specifier: 0.21.0
         version: 0.21.0(publint@0.3.18)(typescript@5.9.3)(vue-tsc@3.2.5(typescript@5.9.3))
       typescript:
         specifier: 5.9.3
@@ -884,7 +884,7 @@ importers:
   packages/wallets/pera:
     dependencies:
       '@perawallet/connect':
-        specifier: ^1.4.1
+        specifier: 1.4.1
         version: 1.4.1(algosdk@3.5.2)(bufferutil@4.1.0)(utf-8-validate@5.0.10)
     devDependencies:
       '@txnlab/use-wallet':
@@ -894,7 +894,7 @@ importers:
         specifier: 3.5.2
         version: 3.5.2
       tsdown:
-        specifier: ^0.21.0
+        specifier: 0.21.0
         version: 0.21.0(publint@0.3.18)(typescript@5.9.3)(vue-tsc@3.2.5(typescript@5.9.3))
       typescript:
         specifier: 5.9.3
@@ -909,7 +909,7 @@ importers:
         specifier: 3.5.2
         version: 3.5.2
       tsdown:
-        specifier: ^0.21.0
+        specifier: 0.21.0
         version: 0.21.0(publint@0.3.18)(typescript@5.9.3)(vue-tsc@3.2.5(typescript@5.9.3))
       typescript:
         specifier: 5.9.3
@@ -918,13 +918,13 @@ importers:
   packages/wallets/walletconnect:
     dependencies:
       '@walletconnect/modal':
-        specifier: ^2.7.0
+        specifier: 2.7.0
         version: 2.7.0(@types/react@19.2.14)(react@19.2.4)
       '@walletconnect/sign-client':
-        specifier: ^2.17.0
+        specifier: 2.23.4
         version: 2.23.4(bufferutil@4.1.0)(db0@0.3.4)(ioredis@5.9.2)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.6)
       '@walletconnect/types':
-        specifier: ^2.17.0
+        specifier: 2.23.4
         version: 2.23.4(db0@0.3.4)(ioredis@5.9.2)
     devDependencies:
       '@txnlab/use-wallet':
@@ -934,7 +934,7 @@ importers:
         specifier: 3.5.2
         version: 3.5.2
       tsdown:
-        specifier: ^0.21.0
+        specifier: 0.21.0
         version: 0.21.0(publint@0.3.18)(typescript@5.9.3)(vue-tsc@3.2.5(typescript@5.9.3))
       typescript:
         specifier: 5.9.3
@@ -943,13 +943,13 @@ importers:
   packages/wallets/web3auth:
     dependencies:
       '@web3auth/base-provider':
-        specifier: ^9.5.0
+        specifier: 9.7.0
         version: 9.7.0(@babel/runtime@7.28.6)(bufferutil@4.1.0)(utf-8-validate@6.0.6)
       '@web3auth/modal':
-        specifier: ^10.15.0
+        specifier: 10.15.0
         version: 10.15.0(@babel/runtime@7.28.6)(@sentry/core@9.47.1)(@solana/web3.js@1.98.4(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6))(bufferutil@4.1.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(typescript@5.9.3)(utf-8-validate@6.0.6)(viem@2.47.0(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)(zod@4.3.6))(vue@3.5.27(typescript@5.9.3))(zod@4.3.6)
       '@web3auth/single-factor-auth':
-        specifier: ^9.5.0
+        specifier: 9.5.0
         version: 9.5.0(@babel/runtime@7.28.6)(bufferutil@4.1.0)(utf-8-validate@6.0.6)
     devDependencies:
       '@txnlab/use-wallet':
@@ -959,7 +959,7 @@ importers:
         specifier: 3.5.2
         version: 3.5.2
       tsdown:
-        specifier: ^0.21.0
+        specifier: 0.21.0
         version: 0.21.0(publint@0.3.18)(typescript@5.9.3)(vue-tsc@3.2.5(typescript@5.9.3))
       typescript:
         specifier: 5.9.3
@@ -9939,7 +9939,7 @@ snapshots:
       https-proxy-agent: 7.0.6
       node-fetch: 2.7.0
       nopt: 8.1.0
-      semver: 7.7.3
+      semver: 7.7.4
       tar: 7.5.7
     transitivePeerDependencies:
       - encoding
@@ -10095,7 +10095,7 @@ snapshots:
       debug: 4.4.3
       lodash: 4.17.23
       pony-cause: 2.1.11
-      semver: 7.7.3
+      semver: 7.7.4
       uuid: 9.0.1
     transitivePeerDependencies:
       - supports-color
@@ -10109,7 +10109,7 @@ snapshots:
       '@types/debug': 4.1.12
       debug: 4.4.3
       pony-cause: 2.1.11
-      semver: 7.7.3
+      semver: 7.7.4
       uuid: 9.0.1
     transitivePeerDependencies:
       - supports-color
@@ -10123,7 +10123,7 @@ snapshots:
       '@types/debug': 4.1.12
       debug: 4.4.3
       pony-cause: 2.1.11
-      semver: 7.7.3
+      semver: 7.7.4
       uuid: 9.0.1
     transitivePeerDependencies:
       - supports-color
@@ -12905,7 +12905,7 @@ snapshots:
 
   '@walletconnect/window-metadata@1.0.0':
     dependencies:
-      '@walletconnect/window-getters': 1.0.0
+      '@walletconnect/window-getters': 1.0.1
 
   '@walletconnect/window-metadata@1.0.1':
     dependencies:
@@ -15885,13 +15885,13 @@ snapshots:
   normalize-package-data@6.0.2:
     dependencies:
       hosted-git-info: 7.0.2
-      semver: 7.7.3
+      semver: 7.7.4
       validate-npm-package-license: 3.0.4
 
   normalize-package-data@8.0.0:
     dependencies:
       hosted-git-info: 9.0.2
-      semver: 7.7.3
+      semver: 7.7.4
       validate-npm-package-license: 3.0.4
 
   normalize-path@3.0.0: {}

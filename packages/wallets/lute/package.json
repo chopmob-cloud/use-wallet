@@ -10,7 +10,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/txnlab/use-wallet.git",
+    "url": "git+https://github.com/txnlab/use-wallet.git",
     "directory": "packages/wallets/lute"
   },
   "type": "module",
@@ -30,12 +30,12 @@
     "algosdk": "^3.0.0"
   },
   "dependencies": {
-    "lute-connect": "^1.4.1"
+    "lute-connect": "1.6.3"
   },
   "devDependencies": {
     "@txnlab/use-wallet": "workspace:*",
     "algosdk": "3.5.2",
-    "tsdown": "^0.21.0",
+    "tsdown": "0.21.0",
     "typescript": "5.9.3"
   },
   "scripts": {

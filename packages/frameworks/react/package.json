@@ -10,7 +10,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/txnlab/use-wallet.git",
+    "url": "git+https://github.com/txnlab/use-wallet.git",
     "directory": "packages/frameworks/react"
   },
   "type": "module",
@@ -43,12 +43,12 @@
     "@txnlab/use-wallet": "workspace:*"
   },
   "devDependencies": {
-    "@types/react": "^19.2.7",
+    "@types/react": "19.2.14",
     "algosdk": "3.5.2",
     "jsdom": "26.1.0",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0",
-    "tsdown": "^0.21.0",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "tsdown": "0.21.0",
     "typescript": "5.9.3"
   },
   "peerDependencies": {
