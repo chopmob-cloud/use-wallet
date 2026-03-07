@@ -275,7 +275,8 @@ describe('WalletManager', () => {
 
     it('loads persisted state correctly', () => {
       const manager = new WalletManager({
-        wallets: [defly(), kibisis()]
+        wallets: [defly(), kibisis()],
+        options: { persistNetwork: true }
       })
       expect(manager.activeWallet?.id).toBe('kibisis')
       expect(manager.activeNetwork).toBe('betanet')
@@ -519,8 +520,8 @@ describe('WalletManager', () => {
   })
 
   describe('options', () => {
-    describe('resetNetwork', () => {
-      it('uses the default network when resetNetwork is true, ignoring persisted state', () => {
+    describe('persistNetwork', () => {
+      it('uses the default network when persistNetwork is false (default), ignoring persisted state', () => {
         mockInitialState = {
           wallets: {},
           activeWallet: null,
@@ -534,13 +535,32 @@ describe('WalletManager', () => {
         const manager = new WalletManager({
           wallets: [],
           defaultNetwork: 'testnet',
-          options: { resetNetwork: true }
+          options: { persistNetwork: false }
         })
 
         expect(manager.activeNetwork).toBe('testnet')
       })
 
-      it('uses the persisted network when resetNetwork is false', () => {
+      it('uses the default network when persistNetwork is unset (defaults to false)', () => {
+        mockInitialState = {
+          wallets: {},
+          activeWallet: null,
+          activeNetwork: 'mainnet',
+          algodClient: new algosdk.Algodv2('', 'https://mainnet-api.4160.nodely.dev'),
+          managerStatus: 'ready',
+          networkConfig: DEFAULT_NETWORK_CONFIG,
+          customNetworkConfigs: {}
+        }
+
+        const manager = new WalletManager({
+          wallets: [],
+          defaultNetwork: 'testnet'
+        })
+
+        expect(manager.activeNetwork).toBe('testnet')
+      })
+
+      it('uses the persisted network when persistNetwork is true', () => {
         mockInitialState = {
           wallets: {},
           activeWallet: null,
@@ -554,7 +574,7 @@ describe('WalletManager', () => {
         const manager = new WalletManager({
           wallets: [],
           defaultNetwork: 'testnet',
-          options: { resetNetwork: false }
+          options: { persistNetwork: true }
         })
 
         expect(manager.activeNetwork).toBe('mainnet')

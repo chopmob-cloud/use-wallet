@@ -338,8 +338,8 @@ import {
 const manager = new WalletManager({
   // ...
   options: {
-    // Reset to default network on page load
-    resetNetwork: true,
+    // Use persisted network from localStorage on page load
+    persistNetwork: true,
     
     // Enable debug logging
     debug: true,
@@ -402,7 +402,7 @@ const manager = new WalletManager({
   options: {
     debug: true,
     logLevel: LogLevel.INFO,
-    resetNetwork: false
+    persistNetwork: false
   }
 })
 ```

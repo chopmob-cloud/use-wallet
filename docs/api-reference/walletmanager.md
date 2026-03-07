@@ -42,7 +42,7 @@ interface WalletManagerConfig {
 
 ```typescript
 interface WalletManagerOptions {
-  resetNetwork?: boolean    // Reset to default network on page load
+  persistNetwork?: boolean  // Use persisted network from localStorage on page load
   debug?: boolean           // Enable debug logging
   logLevel?: LogLevel       // Set specific log level
 }

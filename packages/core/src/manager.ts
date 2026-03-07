@@ -34,7 +34,7 @@ import type {
 } from 'src/wallets/types'
 
 export interface WalletManagerOptions {
-  resetNetwork?: boolean
+  persistNetwork?: boolean
   debug?: boolean
   logLevel?: LogLevel
 }
@@ -51,7 +51,7 @@ export class WalletManager {
   private baseNetworkConfig: Record<string, NetworkConfig>
   public store: Store<State>
   public subscribe: (callback: (state: State) => void) => () => void
-  public options: { resetNetwork: boolean }
+  public options: { persistNetwork: boolean }
 
   private logger: ReturnType<typeof logger.createScopedLogger>
   private events = new EventEmitter<WalletManagerEvents>()
@@ -82,12 +82,12 @@ export class WalletManager {
     const networkConfig = this.initNetworkConfig(this.baseNetworkConfig, persistedState)
 
     // Initialize options
-    this.options = { resetNetwork: options.resetNetwork || false }
+    this.options = { persistNetwork: options.persistNetwork ?? false }
 
     // Set active network
-    const activeNetwork = this.options.resetNetwork
-      ? defaultNetwork
-      : persistedState?.activeNetwork || defaultNetwork
+    const activeNetwork = this.options.persistNetwork
+      ? persistedState?.activeNetwork || defaultNetwork
+      : defaultNetwork
 
     // Validate active network exists in config
     if (!networkConfig[activeNetwork]) {

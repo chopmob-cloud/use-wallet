@@ -31,19 +31,19 @@ const manager = new WalletManager({
 })
 ```
 
-You can also control whether the manager should reset to the default network on page load using the `resetNetwork` option:
+You can also control whether the manager should persist the active network across page loads using the `persistNetwork` option:
 
 ```typescript
 const manager = new WalletManager({
   defaultNetwork: NetworkId.TESTNET,
   options: {
-    // Always start on TestNet, even if the user was previously on a different network
-    resetNetwork: true
+    // Restore the last active network from localStorage on page load
+    persistNetwork: true
   }
 })
 ```
 
-When `resetNetwork` is `false` (the default), use-wallet will attempt to restore the last active network from local storage.
+When `persistNetwork` is `false` (the default), use-wallet will always reset to `defaultNetwork` on page load. Set `persistNetwork: true` for apps with runtime network switching that should remember the user's last network.
 
 ### Runtime Network Switching
 
