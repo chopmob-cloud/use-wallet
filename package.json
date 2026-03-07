@@ -28,7 +28,9 @@
     "example:next": "pnpm --filter \"./examples/next\" dev",
     "example:nuxt": "pnpm --filter \"./examples/nuxt\" dev",
     "example:svelte": "pnpm --filter \"./examples/svelte\" dev",
-    "publint": "pnpm -r --filter './packages/**' exec publint"
+    "publint": "pnpm -r --filter './packages/**' exec publint",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui"
   },
   "devDependencies": {
     "@playwright/test": "1.58.1",
