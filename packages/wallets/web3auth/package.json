@@ -1,6 +1,6 @@
 {
   "name": "@txnlab/use-wallet-web3auth",
-  "version": "5.0.0-rc.0",
+  "version": "5.0.0-rc.1",
   "publishConfig": {
     "access": "public",
     "provenance": true
@@ -35,7 +35,7 @@
     "@web3auth/single-factor-auth": "9.5.0"
   },
   "devDependencies": {
-    "@txnlab/use-wallet": "workspace:*",
+    "@txnlab/use-wallet": "5.0.0-rc.1",
     "algosdk": "3.5.2",
     "tsdown": "0.21.0",
     "typescript": "5.9.3"
