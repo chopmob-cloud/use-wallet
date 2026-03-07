@@ -239,14 +239,14 @@ const ConnectedWallet = ({ wallet }: { wallet: Wallet }) => {
 
 {% tab title="Solid" %}
 ```tsx
-import { useWallet, type BaseWallet } from '@txnlab/use-wallet-solid'
+import { useWallet, type Wallet } from '@txnlab/use-wallet-solid'
 import { createSignal, For, Show } from 'solid-js'
 
 const WalletMenu = () => {
   const { wallets, activeWallet, activeAccount } = useWallet()
   const [connecting, setConnecting] = createSignal(false)
 
-  const handleConnect = async (wallet: BaseWallet) => {
+  const handleConnect = async (wallet: Wallet) => {
     setConnecting(true)
     try {
       await wallet.connect()
@@ -257,7 +257,7 @@ const WalletMenu = () => {
     }
   }
 
-  const setActiveAccount = (event: Event, wallet: BaseWallet) => {
+  const setActiveAccount = (event: Event, wallet: Wallet) => {
     const target = event.target as HTMLSelectElement
     wallet.setActiveAccount(target.value)
   }
@@ -492,7 +492,7 @@ const WalletOption = ({ wallet }: { wallet: Wallet }) => {
 
 {% tab title="Solid" %}
 ```tsx
-const WalletOption = ({ wallet }: { wallet: BaseWallet }) => {
+const WalletOption = ({ wallet }: { wallet: Wallet }) => {
   const [status, setStatus] = createSignal('idle')
   
   const handleConnect = async () => {

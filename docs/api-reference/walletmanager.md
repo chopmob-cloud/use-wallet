@@ -28,14 +28,14 @@ Creates a new WalletManager instance with optional configuration.
 
 ```typescript
 interface WalletManagerConfig {
-  wallets?: SupportedWallet[]
+  wallets?: WalletAdapterConfig[]
   networks?: Record<string, NetworkConfig>
   defaultNetwork?: string
   options?: WalletManagerOptions
 }
 ```
 
-* `wallets` - Array of wallet providers to enable (see [Configuration](../getting-started/configuration.md#configuring-wallets) for details)
+* `wallets` - Array of wallet adapter configs returned by factory functions (see [Configuration](../getting-started/configuration.md#configuring-wallets) for details)
 * `networks` - Custom network configurations (optional, defaults provided)
 * `defaultNetwork` - Network to use on first load (optional, defaults to 'testnet')
 * `options` - Additional configuration options (optional)
@@ -51,23 +51,18 @@ interface WalletManagerOptions {
 #### Example
 
 ```typescript
-import { 
-  WalletManager, 
-  WalletId,
-  NetworkId,
-  LogLevel 
+import {
+  WalletManager,
+  LogLevel
 } from '@txnlab/use-wallet'
+import { pera } from '@txnlab/use-wallet-pera'
+import { walletConnect } from '@txnlab/use-wallet-walletconnect'
 
 const manager = new WalletManager({
   // Configure wallets
   wallets: [
-    WalletId.PERA,
-    {
-      id: WalletId.WALLETCONNECT,
-      options: {
-        projectId: 'your-project-id'
-      }
-    }
+    pera(),
+    walletConnect({ projectId: 'your-project-id' }),
   ],
 
   // Configure networks
@@ -78,7 +73,7 @@ const manager = new WalletManager({
       token: ''
     }
   },
-  defaultNetwork: NetworkId.TESTNET, // or just 'testnet'
+  defaultNetwork: 'testnet',
 
   // Additional options
   options: {
@@ -129,6 +124,14 @@ wallets: BaseWallet[]
 ```
 
 Array of initialized wallet provider instances.
+
+#### availableWallets
+
+```typescript
+availableWallets: BaseWallet[]
+```
+
+Array of wallet providers available for the active network, filtered by each wallet's declared capabilities.
 
 #### activeWallet
 
@@ -191,10 +194,10 @@ Whether all wallet providers have completed initialization.
 #### getWallet
 
 ```typescript
-getWallet(walletId: WalletId): BaseWallet | undefined
+getWallet(walletId: string): BaseWallet | undefined
 ```
 
-Get a specific wallet provider instance by ID.
+Get a specific wallet provider instance by ID or wallet key.
 
 #### resumeSessions
 
@@ -215,7 +218,7 @@ Disconnect all connected wallets.
 #### setActiveNetwork
 
 ```typescript
-setActiveNetwork(networkId: NetworkId | string): Promise<void>
+setActiveNetwork(networkId: string): Promise<void>
 ```
 
 Switch to a different network.
@@ -257,7 +260,7 @@ Typed transaction signer for use with [AtomicTransactionComposer](https://develo
 
 ### Events
 
-The WalletManager includes several event handlers that can be used to track state changes:
+The WalletManager includes several event handlers that can be used to track state changes.
 
 #### subscribe
 
@@ -270,13 +273,30 @@ Subscribe to state changes. Returns an unsubscribe function.
 ```typescript
 interface State {
   wallets: WalletStateMap
-  activeWallet: WalletId | null
+  activeWallet: string | null
   activeNetwork: string
   algodClient: algosdk.Algodv2
   managerStatus: ManagerStatus
   networkConfig: Record<string, NetworkConfig>
 }
 ```
+
+#### on / off
+
+```typescript
+on<K extends keyof WalletManagerEvents>(event: K, handler: WalletManagerEvents[K]): () => void
+off<K extends keyof WalletManagerEvents>(event: K, handler: WalletManagerEvents[K]): void
+```
+
+Subscribe to or unsubscribe from specific wallet events. The `on` method returns an unsubscribe function.
+
+Available events:
+- `walletConnected` — Emitted when a wallet connects
+- `walletDisconnected` — Emitted when a wallet disconnects
+- `activeWalletChanged` — Emitted when the active wallet changes
+- `activeAccountChanged` — Emitted when the active account changes
+- `beforeSign` — Emitted before a transaction signing request
+- `afterSign` — Emitted after a transaction signing request
 
 #### Example
 
@@ -288,6 +308,14 @@ const unsubscribe = manager.subscribe((state) => {
 
 // Later
 unsubscribe()
+
+// Event emitter
+const off = manager.on('walletConnected', (wallet) => {
+  console.log('Wallet connected:', wallet.id)
+})
+
+// Later
+off()
 ```
 
 ### Framework Integration
@@ -336,5 +364,3 @@ See these guides for more information:
 * [Vue Integration](../framework/vue.md)
 * [SolidJS Integration](../framework/solidjs.md)
 * [Svelte Integration](../framework/svelte.md)
-
-The WalletManager's framework-agnostic design makes it possible to create adapters for other frameworks. Community contributions for additional framework adapters (e.g., Svelte, Angular) are welcome!

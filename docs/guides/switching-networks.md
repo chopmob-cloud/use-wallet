@@ -234,7 +234,7 @@ Not all wallets support all networks. For example:
 * The Mnemonic wallet only works on test networks
 * Custom networks may not be supported by all wallets
 
-Please refer to each wallet's documentation to determine which networks they support.
+Wallets can declare which networks they support using `WalletCapabilities`. The `availableWallets` property (available on `WalletManager` and all framework hooks) returns only wallets compatible with the active network. Consider using `availableWallets` instead of `wallets` when rendering wallet selection lists.
 
 ### Default Networks
 

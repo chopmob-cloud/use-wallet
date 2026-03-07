@@ -126,7 +126,7 @@ Reference: [v5-migration-plan.md](./v5-migration-plan.md)
 
 - [ ] Manual first publish of all new packages to npm
 - [ ] Configure npm trusted publishing (OIDC) for each package on npmjs.com
-- [ ] Update GitBook documentation
+- [x] Update GitBook documentation
 - [x] Write v4 → v5 migration guide
 - [x] E2E test updates
 
@@ -158,6 +158,7 @@ Reference: [v5-migration-plan.md](./v5-migration-plan.md)
 - **2026-03-06**: **Pinned dependency versions**: All packages use exact versions (no `^` ranges). Renovate handles version bumps.
 - **2026-03-07**: **E2E test updates**: Updated Playwright tests in `examples/e2e-tests/` for the v5 example UI. Tests target the vanilla-ts example (uses `data-*` attributes for stable selectors). Added `playwright.config.ts` at root and `test:e2e`/`test:e2e:ui` scripts. Three test suites: Mnemonic wallet connect/disconnect/send-transaction, network switching with `availableWallets` filtering (verifies Mnemonic disappears on mainnet), and transaction error handling. Tests use `FakeAlgodResponses.ts` to mock Algod HTTP endpoints — no real node needed. E2E tests are local-only (not in CI) — the cost of Chromium install + build per PR isn't justified for demo-level smoke tests. Can add CI integration later if comprehensive E2E coverage is added.
 - **2026-03-07**: **v4 → v5 migration guide**: Created `docs/guides/migrating-from-v4.x.md` covering all breaking changes: wallet adapter packages, factory function configuration, `resetNetwork` → `persistNetwork`, type changes, removed features, new features (`availableWallets`, event emitter, subpath exports), and localStorage key change. Follows the structure of the existing v3 → v4 guide with GitBook formatting.
+- **2026-03-07**: **GitBook documentation update**: Updated all docs in `docs/` for v5 API. Replaced `WalletId` enum usage with factory function imports across installation, configuration, supported wallets, API reference, framework adapters, and guide pages. Removed Webpack configuration section (not needed in v5), Biatec standalone section (removed in v5), and Liquid Auth section (removed in v5). Added `availableWallets` to API reference. Updated example project directory names and descriptions. Deleted `migrating-from-v3.x.md` (stays in v4 GitBook space). v5 docs will be deployed to a separate `gitbook/v5` branch.
 
 ---
 
