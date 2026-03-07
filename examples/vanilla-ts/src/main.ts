@@ -78,7 +78,7 @@ function renderNetworkSwitch() {
 
 function renderWalletList() {
   const state = getState()
-  const walletHtml = [...manager.wallets]
+  const walletHtml = [...manager.availableWallets]
     .map((wallet) => {
       const walletState = state.wallets[wallet.walletKey]
       const isConnected = !!walletState

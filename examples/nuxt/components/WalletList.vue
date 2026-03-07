@@ -4,7 +4,7 @@ import { useWallet, type Wallet } from '@txnlab/use-wallet-vue'
 
 const MAGIC_ID = 'magic'
 
-const { wallets } = useWallet()
+const { availableWallets } = useWallet()
 const connecting = ref<string | null>(null)
 const magicEmail = ref('')
 
@@ -33,7 +33,7 @@ const isMagicConnectDisabled = (wallet: Wallet) => {
   <div class="space-y-2">
     <h2 class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-3">Wallets</h2>
     <div
-      v-for="wallet in wallets"
+      v-for="wallet in availableWallets"
       :key="wallet.walletKey"
       :class="[
         'rounded-xl border p-3 transition-colors',

@@ -3,7 +3,7 @@
 
   const MAGIC_ID = 'magic'
 
-  const { wallets } = useWallet()
+  const { availableWallets } = useWallet()
 
   let connecting = $state<string | null>(null)
   let magicEmail = $state('')
@@ -31,7 +31,7 @@
 
 <div class="space-y-2">
   <h2 class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-3">Wallets</h2>
-  {#each wallets as wallet (wallet.walletKey)}
+  {#each availableWallets.current as wallet (wallet.walletKey)}
     <div
       class="rounded-xl border p-3 transition-colors {wallet.isActive()
         ? 'border-blue-200 bg-blue-50'

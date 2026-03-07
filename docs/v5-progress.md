@@ -97,12 +97,34 @@ Reference: [v5-migration-plan.md](./v5-migration-plan.md)
 - [x] Add root `publint` script
 - [x] Create `.github/workflows/release.yml` (TxnLab Release Bot, OIDC)
 - [x] Add `CHANGELOG.md` to `.prettierignore`
+- [x] Pre-release testing from `v5` branch
+
+## Sprint 5: API Changes & Tooling
+
+**Track A — API Changes:**
+- [x] Rename `resetNetwork` → `persistNetwork`, flip default to `false` (breaking change)
+- [x] Add wallet adapter capabilities (network filtering)
+  - [x] Define `WalletCapabilities` type in core (`supportedNetworks` + `excludedNetworks`)
+  - [x] Add `capabilities` field to `WalletAdapterConfig` and factory function returns
+  - [x] Declare network capabilities in each wallet adapter's factory function
+  - [x] Add `availableWallets` getter to `WalletManager` (filtered by active network)
+  - [x] Add reactive `availableWallets` to framework adapters (`wallets` unchanged)
+  - [x] Update core and framework adapter tests
+
+**Track B — Tooling/Build:**
+- [x] Migrate tsup → tsdown (all packages)
+- [x] Drop CJS from build output (ESM only)
+- [x] Migrate ESLint v8 → v9 (legacy `.eslintrc.json` → flat `eslint.config.js`)
+- [x] Pin exact dependency versions in all packages (remove `^` ranges)
+- [x] Fix publint `pkg.repository.url` warning (add `git+` prefix)
+
+## Sprint 6: Docs, Publishing & E2E
+
 - [ ] Manual first publish of all new packages to npm
 - [ ] Configure npm trusted publishing (OIDC) for each package on npmjs.com
 - [ ] Update GitBook documentation
 - [ ] Write v4 → v5 migration guide
 - [ ] E2E test updates
-- [ ] Pre-release testing from `v5` branch
 
 ---
 
@@ -125,6 +147,11 @@ Reference: [v5-migration-plan.md](./v5-migration-plan.md)
 - **2026-03-06**: **Dependency model change**: Wallet SDKs move from `peerDependencies` to regular `dependencies` in adapter packages. Peer deps forced consumers to manually install each wallet SDK alongside each adapter (28 packages for a full setup). With regular deps, `npm install @txnlab/use-wallet-pera` brings in `@perawallet/connect` automatically. `algosdk` stays as a peer dep since consumers use it directly. Web3Auth adapter must add `@web3auth/modal`, `@web3auth/base`, `@web3auth/base-provider`, `@web3auth/single-factor-auth` as regular deps (they were invisible before — not listed as peer deps despite being required at runtime). The Web3Auth ambient module declarations (`web3auth-modules.d.ts`) can be removed since the packages will be installed. Magic SDK has a broken ESM build (`@magic-sdk/types` missing `Wallets` export) — document the required Vite workaround until upstream fixes it.
 - **2026-03-06**: **Solid adapter reactivity fix**: The v5 Solid adapter's `transformToWallet()` created plain objects with static property values — `isConnected`, `isActive`, `accounts`, `activeAccount` were captured once and never updated. Solid's fine-grained reactivity requires reactive accessors, not static values. Fixed by using JavaScript getter properties that re-evaluate from the store on each access (e.g., `get isConnected() { return !!walletStateMap()[wallet.walletKey] }`). The `wallets` array is created once (not wrapped in `createMemo`) since the wallet list is static — only the dynamic properties need getters. The Solid adapter now defines its own local `Wallet` interface with `readonly` properties (matching the Svelte adapter precedent of framework-specific `Wallet` types). The core `Wallet` is still re-exported for consumers who need the flat type.
 - **2026-03-06**: **Example project directory renames**: Standardized example directory names to match framework adapter names: `vue-ts` → `vue`, `solid-ts` → `solid`, `svelte-ts` → `svelte`, `nextjs` → `next`. `vanilla-ts` kept as-is (no framework name to shorten to). `nuxt` already clean. Updated root `package.json` example scripts to match.
+- **2026-03-06**: **`resetNetwork` → `persistNetwork`**: Renamed and flipped default. v4's `resetNetwork` defaulted to `false`, meaning the persisted network always overrode `defaultNetwork` — a common pain point for apps switching from TestNet to MainNet. v5's `persistNetwork` defaults to `false` (network resets to `defaultNetwork` on load). Apps with runtime network switching set `persistNetwork: true`. The rename eliminates the double-negative confusion of `resetNetwork: false`.
+- **2026-03-07**: **Wallet adapter capabilities**: Chose option 5 (`supportedNetworks` + `excludedNetworks`) for `WalletCapabilities`. Most wallets use `supportedNetworks` to list 1-2 networks. Mnemonic uses `excludedNetworks: ['mainnet']` to support all networks except MainNet (including custom networks). If both are set, `supportedNetworks` wins with a warning. `wallets` is unchanged (returns all wallets). New `availableWallets` property added to `WalletManager` and all framework adapters — reactively filtered by active network. `WalletCapabilities` exported from `@txnlab/use-wallet` for third-party adapter authors.
+- **2026-03-06**: **Build tooling**: Migrating tsup → tsdown (tsup EOL, recommends tsdown). Dropping CJS build output — ESM only for v5. All framework targets and examples are ESM-first.
+- **2026-03-06**: **ESLint v9**: Migrating from ESLint v8 (legacy `.eslintrc.json`) to ESLint v9 (flat `eslint.config.js`). Removes `@typescript-eslint/eslint-plugin` and `@typescript-eslint/parser` in favor of `typescript-eslint` unified package.
+- **2026-03-06**: **Pinned dependency versions**: All packages use exact versions (no `^` ranges). Renovate handles version bumps.
 
 ---
 

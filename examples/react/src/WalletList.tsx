@@ -4,7 +4,7 @@ import { useState } from 'react'
 const MAGIC_ID = 'magic'
 
 export function WalletList() {
-  const { wallets } = useWallet()
+  const { availableWallets } = useWallet()
   const [connecting, setConnecting] = useState<string | null>(null)
   const [magicEmail, setMagicEmail] = useState('')
 
@@ -31,7 +31,7 @@ export function WalletList() {
   return (
     <div className="space-y-2">
       <h2 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-3">Wallets</h2>
-      {wallets.map((wallet) => (
+      {availableWallets.map((wallet) => (
         <WalletRow
           key={wallet.walletKey}
           wallet={wallet}

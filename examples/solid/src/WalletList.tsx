@@ -4,7 +4,7 @@ import { createSignal, For, Show, type JSX } from 'solid-js'
 const MAGIC_ID = 'magic'
 
 export function WalletList() {
-  const { wallets } = useWallet()
+  const { availableWallets } = useWallet()
   const [connecting, setConnecting] = createSignal<string | null>(null)
   const [magicEmail, setMagicEmail] = createSignal('')
 
@@ -31,7 +31,7 @@ export function WalletList() {
   return (
     <div class="space-y-2">
       <h2 class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-3">Wallets</h2>
-      <For each={wallets()}>
+      <For each={availableWallets()}>
         {(wallet) => (
           <WalletRow
             wallet={wallet}
