@@ -6,7 +6,7 @@ import { useState } from 'react'
 const MAGIC_ID = 'magic'
 
 export function WalletList() {
-  const { availableWallets } = useWallet()
+  const { availableWallets, isReady } = useWallet()
   const [connecting, setConnecting] = useState<string | null>(null)
   const [magicEmail, setMagicEmail] = useState('')
 
@@ -37,11 +37,12 @@ export function WalletList() {
         <WalletRow
           key={wallet.walletKey}
           wallet={wallet}
+          isReady={isReady}
           isConnecting={connecting === wallet.id}
           connectDisabled={isMagicConnectDisabled(wallet)}
           onConnect={() => handleConnect(wallet)}
         >
-          {wallet.id === MAGIC_ID && !wallet.isConnected && (
+          {wallet.id === MAGIC_ID && !(isReady && wallet.isConnected) && (
             <input
               type="email"
               value={magicEmail}
@@ -58,23 +59,26 @@ export function WalletList() {
 
 function WalletRow({
   wallet,
+  isReady,
   isConnecting,
   connectDisabled,
   onConnect,
   children
 }: {
   wallet: Wallet
+  isReady: boolean
   isConnecting: boolean
   connectDisabled: boolean
   onConnect: () => void
   children?: React.ReactNode
 }) {
+  const isConnected = isReady && wallet.isConnected
+  const isActive = isReady && wallet.isActive
+
   return (
     <div
       className={`rounded-xl border p-3 transition-colors ${
-        wallet.isActive
-          ? 'border-blue-200 bg-blue-50'
-          : 'border-gray-200 bg-white hover:border-gray-300'
+        isActive ? 'border-blue-200 bg-blue-50' : 'border-gray-200 bg-white hover:border-gray-300'
       }`}
     >
       <div className="flex items-center gap-3">
@@ -85,7 +89,7 @@ function WalletRow({
         />
         <div className="flex-1 min-w-0">
           <div className="text-sm font-medium text-gray-900">{wallet.metadata.name}</div>
-          {wallet.isConnected && wallet.activeAccount && (
+          {isConnected && wallet.activeAccount && (
             <div className="text-xs text-gray-400 truncate font-mono">
               {wallet.activeAccount.address.slice(0, 8)}...
               {wallet.activeAccount.address.slice(-4)}
@@ -93,9 +97,9 @@ function WalletRow({
           )}
         </div>
         <div className="flex items-center gap-1.5 shrink-0">
-          {wallet.isConnected ? (
+          {isConnected ? (
             <>
-              {!wallet.isActive && (
+              {!isActive && (
                 <button
                   onClick={() => wallet.setActive()}
                   className="rounded-lg border border-blue-200 bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-600 hover:bg-blue-100 transition-colors"

@@ -118,6 +118,10 @@ Reference: [v5-migration-plan.md](./v5-migration-plan.md)
 - [x] Pin exact dependency versions in all packages (remove `^` ranges)
 - [x] Fix publint `pkg.repository.url` warning (add `git+` prefix)
 
+**Track C — Bug Fixes:**
+- [x] Disconnect incompatible wallets on network switch (store subscription in `WalletManager`)
+- [x] Fix Next.js hydration error (`isReady` guard in example components)
+
 ## Sprint 6: Docs, Publishing & E2E
 
 - [ ] Manual first publish of all new packages to npm

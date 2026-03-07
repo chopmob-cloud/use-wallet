@@ -111,6 +111,18 @@ export class WalletManager {
     // Create store
     this.store = new Store<State>(initialState)
 
+    // Track active network for change detection
+    let previousNetwork = activeNetwork
+
+    // Subscribe to disconnect incompatible wallets on network change
+    this.store.subscribe(() => {
+      const currentNetwork = this.store.state.activeNetwork
+      if (currentNetwork !== previousNetwork) {
+        previousNetwork = currentNetwork
+        this.disconnectIncompatibleWallets(currentNetwork)
+      }
+    })
+
     // Subscribe to persist state on updates
     this.store.subscribe(() => this.savePersistedState())
 
@@ -344,6 +356,25 @@ export class WalletManager {
     }
 
     return true
+  }
+
+  private async disconnectIncompatibleWallets(networkId: string): Promise<void> {
+    const connectedWalletKeys = Object.keys(this.store.state.wallets)
+
+    for (const walletKey of connectedWalletKeys) {
+      if (!this.isWalletAvailable(walletKey as WalletKey, networkId)) {
+        const wallet = this._clients.get(walletKey as WalletKey)
+        if (wallet) {
+          this.logger.info(`Disconnecting ${walletKey}: does not support network "${networkId}"`)
+          try {
+            await wallet.disconnect()
+          } catch (error) {
+            this.logger.error(`Error disconnecting ${walletKey}:`, error)
+            removeWallet(this.store, { walletId: walletKey })
+          }
+        }
+      }
+    }
   }
 
   public get availableWallets(): BaseWallet[] {

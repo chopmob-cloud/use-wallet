@@ -1,7 +1,14 @@
 import algosdk from 'algosdk'
 import { logger } from 'src/logger'
 import { DEFAULT_NETWORK_CONFIG, NetworkConfigBuilder } from 'src/network'
-import { LOCAL_STORAGE_KEY, PersistedState, State, DEFAULT_STATE } from 'src/store'
+import {
+  LOCAL_STORAGE_KEY,
+  PersistedState,
+  State,
+  DEFAULT_STATE,
+  removeWallet,
+  setActiveWallet
+} from 'src/store'
 import { WalletManager } from 'src/manager'
 import { StorageAdapter } from 'src/storage'
 import { BaseWallet } from 'src/wallets/base'
@@ -638,6 +645,180 @@ describe('WalletManager', () => {
       for (const wallet of manager.wallets) {
         expect(wallet.resumeSession).toHaveBeenCalled()
       }
+    })
+  })
+
+  describe('disconnectIncompatibleWallets', () => {
+    it('disconnects a connected wallet when switching to an unsupported network', async () => {
+      // Mnemonic excludes mainnet, start on testnet with mnemonic connected
+      mockInitialState = {
+        wallets: {
+          mnemonic: {
+            accounts: [
+              {
+                name: 'Mnemonic 1',
+                address: '7ZUECA7HFLZTXENRV24SHLU4AVPUTMTTDUFUBNBD64C73F3UHRTHAIOF6Q'
+              }
+            ],
+            activeAccount: {
+              name: 'Mnemonic 1',
+              address: '7ZUECA7HFLZTXENRV24SHLU4AVPUTMTTDUFUBNBD64C73F3UHRTHAIOF6Q'
+            }
+          }
+        },
+        activeWallet: 'mnemonic',
+        activeNetwork: 'testnet',
+        algodClient: new algosdk.Algodv2('', 'https://testnet-api.4160.nodely.dev/'),
+        managerStatus: 'ready',
+        networkConfig: DEFAULT_NETWORK_CONFIG,
+        customNetworkConfigs: {}
+      }
+
+      const manager = new WalletManager({
+        wallets: [mnemonicAdapter(), kibisis()],
+        defaultNetwork: 'testnet'
+      })
+
+      const mnemonicWallet = manager.getWallet('mnemonic' as any)!
+      expect(manager.store.state.wallets).toHaveProperty('mnemonic')
+
+      await manager.setActiveNetwork('mainnet')
+
+      expect(mnemonicWallet.disconnect).toHaveBeenCalled()
+    })
+
+    it('clears active wallet when it is disconnected due to network switch', async () => {
+      mockInitialState = {
+        wallets: {
+          mnemonic: {
+            accounts: [
+              {
+                name: 'Mnemonic 1',
+                address: '7ZUECA7HFLZTXENRV24SHLU4AVPUTMTTDUFUBNBD64C73F3UHRTHAIOF6Q'
+              }
+            ],
+            activeAccount: {
+              name: 'Mnemonic 1',
+              address: '7ZUECA7HFLZTXENRV24SHLU4AVPUTMTTDUFUBNBD64C73F3UHRTHAIOF6Q'
+            }
+          }
+        },
+        activeWallet: 'mnemonic',
+        activeNetwork: 'testnet',
+        algodClient: new algosdk.Algodv2('', 'https://testnet-api.4160.nodely.dev/'),
+        managerStatus: 'ready',
+        networkConfig: DEFAULT_NETWORK_CONFIG,
+        customNetworkConfigs: {}
+      }
+
+      const manager = new WalletManager({
+        wallets: [mnemonicAdapter(), kibisis()],
+        defaultNetwork: 'testnet'
+      })
+
+      // Make mock disconnect remove wallet from store (as the real implementation does)
+      const mnemonicWallet = manager.getWallet('mnemonic' as any)!
+      vi.mocked(mnemonicWallet.disconnect).mockImplementation(async () => {
+        removeWallet(manager.store, { walletId: 'mnemonic' })
+        setActiveWallet(manager.store, { walletId: null })
+      })
+
+      expect(manager.activeWallet?.id).toBe('mnemonic')
+
+      await manager.setActiveNetwork('mainnet')
+
+      // Active wallet should be cleared (not auto-switched to kibisis)
+      expect(manager.activeWallet).toBeNull()
+      expect(manager.store.state.activeWallet).toBeNull()
+    })
+
+    it('keeps compatible wallets connected after network switch', async () => {
+      mockInitialState = {
+        wallets: {
+          mnemonic: {
+            accounts: [
+              {
+                name: 'Mnemonic 1',
+                address: '7ZUECA7HFLZTXENRV24SHLU4AVPUTMTTDUFUBNBD64C73F3UHRTHAIOF6Q'
+              }
+            ],
+            activeAccount: {
+              name: 'Mnemonic 1',
+              address: '7ZUECA7HFLZTXENRV24SHLU4AVPUTMTTDUFUBNBD64C73F3UHRTHAIOF6Q'
+            }
+          },
+          kibisis: {
+            accounts: [
+              {
+                name: 'Kibisis 1',
+                address: 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+              }
+            ],
+            activeAccount: {
+              name: 'Kibisis 1',
+              address: 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
+            }
+          }
+        },
+        activeWallet: 'mnemonic',
+        activeNetwork: 'testnet',
+        algodClient: new algosdk.Algodv2('', 'https://testnet-api.4160.nodely.dev/'),
+        managerStatus: 'ready',
+        networkConfig: DEFAULT_NETWORK_CONFIG,
+        customNetworkConfigs: {}
+      }
+
+      const manager = new WalletManager({
+        wallets: [mnemonicAdapter(), kibisis()],
+        defaultNetwork: 'testnet'
+      })
+
+      const kibisisWallet = manager.getWallet('kibisis' as any)!
+
+      await manager.setActiveNetwork('mainnet')
+
+      // Kibisis has no capabilities, so it should remain connected
+      expect(kibisisWallet.disconnect).not.toHaveBeenCalled()
+      expect(manager.store.state.wallets).toHaveProperty('kibisis')
+    })
+
+    it('keeps wallets with no capabilities connected on any network switch', async () => {
+      mockInitialState = {
+        wallets: {
+          defly: {
+            accounts: [
+              {
+                name: 'Defly 1',
+                address: '7ZUECA7HFLZTXENRV24SHLU4AVPUTMTTDUFUBNBD64C73F3UHRTHAIOF6Q'
+              }
+            ],
+            activeAccount: {
+              name: 'Defly 1',
+              address: '7ZUECA7HFLZTXENRV24SHLU4AVPUTMTTDUFUBNBD64C73F3UHRTHAIOF6Q'
+            }
+          }
+        },
+        activeWallet: 'defly',
+        activeNetwork: 'testnet',
+        algodClient: new algosdk.Algodv2('', 'https://testnet-api.4160.nodely.dev/'),
+        managerStatus: 'ready',
+        networkConfig: DEFAULT_NETWORK_CONFIG,
+        customNetworkConfigs: {}
+      }
+
+      const manager = new WalletManager({
+        wallets: [defly(), kibisis()],
+        defaultNetwork: 'testnet'
+      })
+
+      const deflyWallet = manager.getWallet('defly' as any)!
+
+      await manager.setActiveNetwork('mainnet')
+
+      // Defly has no capabilities, should remain connected
+      expect(deflyWallet.disconnect).not.toHaveBeenCalled()
+      expect(manager.store.state.wallets).toHaveProperty('defly')
+      expect(manager.activeWallet?.id).toBe('defly')
     })
   })
 

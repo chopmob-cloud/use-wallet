@@ -5,9 +5,9 @@ import { AccountSwitcher } from './AccountSwitcher'
 import { SendTransaction } from './SendTransaction'
 
 export function ActiveWallet() {
-  const { activeWallet, activeAccount } = useWallet()
+  const { activeWallet, activeAccount, isReady } = useWallet()
 
-  if (!activeWallet || !activeAccount) {
+  if (!isReady || !activeWallet || !activeAccount) {
     return (
       <div className="flex items-center justify-center rounded-2xl border border-dashed border-gray-300 bg-white p-12">
         <p className="text-sm text-gray-400">Connect a wallet to get started</p>
