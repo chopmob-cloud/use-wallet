@@ -91,21 +91,10 @@ for (const pattern of patterns) {
 
 console.log(`Found ${packageJsonPaths.length} publishable packages`)
 
-// Update versions and workspace references
+// Update version field only (workspace:* references are resolved by pnpm publish)
 for (const pkgPath of packageJsonPaths) {
   const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'))
   pkg.version = version
-
-  // Replace workspace:* references with actual version
-  for (const depType of ['dependencies', 'devDependencies', 'peerDependencies']) {
-    if (pkg[depType]) {
-      for (const [name, value] of Object.entries(pkg[depType])) {
-        if (value === 'workspace:*' && packageNames.has(name)) {
-          pkg[depType][name] = version
-        }
-      }
-    }
-  }
 
   fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + '\n')
   console.log(`  Updated ${pkg.name} → ${version}`)

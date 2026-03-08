@@ -48,7 +48,7 @@
   ],
   "dependencies": {
     "@tanstack/solid-store": "0.9.1",
-    "@txnlab/use-wallet": "5.0.0-rc.1"
+    "@txnlab/use-wallet": "workspace:*"
   },
   "devDependencies": {
     "@solidjs/testing-library": "0.8.10",
