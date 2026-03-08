@@ -41,6 +41,12 @@ function getSubpackageDirs(parentDir) {
     })
 }
 
+// Determine npm dist-tag from version (pre-release versions use 'next')
+const corePkgPath = path.join(rootDir, 'packages/core/package.json')
+const corePkg = JSON.parse(fs.readFileSync(corePkgPath, 'utf-8'))
+const isPrerelease = corePkg.version.includes('-')
+const tag = isPrerelease ? 'next' : 'latest'
+
 let hasErrors = false
 
 for (const group of publishGroups) {
@@ -53,14 +59,25 @@ for (const group of publishGroups) {
     console.log(`  Publishing ${pkg.name}@${pkg.version}...`)
 
     try {
-      execSync('pnpm publish --no-git-checks --access public --provenance', {
-        cwd: path.join(rootDir, dir),
-        stdio: 'inherit'
-      })
+      execSync(
+        `pnpm publish --no-git-checks --access public --provenance --tag ${tag}`,
+        {
+          cwd: path.join(rootDir, dir),
+          stdio: 'pipe'
+        }
+      )
       console.log(`  ✓ ${pkg.name} published successfully`)
     } catch (error) {
-      console.error(`  ✗ Failed to publish ${pkg.name}: ${error.message}`)
-      hasErrors = true
+      const stderr = error.stderr?.toString() || ''
+      if (
+        stderr.includes('Cannot publish over the previously published versions') ||
+        stderr.includes('You cannot publish over the previously published versions')
+      ) {
+        console.log(`  ✓ ${pkg.name}@${pkg.version} already published, skipping`)
+      } else {
+        console.error(`  ✗ Failed to publish ${pkg.name}: ${stderr || error.message}`)
+        hasErrors = true
+      }
     }
   }
 }

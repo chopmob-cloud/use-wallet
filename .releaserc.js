@@ -35,7 +35,12 @@ export default {
     [
       '@semantic-release/git',
       {
-        assets: ['CHANGELOG.md', '**/package.json', '!**/node_modules/**'],
+        assets: [
+          'CHANGELOG.md',
+          'packages/core/package.json',
+          'packages/wallets/*/package.json',
+          'packages/frameworks/*/package.json'
+        ],
         message: 'chore(release): ${nextRelease.version} [skip ci]'
       }
     ]
